@@ -274,13 +274,39 @@ html, body, #root {
 .rp-tab-pane.on {
   display: flex;
 }
-/* 파일 트리 내부 스크롤 */
+/* 파일 트리 내부 스크롤 - only target actual scrollable tree containers */
 .rp-tab-pane > .ft,
-.rp-tab-pane > .fl,
-.rp-tab-pane > div:not(.rp-tp):not(.src-hd):not(.src-chips):not(.src-vw) {
+.rp-tab-pane > .fl {
   flex: 1;
   overflow-y: auto;
   min-height: 0;
+}
+/* 내 파일 패널: 상단 바/하단 바는 고정, 본문만 스크롤 */
+#rpPaneMy {
+  display: flex !important;
+  flex-direction: column !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+}
+#rpPaneMy > .rp-bar {
+  flex: none !important;
+  overflow: visible !important;
+  min-height: auto !important;
+}
+#rpPaneMy > .rp-b {
+  flex: 1 !important;
+  overflow-y: auto !important;
+  min-height: 0 !important;
+}
+#rpPaneMy > .rp-ft {
+  flex: none !important;
+  overflow: visible !important;
+  min-height: auto !important;
+}
+#rpPaneMy > .comm-mini {
+  flex: none !important;
+  overflow: visible !important;
+  min-height: auto !important;
 }
 /* ── 출처 패널 레이아웃: src-hd/chips 고정, src-vw만 스크롤 ── */
 #rpPaneSrc { padding: 0 !important; display: flex; flex-direction: column; }
@@ -611,6 +637,13 @@ html, body, #root {
 
 /* 프로토타입 버전 패널 숨기기 */
 .pf { display: none !important; }
+
+/* ── 알림 벨 아이콘 ── */
+.icon-bell::before {
+  content: '🔔';
+  font-size: 15px;
+  line-height: 1;
+}
 
 /* ── 알림 패널: 핵심 공지만, 심플하게 ── */
 .noti-panel {
@@ -1188,6 +1221,26 @@ textarea:focus { outline: none; }
 }
 .adm-kpi-l { font-size: 11px; font-weight: 600; color: var(--text-2); margin-top: 2px; }
 .adm-kpi-sub { font-size: 9px; color: var(--text-4); margin-top: 1px; }
+.adm-kpi-link {
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s, transform 0.1s;
+}
+.adm-kpi-link:hover {
+  background: var(--bg-3) !important;
+  border-color: var(--accent) !important;
+  transform: translateY(-1px);
+}
+.adm-kpi-arrow {
+  display: inline-block;
+  opacity: 0;
+  transition: opacity 0.15s, transform 0.15s;
+  font-size: 10px;
+  color: var(--accent);
+}
+.adm-kpi-link:hover .adm-kpi-arrow {
+  opacity: 1;
+  transform: translateX(2px);
+}
 
 .adm-home-row { display: flex; gap: 12px; }
 .adm-home-card {
@@ -2345,4 +2398,196 @@ textarea:focus { outline: none; }
 @media (max-width: 900px) {
   .app { grid-template-columns: 240px 1fr !important; }
   .sb { display: flex !important; }
+}
+
+/* ═══════════════════════════════════════
+ * LIGHT THEME: 시각적 품질 개선
+ * ═══════════════════════════════════════ */
+html[data-theme="light"] {
+  /* 채팅 메시지 사용자 버블 */
+}
+html[data-theme="light"] .msg-b {
+  background: var(--accent) !important;
+  box-shadow: 0 2px 10px rgba(59,125,224,0.18) !important;
+}
+html[data-theme="light"] .sp {
+  background: var(--bg-3) !important;
+  border-color: var(--border-2) !important;
+}
+html[data-theme="light"] .sb {
+  background: var(--bg-1) !important;
+  box-shadow: 1px 0 8px rgba(0,0,0,0.06) !important;
+}
+html[data-theme="light"] .tb {
+  background: rgba(255,255,255,0.95) !important;
+  box-shadow: 0 1px 0 var(--border-1) !important;
+}
+html[data-theme="light"] .rp {
+  background: var(--bg-2) !important;
+  border-left-color: var(--border-2) !important;
+}
+html[data-theme="light"] .ci {
+  background: var(--bg-1) !important;
+  border-color: var(--border-2) !important;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.06) !important;
+}
+html[data-theme="light"] .ci:focus-within {
+  border-color: var(--accent-bd) !important;
+  box-shadow: 0 0 0 3px rgba(59,125,224,0.10) !important;
+}
+html[data-theme="light"] .adm {
+  background: var(--bg-1) !important;
+  box-shadow: 0 12px 48px rgba(0,0,0,0.12) !important;
+}
+html[data-theme="light"] .adm-t {
+  background: var(--bg-2) !important;
+  border-right-color: var(--border-2) !important;
+}
+html[data-theme="light"] .adm-kpi {
+  background: var(--bg-1) !important;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06) !important;
+}
+html[data-theme="light"] .wc {
+  background: var(--bg-1) !important;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06) !important;
+}
+html[data-theme="light"] .wc:hover {
+  box-shadow: 0 6px 20px rgba(0,0,0,0.1) !important;
+}
+html[data-theme="light"] .comm-box {
+  box-shadow: 0 16px 48px rgba(0,0,0,0.12) !important;
+}
+html[data-theme="light"] .ov {
+  background: rgba(0,0,0,0.3) !important;
+}
+html[data-theme="light"] .sc-btn.on {
+  background: var(--bg-1) !important;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.12) !important;
+}
+html[data-theme="light"] .ib {
+  background: var(--bg-2) !important;
+}
+html[data-theme="light"] .noti-panel {
+  box-shadow: 0 8px 24px rgba(0,0,0,0.10) !important;
+}
+html[data-theme="light"] .toast {
+  background: var(--bg-1) !important;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.10) !important;
+  border-color: var(--border-2) !important;
+}
+html[data-theme="light"] .src-doc-meta {
+  background: var(--bg-3) !important;
+}
+
+/* ═══════════════════════════════════════
+ * 통합모드 / AI 모드 스위처 UX 개선
+ * ═══════════════════════════════════════ */
+.v26-chat-controls {
+  border-radius: var(--r-lg) var(--r-lg) 0 0 !important;
+  border-bottom: 1px solid var(--border-1) !important;
+}
+.v26-mode-btn {
+  transition: all 0.15s var(--ease) !important;
+}
+.v26-mode-btn[data-mode="통합모드"].on {
+  background: rgba(82,160,168,0.12) !important;
+  border-color: rgba(82,160,168,0.32) !important;
+  color: var(--t) !important;
+}
+.v26-mode-btn[data-mode="생산자재 모드"].on {
+  background: var(--g-dim) !important;
+  border-color: rgba(78,173,123,0.32) !important;
+  color: var(--g) !important;
+}
+.v26-control-label {
+  font-size: 9.5px !important;
+  color: var(--text-4) !important;
+  font-weight: 700 !important;
+}
+
+/* ═══════════════════════════════════════
+ * 전반적인 라인 정렬 / 여백 개선
+ * ═══════════════════════════════════════ */
+.adm-b {
+  line-height: 1.6 !important;
+}
+.adm-home-grid {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 12px !important;
+}
+.adm-home-row {
+  align-items: stretch !important;
+}
+.adm-todo-list {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 6px !important;
+}
+.adm-todo {
+  transition: background 0.12s !important;
+}
+.adm-todo:hover {
+  background: var(--bg-3) !important;
+}
+/* 최종 승인 파이프라인 */
+.adm-pipeline.compact {
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  padding: 10px 14px !important;
+  background: var(--bg-2) !important;
+  border: 1px solid var(--border-1) !important;
+  border-radius: 10px !important;
+  margin-bottom: 12px !important;
+  overflow-x: auto !important;
+}
+.adm-pipe-step {
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  flex-shrink: 0 !important;
+}
+.adm-pipe-circle {
+  width: 28px !important;
+  height: 28px !important;
+  border-radius: 50% !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-size: 11px !important;
+  font-weight: 700 !important;
+  color: white !important;
+  flex-shrink: 0 !important;
+}
+.adm-pipe-label {
+  font-size: 11px !important;
+  font-weight: 600 !important;
+  color: var(--text-2) !important;
+}
+.adm-pipe-badge {
+  font-size: 9px !important;
+  padding: 1px 6px !important;
+  border-radius: 4px !important;
+  font-weight: 600 !important;
+  margin-top: 2px !important;
+}
+.adm-pipe-arrow {
+  color: var(--text-4) !important;
+  font-size: 10px !important;
+  flex-shrink: 0 !important;
+}
+.adm-pipe-step.active .adm-pipe-label {
+  color: var(--text-1) !important;
+}
+
+/* ═══════════════════════════════════════
+ * 플로팅 캐릭터 동기화 개선
+ * ═══════════════════════════════════════ */
+.float-char {
+  transition: opacity 0.3s !important;
+}
+.float-char.changing {
+  opacity: 0 !important;
+  pointer-events: none !important;
 }

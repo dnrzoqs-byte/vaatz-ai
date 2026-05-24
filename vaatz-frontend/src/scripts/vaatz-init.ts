@@ -38,11 +38,15 @@ function oa(){document.getElementById('ao').classList.add('sh');document.body.st
 function ca(){document.getElementById('ao').classList.remove('sh');document.body.style.overflow=''}
 function at(b,id){
   document.querySelectorAll('.atb').forEach(t=>t.classList.remove('on'));
-  b.classList.add('on');
-  ['p-req','p-doc','p-usr','p-adm','p-int','p-mon','p-verify','p-sec'].forEach(t=>{
+  if(b)b.classList.add('on');
+  ['p-home','p-req','p-final','p-verify','p-doc','p-aidb','p-usr','p-adm','p-int','p-mon','p-sec'].forEach(t=>{
     const e=document.getElementById(t);
     if(e)e.style.display=t===id?'block':'none';
   });
+}
+function goTab(id){
+  const btn=document.querySelector(`.atb[onclick*="${id}"]`);
+  at(btn,id);
 }
 
 // ─── Folder Toggle (robust) ───
@@ -693,7 +697,7 @@ function toggleTheme(){
   const cur=html.getAttribute('data-theme')||'dark';
   const next=cur==='dark'?'light':'dark';
   html.setAttribute('data-theme',next);
-  document.getElementById('themeT').textContent=next==='dark'?'🌙':'☀️';
+  const tt=document.getElementById('themeT')||document.getElementById('themeBtn');if(tt)tt.textContent=next==='dark'?'🌙':'☀️';
   toast(next==='light'?'☀️ 라이트 모드로 전환했습니다.':'🌙 다크 모드로 전환했습니다.',next==='light'?'☀️':'🌙',2000);
 }
 
@@ -2005,7 +2009,7 @@ sendMessage = function(){
     const box=$('.comm-box'); if(box) box.classList.add('v26-wide');
     const ct=$('#ct-qa'); if(!ct) return;
     const list=filteredQa(); const selected=qa.find(q=>q.id===communityState.selected)||list[0]||qa[0]; if(selected) communityState.selected=selected.id;
-    ct.innerHTML=`<div class="v26-community v26-contain"><aside class="v26-community-side"><div class="v26-community-title">지식커뮤니티</div><div class="v26-community-sub">구매본부 구성원이 질문하고, 채택 답변은 AI 학습 후보로 올라갑니다.</div><div class="v26-q-stats"><div class="v26-q-stat"><div class="v">${qa.length.toLocaleString()}</div><div class="l">전체 질문</div></div><div class="v26-q-stat"><div class="v">82%</div><div class="l">해결률</div></div><div class="v26-q-stat"><div class="v">18</div><div class="l">오늘 활동</div></div><div class="v26-q-stat"><div class="v">11</div><div class="l">AI 후보</div></div></div><div class="v26-cat-title">카테고리</div>${categories.map(c=>`<button class="v26-cat-btn ${communityState.cat===c?'on':''}" onclick="setQCatV26('${c}')"><span>${c==='전체'?'📚':c==='입찰'?'🏷️':c==='계약'?'📄':c==='VAATZ'?'🖥️':c==='5스타'?'⭐':c==='원가'?'💰':c==='일반자재'?'📦':c==='해외구매'?'🌐':c==='협력사'?'🤝':'📘'} ${c}</span><span>${c==='전체'?qa.length:qa.filter(q=>q.cat===c).length}</span></button>`).join('')}<div class="v26-cat-title">인기 태그</div><div class="v26-tag-cloud">${allTags().map(t=>`<button class="v26-tag ${communityState.tag===t?'on':''}" onclick="setQTagV26('${t}')">#${t}</button>`).join('')}</div></aside><main class="v26-community-main"><div class="v26-q-hero"><div><div class="v26-community-title">구매본부 Q&A</div><div class="v26-community-sub">규정·VAATZ·원가·협력사 질문을 빠르게 검색하고 답변을 남길 수 있습니다.</div><div class="v26-q-searchbar"><span>🔍</span><input value="${esc(communityState.query)}" placeholder="질문, 답변, 태그를 검색하세요" oninput="searchQnaV26(this.value)"></div></div><div class="v26-q-actions"><button class="v26-secondary" onclick="setQStatusV26('답변대기')">답변대기</button><button class="v26-primary" onclick="openQuestionWriteV26()">＋ 질문하기</button></div></div><div class="v26-filter-row"><select class="v26-select" onchange="setQStatusV26(this.value)"><option ${communityState.status==='전체'?'selected':''}>전체</option><option ${communityState.status==='답변대기'?'selected':''}>답변대기</option><option ${communityState.status==='해결중'?'selected':''}>해결중</option><option ${communityState.status==='채택'?'selected':''}>채택</option><option ${communityState.status==='HOT'?'selected':''}>HOT</option><option ${communityState.status==='NEW'?'selected':''}>NEW</option></select><button class="v26-secondary" onclick="clearQFiltersV26()">필터 초기화</button><span style="margin-left:auto;color:var(--text-4);font-size:12px">${list.length}개 질문 표시</span></div><div class="v26-q-list">${list.map(q=>`<article class="v26-q-card ${q.id===communityState.selected?'on':''}" onclick="selectQuestionV26(${q.id})"><div class="v26-q-top"><div class="v26-vote"><div class="n">${q.votes}</div><div class="l">추천</div></div><div style="flex:1;min-width:0"><div class="v26-q-title">${esc(q.title)}</div><div class="v26-q-body">${esc(q.body)}</div><div class="v26-q-meta"><span class="v26-q-pill ${statusClass(q.status)}">${q.status}</span><span>💬 ${q.answers}</span><span>👤 ${esc(q.author)}</span><span>${q.time}</span>${q.tags.map(t=>`<span class="v26-tag" onclick="event.stopPropagation();setQTagV26('${t}')">#${esc(t)}</span>`).join('')}</div></div></div></article>`).join('')||`<div class="v26-empty">검색 결과가 없습니다. 필터를 초기화하거나 새 질문을 등록해보세요.</div>`}</div></main><aside class="v26-community-detail">${renderQuestionDetail(selected)}</aside></div>`;
+    ct.innerHTML=`<div class="v26-community v26-contain"><aside class="v26-community-side"><div class="v26-community-title">💡 구매 커뮤니티</div><div class="v26-community-sub">구매본부 구성원이 질문하고, 채택 답변은 AI 학습 후보로 올라갑니다.</div><div class="v26-q-stats"><div class="v26-q-stat"><div class="v">${qa.length.toLocaleString()}</div><div class="l">전체 질문</div></div><div class="v26-q-stat"><div class="v">82%</div><div class="l">해결률</div></div><div class="v26-q-stat"><div class="v">18</div><div class="l">오늘 활동</div></div><div class="v26-q-stat"><div class="v">11</div><div class="l">AI 후보</div></div></div><div class="v26-cat-title">카테고리</div>${categories.map(c=>`<button class="v26-cat-btn ${communityState.cat===c?'on':''}" onclick="setQCatV26('${c}')"><span>${c==='전체'?'📚':c==='입찰'?'🏷️':c==='계약'?'📄':c==='VAATZ'?'🖥️':c==='5스타'?'⭐':c==='원가'?'💰':c==='일반자재'?'📦':c==='해외구매'?'🌐':c==='협력사'?'🤝':'📘'} ${c}</span><span>${c==='전체'?qa.length:qa.filter(q=>q.cat===c).length}</span></button>`).join('')}<div class="v26-cat-title">인기 태그</div><div class="v26-tag-cloud">${allTags().map(t=>`<button class="v26-tag ${communityState.tag===t?'on':''}" onclick="setQTagV26('${t}')">#${t}</button>`).join('')}</div></aside><main class="v26-community-main"><div class="v26-q-hero"><div><div class="v26-community-title">구매 커뮤니티 Q&A</div><div class="v26-community-sub">규정·VAATZ·원가·협력사 질문을 빠르게 검색하고 답변을 남길 수 있습니다.</div><div class="v26-q-searchbar"><span>🔍</span><input value="${esc(communityState.query)}" placeholder="질문, 답변, 태그를 검색하세요" oninput="searchQnaV26(this.value)"></div></div><div class="v26-q-actions"><button class="v26-secondary" onclick="setQStatusV26('답변대기')">답변대기</button><button class="v26-primary" onclick="openQuestionWriteV26()">＋ 질문하기</button></div></div><div class="v26-filter-row"><select class="v26-select" onchange="setQStatusV26(this.value)"><option ${communityState.status==='전체'?'selected':''}>전체</option><option ${communityState.status==='답변대기'?'selected':''}>답변대기</option><option ${communityState.status==='해결중'?'selected':''}>해결중</option><option ${communityState.status==='채택'?'selected':''}>채택</option><option ${communityState.status==='HOT'?'selected':''}>HOT</option><option ${communityState.status==='NEW'?'selected':''}>NEW</option></select><button class="v26-secondary" onclick="clearQFiltersV26()">필터 초기화</button><span style="margin-left:auto;color:var(--text-4);font-size:12px">${list.length}개 질문 표시</span></div><div class="v26-q-list">${list.map(q=>`<article class="v26-q-card ${q.id===communityState.selected?'on':''}" onclick="selectQuestionV26(${q.id})"><div class="v26-q-top"><div class="v26-vote"><div class="n">${q.votes}</div><div class="l">추천</div></div><div style="flex:1;min-width:0"><div class="v26-q-title">${esc(q.title)}</div><div class="v26-q-body">${esc(q.body)}</div><div class="v26-q-meta"><span class="v26-q-pill ${statusClass(q.status)}">${q.status}</span><span>💬 ${q.answers}</span><span>👤 ${esc(q.author)}</span><span>${q.time}</span>${q.tags.map(t=>`<span class="v26-tag" onclick="event.stopPropagation();setQTagV26('${t}')">#${esc(t)}</span>`).join('')}</div></div></div></article>`).join('')||`<div class="v26-empty">검색 결과가 없습니다. 필터를 초기화하거나 새 질문을 등록해보세요.</div>`}</div></main><aside class="v26-community-detail">${renderQuestionDetail(selected)}</aside></div>`;
   };
   function renderQuestionDetail(q){if(!q)return `<div class="v26-empty">질문을 선택하면 상세 내용이 표시됩니다.</div>`;return `<div class="v26-buddy-mini"><div class="v26-buddy-face"></div><div class="v26-buddy-text"><div class="t">VAATZ Buddy</div><div class="d">좋은 답변은 채택 후 AI 학습 후보로 자동 추천됩니다.</div></div></div><div class="v26-detail-card"><div class="v26-q-meta" style="margin-bottom:8px"><span class="v26-q-pill ${statusClass(q.status)}">${q.status}</span><span>${q.cat}</span>${q.tags.map(t=>`<span class="v26-tag" onclick="setQTagV26('${t}')">#${esc(t)}</span>`).join('')}</div><div class="v26-q-title">${esc(q.title)}</div><div class="v26-q-body">${esc(q.body)}</div><div class="v26-answer"><div class="v26-answer-title">채택 답변 예시</div><div class="v26-answer-body">관련 규정 조항과 VAATZ 메뉴 경로를 함께 적으면 채택률이 높아집니다. 답변은 추천 10개 이상 또는 질문자 채택 시 AI 학습 검증 후보로 이동합니다.</div><div style="display:flex;gap:8px;margin-top:10px"><button class="v26-secondary" onclick="saveCommunityNoteV26(${q.id})">⭐ 메모 저장</button><button class="v26-secondary" onclick="say('AI 학습 후보로 추천했습니다.','🧠')">🧠 AI 후보 추천</button></div></div><div class="v26-answer"><div class="v26-answer-title">답변 작성</div><div class="v26-reply-box"><textarea id="v26ReplyText" placeholder="근거 문서, 규정 조항, VAATZ 메뉴 경로를 포함해 답변해보세요."></textarea><div style="display:flex;justify-content:flex-end;gap:8px;margin-top:8px"><button class="v26-secondary" onclick="say('임시 저장했습니다.','💾')">임시저장</button><button class="v26-primary" onclick="postAnswerV26(${q.id})">답변 등록</button></div></div></div></div>`}
   window.selectQuestionV26=id=>{communityState.selected=id;renderCommunityV26()};
@@ -2495,7 +2499,7 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
   /* ────────────────────────────────────────────────
    * 1) 컨셉/아이콘 통일: "💡 구매본부 지식 커뮤니티"
    * ──────────────────────────────────────────────── */
-  const COMM_NAME='구매본부 지식 커뮤니티';
+  const COMM_NAME='구매 커뮤니티';
   const COMM_ICON='💡';
 
   function unifyCommunityName(){
@@ -2508,7 +2512,7 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
     $$('.v29-comm-left .v29-comm-title').forEach(el=>{
       // 메인 큰 타이틀만 변경 (HOT Q&A 같은 sub-title은 제외)
       if(el.textContent.includes('구매') && el.textContent.includes('커뮤니티')){
-        el.innerHTML=`${COMM_ICON} 구매본부<br>지식 커뮤니티`;
+        el.innerHTML=`${COMM_ICON} 구매<br>커뮤니티`;
       }
     });
     // 우측 사이드바 미니 패널
@@ -3044,7 +3048,7 @@ const say=(m,i='✅',d=2200)=>{try{(window.toast||window.say||console.log)(m,i,d
 /* ═══════════════════════════════════════
  * ① 구매지식 커뮤니티 이름/헤더 통일
  * ═══════════════════════════════════════ */
-const COMM_TITLE='구매지식 커뮤니티';
+const COMM_TITLE='구매 커뮤니티';
 const COMM_ICON='💡';
 
 function patchCommHeader(){
@@ -3484,7 +3488,9 @@ function syncAllChar(emoji) {
 window.pickChar = function(btn, emoji) {
   document.querySelectorAll('.char-sel').forEach(b => b.classList.remove('active'));
   if (btn) btn.classList.add('active');
-  syncAllChar(emoji);
+  const fc = document.getElementById('floatChar');
+  if (fc) { fc.classList.add('changing'); setTimeout(()=>{ syncAllChar(emoji); fc.classList.remove('changing'); }, 200); }
+  else syncAllChar(emoji);
   if (window.toast) window.toast((btn && btn.title ? btn.title : emoji) + ' 선택!', '✨', 1200);
 };
 

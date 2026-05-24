@@ -339,12 +339,12 @@
 <div class="adm-b" id="p-home">
 <div class="adm-home-grid">
   <div class="adm-kpi-row">
-    <div class="adm-kpi"><div class="adm-kpi-v" style="color:var(--a)">5</div><div class="adm-kpi-l">검토 대기</div><div class="adm-kpi-sub">팀 문서 요청</div></div>
-    <div class="adm-kpi"><div class="adm-kpi-v" style="color:var(--accent)">2</div><div class="adm-kpi-l">최종 승인 대기</div><div class="adm-kpi-sub">폴더 배정 필요</div></div>
-    <div class="adm-kpi"><div class="adm-kpi-v" style="color:var(--g)">14</div><div class="adm-kpi-l">AI 반영 완료</div><div class="adm-kpi-sub">이번 달</div></div>
-    <div class="adm-kpi"><div class="adm-kpi-v" style="color:var(--v)">94.2%</div><div class="adm-kpi-l">답변 신뢰도</div><div class="adm-kpi-sub">이번 달 평균</div></div>
-    <div class="adm-kpi"><div class="adm-kpi-v">2,847</div><div class="adm-kpi-l">총 질의</div><div class="adm-kpi-sub">이번 달</div></div>
-    <div class="adm-kpi"><div class="adm-kpi-v">48<span style="font-size:14px">명</span></div><div class="adm-kpi-l">활성 사용자</div><div class="adm-kpi-sub">월간</div></div>
+    <div class="adm-kpi adm-kpi-link" onclick="goTab('p-req')" title="팀 문서 검토로 이동"><div class="adm-kpi-v" style="color:var(--a)">5</div><div class="adm-kpi-l">검토 대기 <span class="adm-kpi-arrow">→</span></div><div class="adm-kpi-sub">팀 문서 요청</div></div>
+    <div class="adm-kpi adm-kpi-link" onclick="goTab('p-final')" title="최종 승인으로 이동"><div class="adm-kpi-v" style="color:var(--accent)">2</div><div class="adm-kpi-l">최종 승인 대기 <span class="adm-kpi-arrow">→</span></div><div class="adm-kpi-sub">폴더 배정 필요</div></div>
+    <div class="adm-kpi adm-kpi-link" onclick="goTab('p-doc')" title="지식 베이스로 이동"><div class="adm-kpi-v" style="color:var(--g)">14</div><div class="adm-kpi-l">AI 반영 완료 <span class="adm-kpi-arrow">→</span></div><div class="adm-kpi-sub">이번 달</div></div>
+    <div class="adm-kpi adm-kpi-link" onclick="goTab('p-mon')" title="모니터링으로 이동"><div class="adm-kpi-v" style="color:var(--v)">94.2%</div><div class="adm-kpi-l">답변 신뢰도 <span class="adm-kpi-arrow">→</span></div><div class="adm-kpi-sub">이번 달 평균</div></div>
+    <div class="adm-kpi adm-kpi-link" onclick="goTab('p-mon')" title="모니터링으로 이동"><div class="adm-kpi-v">2,847</div><div class="adm-kpi-l">총 질의 <span class="adm-kpi-arrow">→</span></div><div class="adm-kpi-sub">이번 달</div></div>
+    <div class="adm-kpi adm-kpi-link" onclick="goTab('p-usr')" title="사용자 관리로 이동"><div class="adm-kpi-v">48<span style="font-size:14px">명</span></div><div class="adm-kpi-l">활성 사용자 <span class="adm-kpi-arrow">→</span></div><div class="adm-kpi-sub">월간</div></div>
   </div>
 
   <div class="adm-home-row">
@@ -512,7 +512,7 @@
     </div>
   </div>
   <div class="adm-pipe-arrow">▶</div>
-  <div class="adm-pipe-step" onclick="at(document.querySelector('[onclick*=p-final]'),'p-final')" style="cursor:pointer">
+  <div class="adm-pipe-step" onclick="goTab('p-final')" style="cursor:pointer" title="최종 승인 탭으로 이동">
     <div class="adm-pipe-circle" style="background:var(--v)">3</div>
     <div class="adm-pipe-body">
       <div class="adm-pipe-icon">✅</div>
@@ -549,7 +549,7 @@
 </div></div>
 </div>
 
-<div class="adm-b" id="p-usr">
+<div class="adm-b" id="p-usr" style="display:none">
 <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
 <div style="font-size:13px;font-weight:600">사용자 · 권한 관리 <span style="color:var(--text-4);font-size:11px;font-weight:400">48명 · 8개 팀</span></div>
 <div style="display:flex;gap:4px">
@@ -1201,7 +1201,7 @@
 <!-- ═══ COMMUNITY ═══ -->
 <div class="comm-ov" id="commOv" onclick="if(event.target===this)closeComm()">
 <div class="comm-box">
-<div class="comm-hd"><h2 style="display:flex;align-items:center;gap:8px"><span style="background:var(--accent-g);-webkit-background-clip:text;-webkit-text-fill-color:transparent">💡 구매 지식 커뮤니티</span></h2><button class="adm-x" onclick="closeComm()">✕</button></div>
+<div class="comm-hd"><h2 style="display:flex;align-items:center;gap:8px"><span style="background:var(--accent-g);-webkit-background-clip:text;-webkit-text-fill-color:transparent">💡 구매 커뮤니티</span></h2><button class="adm-x" onclick="closeComm()">✕</button></div>
 <div class="comm-tabs" style="background:var(--bg-2)">
 <button class="comm-tab on" onclick="commTab(this,'ct-qa')">💬 Q&A</button>
 <button class="comm-tab" onclick="commTab(this,'ct-hof')">🏆 명예의 전당</button>
