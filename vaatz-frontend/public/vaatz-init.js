@@ -4072,5 +4072,281 @@ if (document.readyState === 'loading') {
   };
   if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', _admInit);
   else setTimeout(_admInit, 400);
+
+  /* 7. Float-char 캐릭터 sync 패치 */
+  var _patchFloatCharSync = function(){
+    /* v33PickChar 호출 시 floatCharBody도 업데이트 */
+    var origV33Pick = window.v33PickChar;
+    if(origV33Pick && !window.__floatSynced){
+      window.__floatSynced = true;
+      window.v33PickChar = function(btn, emoji, name){
+        if(origV33Pick) origV33Pick.apply(this, arguments);
+        /* floatCharBody SVG를 이모지로 교체 */
+        var fcb = document.getElementById('floatCharBody');
+        if(fcb){
+          fcb.innerHTML = '<span style="font-size:56px;line-height:80px;display:block;text-align:center;width:64px;filter:drop-shadow(0 4px 8px rgba(0,0,0,0.3))">' + emoji + '</span>';
+        }
+        var fs = document.getElementById('floatShow');
+        if(fs) fs.innerHTML = '<span style="font-size:44px;line-height:64px;display:block;text-align:center;width:52px">' + emoji + '</span>';
+      };
+    }
+  };
+  setTimeout(_patchFloatCharSync, 600);
+})();
+
+/* ═══════════════════════════════════════════
+ * VAATZ Q&A v36 — 지식IN 스타일 재설계
+ * 자연스러운 Q&A 스레드 형태
+ * ═══════════════════════════════════════════ */
+(function(){
+'use strict';
+var $ = function(s, r){ return (r||document).querySelector(s); };
+function esc(s){ return String(s||'').replace(/[&<>"']/g, function(m){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]; }); }
+function say(m, i, d){ try{ (window.toast||window.say||console.log)(m, i||'✅', d||1800); } catch(e){ console.log(m); } }
+
+var catIcons = {'전체':'📚','입찰':'🏷️','계약':'📋','VAATZ':'🖥️','5스타':'⭐','원가':'💰','일반자재':'📦','해외구매':'🌐','협력사':'🤝'};
+var cats = ['전체','입찰','계약','VAATZ','5스타','원가','일반자재','해외구매','협력사'];
+
+var questions = [
+  {id:1, cat:'입찰', title:'탄력적입찰에서 1회차 유찰 시 처리 절차가 궁금합니다',
+   body:'구매업무규정 제23조에 따른 재공고 요건과 수의계약 전환 기준이 궁금합니다. VAATZ에서 유찰처리 메뉴는 어디서 찾나요?',
+   tags:['탄력적입찰','유찰','수의계약'], author:'계약초보', time:'3일 전', votes:47, adopted:true,
+   answers:[
+     {id:11, author:'프로큐어마스터', role:'CPO', lv:4, time:'3일 전', votes:42, adopted:true,
+      body:'구매업무규정 제23조 4항에 따르면 1회차 유찰 시 참여 업체 확대 또는 수의계약 전환이 가능합니다.\n\n실무적으로는 구매위원회 사전 승인을 받고 진행해야 하며, VAATZ에서는 [입찰관리 → 유찰처리] 메뉴에서 처리합니다. 참여 업체 확대 후 재공고 기간은 최소 5영업일이 필요합니다.'},
+     {id:12, author:'입찰달인', role:'책임매니저', lv:3, time:'2일 전', votes:15, adopted:false,
+      body:'추가로 수의계약 전환 시에는 긴급성 사유서를 첨부해야 합니다. 5천만원 이상은 구매위원회 승인 필요합니다.'},
+   ]},
+  {id:2, cat:'원가', title:'원가모드에서 단가 이력과 환율 기준을 같이 볼 수 있나요?',
+   body:'원가 관련 질의 시 어떤 DB와 문서를 연결해야 하는지 궁금합니다.',
+   tags:['원가모드','단가','환율'], author:'원가분석러', time:'2시간 전', votes:34, adopted:false,
+   answers:[
+     {id:21, author:'VAATZ달인', role:'수석바이어', lv:3, time:'1시간 전', votes:12, adopted:false,
+      body:'원가모드는 현재 단가 이력 DB 연동 중입니다. 설정 > AI 모드 > 원가 에서 VAATZ 마스터 데이터 연결을 활성화하면 가능합니다.'},
+   ]},
+  {id:3, cat:'5스타', title:'5스타 4→5등급 승급 시 IATF 16949가 필수인가요?',
+   body:'2026년 기준으로 필수 요건인지, 기존 업체의 유예기간이 있는지 확인하고 싶습니다.',
+   tags:['5스타','IATF16949','협력사'], author:'품질매니저', time:'1일 전', votes:18, adopted:false,
+   answers:[]},
+  {id:4, cat:'VAATZ', title:'VAATZ 해외 발주 환율은 발주 시점과 결제 시점 중 어느 것이 기준인가요?',
+   body:'글로벌 구매 모듈에서 환율 자동 적용 기준과 예외 처리 방법이 궁금합니다.',
+   tags:['VAATZ','환율','해외구매'], author:'해외구매담당', time:'오늘', votes:22, adopted:true,
+   answers:[
+     {id:41, author:'글로벌구매Pro', role:'책임매니저', lv:3, time:'오늘', votes:19, adopted:true,
+      body:'VAATZ 글로벌 구매 모듈에서 환율은 매일 09시 기준으로 자동 갱신됩니다.\n\n발주 시점 기준이며, 결제 시점 환율 차이는 [글로벌구매 → 환율관리 → 차이 정산] 메뉴에서 처리합니다.'},
+   ]},
+  {id:5, cat:'일반자재', title:'MRO 반복 구매 시 경매입찰 생략 기준이 있나요?',
+   body:'반복 구매 품목의 계약 활용 가능 여부와 예외 승인 조건이 궁금합니다.',
+   tags:['MRO','반복구매','경매입찰'], author:'MRO담당', time:'20분 전', votes:9, adopted:false,
+   answers:[]},
+  {id:6, cat:'협력사', title:'협력사 평가 결과를 입찰 참여 조건에 자동 반영할 수 있나요?',
+   body:'5스타 등급과 납품 품질 이슈를 VAATZ 입찰 초대 조건에 반영하는 방법이 궁금합니다.',
+   tags:['협력사','입찰초대','5스타'], author:'품질지킴이', time:'어제', votes:16, adopted:false,
+   answers:[]},
+];
+
+var qaS = { cat:'전체', view:'list', selId:null, q:'' };
+
+function filtered(){
+  return questions.filter(function(q){
+    if(qaS.cat !== '전체' && q.cat !== qaS.cat) return false;
+    if(qaS.q){
+      var kw = qaS.q.toLowerCase();
+      if(!(q.title + ' ' + q.body + ' ' + q.tags.join(' ')).toLowerCase().includes(kw)) return false;
+    }
+    return true;
+  });
+}
+
+function renderList(ct){
+  var list = filtered();
+  ct.innerHTML = '<div class="qa36-wrap">' +
+    '<div class="qa36-header">' +
+      '<div><div class="qa36-title">구매본부 지식 Q&A</div><div class="qa36-sub">실무 노하우를 함께 나눕니다 · 답변 채택은 Admin이 진행합니다</div></div>' +
+      '<button class="qa36-ask-btn" onclick="qa36OpenAsk()">✏️ 질문하기</button>' +
+    '</div>' +
+    '<div class="qa36-toolbar"><div class="qa36-search"><span style="color:var(--text-4);font-size:13px">🔍</span><input placeholder="질문·태그 검색..." value="' + esc(qaS.q) + '" oninput="qa36Search(this.value)"></div></div>' +
+    '<div class="qa36-cats">' +
+      cats.map(function(c){ return '<button class="qa36-cat' + (qaS.cat===c?' on':'') + '" onclick="qa36SetCat(\'' + c + '\')">' + (catIcons[c]||'') + ' ' + c + '</button>'; }).join('') +
+    '</div>' +
+    '<div class="qa36-list">' +
+      (list.length === 0
+        ? '<div class="qa36-empty">검색 결과가 없습니다.</div>'
+        : list.map(function(q){
+            return '<div class="qa36-card' + (q.adopted?' adopted':'') + '" onclick="qa36Select(' + q.id + ')">' +
+              '<div class="qa36-card-left">' +
+                '<div class="qa36-votes"><span class="qa36-vote-n">' + q.votes + '</span><span class="qa36-vote-l">추천</span></div>' +
+                '<div class="qa36-ans-cnt' + (q.answers.length>0?' has-ans':'') + '"><span>' + q.answers.length + '</span><span>답변</span></div>' +
+              '</div>' +
+              '<div class="qa36-card-body">' +
+                '<div class="qa36-card-title">' +
+                  (q.adopted ? '<span class="qa36-badge adopted">✓ 채택</span>' : '') +
+                  (q.answers.length===0 ? '<span class="qa36-badge wait">답변대기</span>' : '') +
+                  esc(q.title) +
+                '</div>' +
+                '<div class="qa36-card-preview">' + esc(q.body.substring(0,90)) + (q.body.length>90?'...':'') + '</div>' +
+                '<div class="qa36-card-meta">' +
+                  '<span class="qa36-cat-tag">' + (catIcons[q.cat]||'') + ' ' + esc(q.cat) + '</span>' +
+                  '<span>👤 ' + esc(q.author) + '</span>' +
+                  '<span>' + q.time + '</span>' +
+                  q.tags.map(function(t){ return '<span class="qa36-tag">#' + esc(t) + '</span>'; }).join('') +
+                '</div>' +
+              '</div>' +
+            '</div>';
+          }).join('')
+      ) +
+    '</div></div>';
+}
+
+function renderDetail(ct){
+  var q = questions.find(function(x){ return x.id === qaS.selId; });
+  if(!q){ qaS.view='list'; renderList(ct); return; }
+
+  var sortedAns = q.answers.slice().sort(function(a,b){ return (b.adopted - a.adopted) || b.votes - a.votes; });
+
+  ct.innerHTML = '<div class="qa36-wrap">' +
+    '<button class="qa36-back" onclick="qa36Back()">← 목록으로</button>' +
+
+    '<div class="qa36-q-card">' +
+      '<div class="qa36-q-meta">' +
+        '<span class="qa36-cat-tag">' + (catIcons[q.cat]||'') + ' ' + esc(q.cat) + '</span>' +
+        '<span class="qa36-q-author">👤 ' + esc(q.author) + '</span>' +
+        '<span>' + q.time + '</span>' +
+        q.tags.map(function(t){ return '<span class="qa36-tag">#' + esc(t) + '</span>'; }).join('') +
+      '</div>' +
+      '<div class="qa36-q-title">' + esc(q.title) + '</div>' +
+      '<div class="qa36-q-body">' + esc(q.body) + '</div>' +
+      '<div class="qa36-q-foot">' +
+        '<button class="qa36-vote-btn" onclick="qa36VoteQ(' + q.id + ',this)">👍 추천 ' + q.votes + '</button>' +
+      '</div>' +
+    '</div>' +
+
+    '<div class="qa36-ans-section">' +
+      '<div class="qa36-ans-hd">답변 ' + q.answers.length + '개</div>' +
+      (q.answers.length === 0
+        ? '<div class="qa36-empty">아직 답변이 없습니다.<br>첫 번째 답변을 작성해보세요!</div>'
+        : sortedAns.map(function(a){
+            return '<div class="qa36-ans-card' + (a.adopted?' adopted':'') + '">' +
+              (a.adopted ? '<div class="qa36-ans-adopted-badge">✓ 채택 답변</div>' : '') +
+              '<div class="qa36-ans-meta">' +
+                '<div class="qa36-ans-author">' +
+                  '<span class="qa36-ans-lv lv-' + a.lv + '">Lv.' + a.lv + '</span>' +
+                  '<span class="qa36-ans-nm">' + esc(a.author) + '</span>' +
+                  '<span class="qa36-ans-role">' + esc(a.role) + '</span>' +
+                '</div>' +
+                '<span class="qa36-ans-time">' + a.time + '</span>' +
+              '</div>' +
+              '<div class="qa36-ans-body">' + esc(a.body) + '</div>' +
+              '<div class="qa36-ans-foot">' +
+                '<button class="qa36-vote-btn" onclick="qa36VoteA(' + q.id + ',' + a.id + ',this)">👍 ' + a.votes + '</button>' +
+              '</div>' +
+            '</div>';
+          }).join('')
+      ) +
+    '</div>' +
+
+    '<div class="qa36-reply-box">' +
+      '<div class="qa36-reply-title">✏️ 답변 작성</div>' +
+      '<textarea id="qa36ReplyText" class="qa36-reply-ta" placeholder="답변을 작성해주세요. 관련 규정, VAATZ 메뉴 경로, 실무 예시를 함께 적으면 좋습니다."></textarea>' +
+      '<div class="qa36-reply-foot"><button class="qa36-submit-btn" onclick="qa36PostAnswer(' + q.id + ')">답변 등록</button></div>' +
+    '</div>' +
+  '</div>';
+}
+
+function renderQA(){
+  var ct = document.getElementById('ct-qa');
+  if(!ct) return;
+  if(qaS.view === 'detail' && qaS.selId) renderDetail(ct);
+  else renderList(ct);
+}
+
+/* ── Public API ── */
+window.qa36Select = function(id){ qaS.view='detail'; qaS.selId=id; renderQA(); };
+window.qa36Back   = function(){ qaS.view='list'; qaS.selId=null; renderQA(); };
+window.qa36SetCat = function(c){ qaS.cat=c; qaS.view='list'; qaS.selId=null; renderQA(); };
+window.qa36Search = function(v){
+  qaS.q = v;
+  clearTimeout(window.__qa36s);
+  window.__qa36s = setTimeout(function(){ if(qaS.view==='list') renderQA(); }, 130);
+};
+window.qa36VoteQ = function(id, btn){
+  var q = questions.find(function(x){ return x.id===id; });
+  if(!q) return;
+  q.votes++;
+  if(btn) btn.textContent = '👍 추천 ' + q.votes;
+  say('추천했습니다!','👍',1200);
+};
+window.qa36VoteA = function(qid, aid, btn){
+  var q = questions.find(function(x){ return x.id===qid; });
+  if(!q) return;
+  var a = q.answers.find(function(x){ return x.id===aid; });
+  if(!a) return;
+  a.votes++;
+  if(btn) btn.textContent = '👍 ' + a.votes;
+  say('추천했습니다!','👍',1200);
+};
+window.qa36PostAnswer = function(qid){
+  var q = questions.find(function(x){ return x.id===qid; });
+  var ta = document.getElementById('qa36ReplyText');
+  if(!q || !ta || !ta.value.trim()){ say('답변 내용을 입력해주세요.','⚠️',1500); return; }
+  q.answers.push({
+    id: Date.now(), author:'프로큐어히어로', role:'책임매니저', lv:2,
+    time:'방금', votes:0, adopted:false, body: ta.value.trim()
+  });
+  say('답변이 등록되었습니다.','✅',1800);
+  renderDetail(document.getElementById('ct-qa'));
+};
+window.qa36OpenAsk = function(){
+  if(document.getElementById('qa36AskModal')) return;
+  var html = '<div class="rq-m" id="qa36AskModal" onclick="if(event.target===this)qa36CloseAsk()" style="z-index:3500">' +
+    '<div class="rq-b" style="width:min(540px,96vw)">' +
+      '<div class="rq-h" style="display:flex;justify-content:space-between;align-items:center">✏️ 질문 등록<button class="adm-x" onclick="qa36CloseAsk()">✕</button></div>' +
+      '<div style="display:flex;flex-direction:column;gap:12px;padding:4px 0">' +
+        '<div><label style="font-size:11px;font-weight:600;color:var(--text-3);display:block;margin-bottom:5px">카테고리</label>' +
+          '<select id="qa36AskCat" class="frm-i" style="width:100%">' +
+            cats.filter(function(c){ return c!=='전체'; }).map(function(c){ return '<option value="'+c+'">'+c+'</option>'; }).join('') +
+          '</select></div>' +
+        '<div><label style="font-size:11px;font-weight:600;color:var(--text-3);display:block;margin-bottom:5px">제목</label><input id="qa36AskTitle" class="frm-i" placeholder="질문을 한 줄로 요약해주세요" style="width:100%"></div>' +
+        '<div><label style="font-size:11px;font-weight:600;color:var(--text-3);display:block;margin-bottom:5px">상세 내용</label><textarea id="qa36AskBody" class="frm-i" style="width:100%;min-height:100px;resize:vertical" placeholder="상황, 관련 문서, VAATZ 메뉴, 원하는 답변 형태를 적어주세요"></textarea></div>' +
+        '<div><label style="font-size:11px;font-weight:600;color:var(--text-3);display:block;margin-bottom:5px">태그 (쉼표 구분)</label><input id="qa36AskTags" class="frm-i" placeholder="탄력적입찰, 수의계약" style="width:100%"></div>' +
+      '</div>' +
+      '<div class="frm-a" style="margin-top:14px">' +
+        '<button class="btn btn-c" onclick="qa36CloseAsk()">취소</button>' +
+        '<button class="btn btn-p" onclick="qa36SubmitAsk()">질문 등록</button>' +
+      '</div>' +
+    '</div></div>';
+  document.body.insertAdjacentHTML('beforeend', html);
+  document.getElementById('qa36AskModal').style.display = 'flex';
+  setTimeout(function(){ document.getElementById('qa36AskTitle')?.focus(); }, 80);
+};
+window.qa36CloseAsk = function(){ document.getElementById('qa36AskModal')?.remove(); };
+window.qa36SubmitAsk = function(){
+  var cat = document.getElementById('qa36AskCat')?.value;
+  var title = document.getElementById('qa36AskTitle')?.value.trim();
+  var body = document.getElementById('qa36AskBody')?.value.trim();
+  var tagsRaw = document.getElementById('qa36AskTags')?.value || '';
+  if(!title || !body){ say('제목과 내용을 입력해주세요.','⚠️',1500); return; }
+  var tags = tagsRaw ? tagsRaw.split(',').map(function(t){ return t.replace(/#/g,'').trim(); }).filter(Boolean) : [];
+  questions.unshift({ id:Date.now(), cat:cat||'전체', title:title, body:body, tags:tags,
+    author:'프로큐어히어로', time:'방금', votes:0, adopted:false, answers:[] });
+  window.qa36CloseAsk();
+  qaS.cat='전체'; qaS.view='list';
+  renderQA();
+  say('질문이 등록되었습니다.','✅',1800);
+};
+
+/* ── renderCommunityV29 override ── */
+window.renderCommunityV29 = function(){
+  var box = document.querySelector('.comm-box');
+  if(box){ box.classList.add('v29-wide'); box.classList.remove('v27-wide','v26-wide'); }
+  renderQA();
+};
+
+/* boot */
+if(document.readyState === 'loading')
+  document.addEventListener('DOMContentLoaded', function(){ setTimeout(renderQA, 300); });
+else
+  setTimeout(renderQA, 300);
+
 })();
 
