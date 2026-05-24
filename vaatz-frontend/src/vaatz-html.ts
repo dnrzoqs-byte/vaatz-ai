@@ -1354,8 +1354,20 @@
 
 <!-- Shop — Expanded v2 with full accessories + backgrounds -->
 <div id="ct-shop" style="display:none">
-<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px"><div style="font-size:13px;font-weight:600">🛒 캐릭터 상점</div><div style="font-size:12px;font-weight:600;color:var(--accent);font-family:Outfit">💰 520pt 보유</div></div>
-<div style="font-size:10px;color:var(--text-3);margin-bottom:12px;line-height:1.5;background:var(--bg-2);padding:8px 12px;border-radius:6px;border:1px solid var(--border-1)">💡 아이템을 조합해 나만의 캐릭터를 꾸며보세요! 구매·장착 후 즉시 캐릭터에 반영됩니다.</div>
+<div style="display:flex;gap:12px;margin-bottom:14px">
+  <!-- 미니 캐릭터 프리뷰 -->
+  <div style="flex-shrink:0;width:110px;background:var(--bg-2);border:1px solid var(--border-1);border-radius:12px;padding:10px;display:flex;flex-direction:column;align-items:center;gap:6px">
+    <div id="shopCharPreview" style="font-size:48px;line-height:1;animation:charFloat 3s ease-in-out infinite">🐧</div>
+    <div style="font-size:9px;color:var(--text-4);font-weight:600">미리보기</div>
+    <div style="font-size:10px;font-weight:600;color:var(--accent);font-family:Outfit">💰 520pt</div>
+    <button style="font-size:9px;padding:4px 8px;background:var(--bg-3);border:1px solid var(--border-2);border-radius:6px;color:var(--text-2);cursor:pointer;font-family:inherit" onclick="if(window.commTab)commTab(document.querySelectorAll('.comm-tab')[3],'ct-char')">👤 캐릭터 꾸미기</button>
+  </div>
+  <!-- 헤더 텍스트 -->
+  <div style="flex:1">
+    <div style="font-size:14px;font-weight:700;margin-bottom:4px">🛒 캐릭터 상점</div>
+    <div style="font-size:10.5px;color:var(--text-3);line-height:1.6;background:var(--bg-2);padding:8px 12px;border-radius:8px;border:1px solid var(--border-1)">💡 아이템을 구매하면 <b style="color:var(--text-2)">👤 캐릭터</b> 탭 인벤토리에 추가됩니다. 구매 후 캐릭터 탭에서 클릭하면 즉시 장착!</div>
+  </div>
+</div>
 
 <div style="font-size:11px;font-weight:600;color:var(--text-2);margin-bottom:6px">🎩 모자 · 헤어</div>
 <div class="shop-grid" style="margin-bottom:14px">
@@ -1470,6 +1482,7 @@
 <div class="float-char-bubble" id="charBubble">오늘도 화이팅! 💪<br>구매 지식 나누러 가요~</div>
 <div class="float-char-menu" id="charMenu">
 <button onclick="openComm('char');closeCharMenu()">🧸 캐릭터 꾸미기</button>
+<button onclick="openComm('shop');closeCharMenu()">🛒 캐릭터 상점</button>
 <button onclick="openComm('qa');closeCharMenu()">💡 Q&A 참여하기</button>
 <button onclick="openComm('hof');closeCharMenu()">🏆 명예의 전당</button>
 <button onclick="editBubbleMsg()">💬 말풍선 변경</button>
@@ -2094,8 +2107,27 @@ html[data-user-role="admin"] .v29-action-row button[onclick*="v29Nominate"]{
   width:100vw!important;height:100vh!important;
   max-height:100vh!important;border-radius:0!important;
 }
-/* 커뮤니티 탭바 - 팝업 내 없애도 됨 (v29 uses 3-column) */
-.comm-box .comm-tabs{display:none!important}
+/* 커뮤니티 탭바 - 캐릭터/상점 접근을 위해 표시 유지 */
+.comm-box .comm-tabs{
+  display:flex!important;
+  padding:0 16px!important;
+  gap:0!important;
+  background:var(--bg-1)!important;
+  border-bottom:1px solid var(--border-1)!important;
+  overflow-x:auto!important;
+  scrollbar-width:none!important;
+}
+.comm-box .comm-tabs::-webkit-scrollbar{display:none!important}
+.comm-tab{
+  border:none!important;background:none!important;
+  color:var(--text-3)!important;font-size:11.5px!important;
+  font-weight:600!important;padding:10px 14px!important;
+  cursor:pointer!important;white-space:nowrap!important;
+  border-bottom:2px solid transparent!important;
+  transition:all .15s!important;font-family:inherit!important;
+}
+.comm-tab:hover{color:var(--text-1)!important}
+.comm-tab.on{color:var(--accent)!important;border-bottom-color:var(--accent)!important;background:none!important}
 .comm-box .comm-body{
   flex:1!important;overflow:hidden!important;
   min-height:0!important;padding:0!important;
@@ -2319,7 +2351,7 @@ html[data-user-role="admin"] .v29-action-row button[onclick*="v29Nominate"]{
 
 /* 기존 v28/v29/v30 max 버튼, 힌트 완전 제거 */
 #v28CommHint,.v30-modal-tools,.v27-comm-toolbar,#v27CommMax{display:none!important}
-.comm-hd .adm-x{display:none!important} /* v34 ctrl btn으로 대체 */
+.comm-hd .adm-x{display:flex!important} /* 닫기 버튼 표시 */
 </style>
 
 <!-- ═══════════════════════════════════════════════════════════════

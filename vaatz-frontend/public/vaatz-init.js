@@ -2998,13 +2998,18 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
     const origBuy=window.buyItem;
     window.buyItem=function(el,emoji,name,price){
       if(el.classList.contains('owned')){
-        // 이미 보유한 배경/아이템: 즉시 장착
-        if(emoji.startsWith('bg-')){ v33EquipItem(el,emoji); el.classList.add('equipped'); }
+        // 이미 보유한 배경/아이템: 즉시 장착 + 미리보기 갱신
+        v33EquipItem(el,emoji);
+        el.classList.add('equipped');
+        updateShopPreview();
         return;
       }
       if(!confirm(name+' '+price+'pt로 구매하시겠습니까?')) return;
       el.classList.add('owned');
       const prEl=el.querySelector('.shop-pr'); if(prEl) prEl.textContent='✓ 보유';
+      // 구매 즉시 장착 (싸이월드 스타일)
+      v33EquipItem(el,emoji);
+      updateShopPreview();
       // 인벤토리 빈 슬롯에 추가
       const emptySlot=document.querySelector('#ct-char .inv-slot.empty');
       if(emptySlot){
@@ -3014,10 +3019,16 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
         emptySlot.textContent=dispEmoji;
         emptySlot.dataset.itemKey=emoji; // 실제 키 보존
         emptySlot.title=name;
-        emptySlot.onclick=function(){ window.equipItem(this,emoji); };
+        emptySlot.onclick=function(){ window.equipItem(this,emoji); updateShopPreview(); };
       }
-      if(window.toast) window.toast(name+' 구매! 인벤토리에서 장착하세요.','🎉',2200);
+      if(window.toast) window.toast(name+' 구매 및 장착 완료!','🎉',2200);
     };
+
+    // 상점 캐릭터 미리보기 갱신
+    function updateShopPreview(){
+      const preview=document.getElementById('shopCharPreview');
+      if(preview) preview.textContent = v33CharState.char || '🐧';
+    }
   }
 
   // 인벤토리 슬롯도 안전한 이모지로 업데이트
@@ -3064,6 +3075,10 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
             patchInventory();
           },50);
         }
+        // 상점 탭 열릴 때: 인벤토리에서 장착된 아이템 표시
+        if(id==='ct-shop'){
+          setTimeout(()=>{ renderV33Character(); },80);
+        }
       };
     }
 
@@ -3079,6 +3094,9 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
           if(tab==='char'){
             setupV33CharacterPicker();
             patchInventory();
+          }
+          if(tab==='shop'){
+            renderV33Character();
           }
         },120);
       };
@@ -3536,10 +3554,25 @@ function setEmojiOnBuddy(el, emoji) {
 function syncAllChar(emoji) {
   window._v35Emoji = emoji;
   document.querySelectorAll('.buddy-3d').forEach(el => setEmojiOnBuddy(el, emoji));
-  ['charMain','floatCharBody','floatShow'].forEach(id => {
+  // floatCharBody는 SVG 캐릭터를 포함하므로 덮어쓰지 않음
+  // charMain, floatShow만 업데이트
+  ['charMain','floatShow'].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.textContent = emoji;
   });
+  // floatCharBody에는 오버레이로만 표시
+  const fcb = document.getElementById('floatCharBody');
+  if (fcb) {
+    let ov = fcb.querySelector('.v35-emoji-overlay');
+    if (!ov) {
+      ov = document.createElement('span');
+      ov.className = 'v35-emoji-overlay';
+      ov.style.cssText = 'position:absolute;top:-8px;right:-8px;font-size:16px;z-index:5;pointer-events:none;';
+      fcb.style.position = 'relative';
+      fcb.appendChild(ov);
+    }
+    ov.textContent = emoji;
+  }
 }
 
 window.pickChar = function(btn, emoji) {
