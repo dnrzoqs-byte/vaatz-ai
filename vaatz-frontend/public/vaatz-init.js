@@ -3914,3 +3914,130 @@ if (document.readyState === 'loading') {
 
 })();
 
+/* ═══════════════════════════════════════════
+ * VAATZ Admin Enhancement Pack
+ * ─ Admin maximize, user edit modal,
+ *   float-char reposition, Aa disable
+ * ═══════════════════════════════════════════ */
+(function(){
+  /* 1. Admin maximize toggle */
+  window.toggleAdmMaximize = function(){
+    var box = document.getElementById('admBox');
+    if(!box) return;
+    var isMax = box.classList.toggle('maximized');
+    var btn = document.getElementById('admMaxBtn');
+    if(btn){ btn.innerHTML = isMax ? '↙' : '⛶'; btn.title = isMax ? '원래 크기' : '화면 확대'; }
+  };
+
+  /* 2. Float-char right-panel awareness */
+  function updateFloatCharPos(){
+    var rp = document.getElementById('rp');
+    var fc = document.getElementById('floatChar');
+    if(!fc) return;
+    if(rp && rp.classList.contains('sh')){
+      var rpW = rp.offsetWidth || 340;
+      fc.style.right = (rpW + 20) + 'px';
+    } else {
+      fc.style.right = '20px';
+    }
+  }
+  var origRpT = window.rpT;
+  window.rpT = function(){
+    if(origRpT) origRpT.apply(this, arguments);
+    setTimeout(updateFloatCharPos, 200);
+  };
+  var origRpSwitchTab = window.rpSwitchTab;
+  window.rpSwitchTab = function(tab){
+    if(origRpSwitchTab) origRpSwitchTab.apply(this, arguments);
+    setTimeout(updateFloatCharPos, 100);
+  };
+
+  /* 3. User edit modal */
+  window.openUserEdit = function(row, name, role, position, team){
+    var modal = document.getElementById('userEditModal');
+    if(!modal){
+      modal = document.createElement('div');
+      modal.id = 'userEditModal';
+      modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:9999;display:flex;align-items:center;justify-content:center';
+      modal.onclick = function(e){ if(e.target===modal) modal.remove(); };
+      document.body.appendChild(modal);
+    }
+    modal.innerHTML = '<div style="background:var(--bg-1);border-radius:16px;padding:24px;width:420px;border:1px solid var(--border-1)">' +
+      '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px">' +
+        '<h3 style="font-size:14px;font-weight:700;color:var(--text-1)">사용자 권한 변경</h3>' +
+        '<button style="background:none;border:none;font-size:16px;cursor:pointer;color:var(--text-3)" onclick="document.getElementById(\'userEditModal\').remove()">✕</button>' +
+      '</div>' +
+      '<div style="display:flex;align-items:center;gap:12px;padding:12px;background:var(--bg-2);border-radius:10px;margin-bottom:16px">' +
+        '<div style="width:36px;height:36px;border-radius:10px;background:var(--accent-g);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;color:white">'+ (name?name[0]:'?') +'</div>' +
+        '<div><div style="font-size:13px;font-weight:600;color:var(--text-1)">'+ name +'</div><div style="font-size:10px;color:var(--text-4)">'+ position +' · '+ team +'</div></div>' +
+      '</div>' +
+      '<div style="margin-bottom:12px">' +
+        '<label style="font-size:11px;font-weight:600;color:var(--text-3);display:block;margin-bottom:6px">권한 역할</label>' +
+        '<select id="userEditRole" style="width:100%;padding:9px 12px;background:var(--bg-2);border:1px solid var(--border-1);border-radius:8px;color:var(--text-1);font-size:12px">' +
+          '<option value="시스템관리자"'+(role==='시스템관리자'?' selected':'')+'>🔐 시스템관리자</option>' +
+          '<option value="Admin 담당자"'+(role==='Admin 담당자'?' selected':'')+'>🛡 Admin 담당자</option>' +
+          '<option value="팀장"'+(role==='팀장'?' selected':'')+'>👑 팀장 (높음 열람)</option>' +
+          '<option value="팀관리자"'+(role==='팀관리자'?' selected':'')+'>📋 팀관리자</option>' +
+          '<option value="일반"'+(role==='일반'?' selected':'')+'>👤 일반 구성원</option>' +
+          '<option value="외부"'+'>🏢 외부 협력사</option>' +
+        '</select>' +
+      '</div>' +
+      '<div style="margin-bottom:16px">' +
+        '<label style="font-size:11px;font-weight:600;color:var(--text-3);display:block;margin-bottom:6px">보안 등급 접근</label>' +
+        '<div style="display:flex;gap:6px">' +
+          '<label style="display:flex;align-items:center;gap:5px;font-size:11px;cursor:pointer"><input type="checkbox" checked id="ue_h"> <span class="bd bd-h" style="font-size:9px">높음</span></label>' +
+          '<label style="display:flex;align-items:center;gap:5px;font-size:11px;cursor:pointer"><input type="checkbox" checked id="ue_m"> <span class="bd bd-md" style="font-size:9px">중간</span></label>' +
+          '<label style="display:flex;align-items:center;gap:5px;font-size:11px;cursor:pointer"><input type="checkbox" checked id="ue_l"> <span class="bd bd-l" style="font-size:9px">낮음</span></label>' +
+        '</div>' +
+      '</div>' +
+      '<div style="display:flex;gap:8px;justify-content:flex-end">' +
+        '<button class="btn btn-c" onclick="document.getElementById(\'userEditModal\').remove()">취소</button>' +
+        '<button class="btn btn-p" onclick="saveUserEdit(\'' + name + '\')">변경하기</button>' +
+      '</div>' +
+    '</div>';
+    modal.style.display = 'flex';
+  };
+
+  window.saveUserEdit = function(name){
+    var role = document.getElementById('userEditRole')?.value || '';
+    document.getElementById('userEditModal')?.remove();
+    if(window.toast) window.toast(name + ' 권한이 ' + role + '(으)로 변경되었습니다.', '✅', 2500);
+  };
+
+  window.openAddUserModal = function(){
+    if(window.toast) window.toast('사용자 추가 기능: SSO 연동 후 사용 가능합니다.', '👥', 2500);
+  };
+
+  /* 4. Final filter */
+  window.setFinalFilter = function(btn, filter){
+    document.querySelectorAll('.final-filter-btn').forEach(b => b.classList.remove('on'));
+    if(btn) btn.classList.add('on');
+    document.querySelectorAll('.final-doc-row').forEach(row => {
+      if(filter === 'assigned') row.style.display = row.classList.contains('assigned') ? '' : 'none';
+      else if(filter === 'unassigned') row.style.display = !row.classList.contains('assigned') ? '' : 'none';
+      else row.style.display = '';
+    });
+  };
+
+  /* 5. Disable Aa font shortcut permanently */
+  var _origInstallFont = window.installFontShortcut;
+  window.installFontShortcut = function(){ /* disabled */ };
+  setTimeout(function(){
+    var el = document.getElementById('v27FontShortcut');
+    if(el) el.remove();
+  }, 500);
+
+  /* 6. Init on load */
+  var _admInit = function(){
+    updateFloatCharPos();
+    /* Override rp toggle to reposition float-char */
+    var rp = document.getElementById('rp');
+    if(rp){
+      var obs = new MutationObserver(updateFloatCharPos);
+      obs.observe(rp, {attributes:true, attributeFilter:['class']});
+    }
+  };
+  if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', _admInit);
+  else setTimeout(_admInit, 400);
+})();
+

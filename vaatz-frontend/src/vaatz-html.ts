@@ -312,19 +312,27 @@
 </div>
 
 <div class="ov" id="ao">
-<div class="adm">
-<div class="adm-h"><h2>Admin 관리</h2><button class="adm-x" onclick="ca()">✕</button></div>
+<div class="adm" id="admBox">
+<div class="adm-h">
+  <h2>⚙️ Admin 관리</h2>
+  <div style="display:flex;gap:6px;align-items:center">
+    <button class="adm-x" id="admMaxBtn" onclick="toggleAdmMaximize()" title="화면 확대">⛶</button>
+    <button class="adm-x" onclick="ca()">✕</button>
+  </div>
+</div>
 <div class="adm-t">
-<button class="atb on" onclick="at(this,'p-home')">🏠 운영 홈</button>
-<button class="atb" onclick="at(this,'p-req')">📋 팀 문서 검토 <span class="adm-badge">5</span></button>
-<button class="atb" onclick="at(this,'p-final')">✅ 최종 승인 <span class="adm-badge adm-badge-g">2</span></button>
-<button class="atb" onclick="at(this,'p-doc')">📁 지식 베이스</button>
-<button class="atb" onclick="at(this,'p-usr')">👥 사용자 관리</button>
-<button class="atb" onclick="at(this,'p-adm')">🛡 권한 · 조직</button>
-<button class="atb" onclick="at(this,'p-int')">🔗 데이터 연계</button>
-<button class="atb" onclick="at(this,'p-mon')">📊 사용 현황</button>
-<button class="atb" onclick="at(this,'p-verify')">🧠 AI 검증</button>
-<button class="atb" onclick="at(this,'p-sec')">🔐 보안</button>
+  <div class="adm-t-section-label">── 승인 프로세스</div>
+  <button class="atb on" onclick="at(this,'p-home')">🏠 운영 홈</button>
+  <button class="atb atb-flow" onclick="at(this,'p-req')">📤 팀 문서 검토 <span class="adm-badge">5</span></button>
+  <button class="atb atb-flow" onclick="at(this,'p-final')">✅ 최종 승인 <span class="adm-badge adm-badge-g">2</span></button>
+  <button class="atb atb-flow" onclick="at(this,'p-verify')">🧠 AI 검증 <span class="adm-badge" style="background:var(--accent)">3</span></button>
+  <div class="adm-t-section-label">── 시스템 관리</div>
+  <button class="atb" onclick="at(this,'p-doc')">📁 지식 베이스</button>
+  <button class="atb" onclick="at(this,'p-aidb')">🎛 AI 모드 DB</button>
+  <button class="atb" onclick="at(this,'p-usr')">👥 사용자 · 권한</button>
+  <button class="atb" onclick="at(this,'p-int')">🔗 데이터 연계</button>
+  <button class="atb" onclick="at(this,'p-mon')">📊 모니터링</button>
+  <button class="atb" onclick="at(this,'p-sec')">🔐 보안 · 정책</button>
 </div>
 
 <!-- ════ 운영 홈 ════ -->
@@ -389,25 +397,25 @@
 </div>
 </div>
 
-<!-- ════ 최종 승인 탭 (폴더형 문서 배정) ════ -->
+<!-- ════ 최종 승인 탭 ════ -->
 <div class="adm-b" id="p-final" style="display:none">
-<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
-  <div>
-    <div style="font-size:13px;font-weight:700">✅ 최종 승인 · 폴더 배정</div>
-    <div style="font-size:11px;color:var(--text-3);margin-top:2px">팀 Admin 승인 완료 → 시스템 Admin이 폴더를 지정하면 AI 학습에 반영됩니다.</div>
+<!-- 파이프라인 미니뷰 -->
+<div class="adm-pipeline compact">
+  <div class="adm-pipe-step active"><div class="adm-pipe-circle" style="background:var(--a)">3</div><div class="adm-pipe-body"><div class="adm-pipe-label">최종 승인 단계</div><div class="adm-pipe-badge" style="background:var(--a-dim);color:var(--a)">현재 위치</div></div></div>
+  <div class="adm-pipe-arrow">▶</div>
+  <div class="adm-pipe-step"><div class="adm-pipe-circle" style="background:var(--g)">4</div><div class="adm-pipe-body"><div class="adm-pipe-label">AI 임베딩</div><div class="adm-pipe-badge" style="background:var(--g-dim);color:var(--g)">완료 11건</div></div></div>
+</div>
+
+<div style="display:flex;justify-content:space-between;align-items:center;margin:12px 0 8px">
+  <div style="display:flex;gap:6px">
+    <button class="final-filter-btn on" onclick="setFinalFilter(this,'all')">전체 <span style="background:var(--a-dim);color:var(--a);padding:0 5px;border-radius:8px;font-size:9px">2</span></button>
+    <button class="final-filter-btn" onclick="setFinalFilter(this,'unassigned')">미배정 <span style="background:var(--a-dim);color:var(--a);padding:0 5px;border-radius:8px;font-size:9px">2</span></button>
+    <button class="final-filter-btn" onclick="setFinalFilter(this,'assigned')">배정완료 <span style="background:var(--g-dim);color:var(--g);padding:0 5px;border-radius:8px;font-size:9px">0</span></button>
   </div>
   <div style="display:flex;gap:6px">
     <button class="tb-b" onclick="batchFolderAssign()">📂 선택 일괄 배정</button>
     <button class="tb-b" style="color:var(--r)" onclick="batchRejectFinal()">❌ 반려</button>
   </div>
-</div>
-
-<div class="final-stage-bar">
-  <div class="final-stage active"><span class="final-stage-n">2</span><span>폴더 미지정</span></div>
-  <div class="final-stage-arrow">→</div>
-  <div class="final-stage"><span class="final-stage-n g">3</span><span>임베딩 대기</span></div>
-  <div class="final-stage-arrow">→</div>
-  <div class="final-stage"><span class="final-stage-n b">11</span><span>AI 반영 완료</span></div>
 </div>
 
 <div style="font-size:11px;font-weight:600;color:var(--text-3);margin:14px 0 6px">📥 폴더 미지정 문서 <span style="background:var(--a-dim);color:var(--a);padding:1px 7px;border-radius:4px;font-size:10px">2건</span></div>
@@ -453,17 +461,45 @@
 </div>
 </div>
 
-<!-- ════ 팀 문서 검토 (기존 p-req) ════ -->
+<!-- ════ 팀 문서 검토 ════ -->
 <div class="adm-b" id="p-req" style="display:none">
-<!-- v20: Approval Pipeline Visualization -->
-<div class="req-flow-bar">
-  <div class="req-flow-step active"><div class="req-flow-ic">📤</div><div class="req-flow-label">① 팀원 업로드</div><div class="req-flow-cnt" style="background:var(--a-dim);color:var(--a)">5건 대기</div></div>
-  <div class="req-flow-arrow">→</div>
-  <div class="req-flow-step"><div class="req-flow-ic">👤</div><div class="req-flow-label">② 팀 Admin 검토</div><div class="req-flow-cnt" style="background:var(--accent-dim);color:var(--accent)">3건 검토중</div></div>
-  <div class="req-flow-arrow">→</div>
-  <div class="req-flow-step"><div class="req-flow-ic">✅</div><div class="req-flow-label">③ 최종 승인 · 폴더배정</div><div class="req-flow-cnt" style="background:var(--v-dim);color:var(--v)">2건 대기</div><button class="req-flow-go" onclick="at(document.querySelector('[onclick*=p-final]'),'p-final')">이동 →</button></div>
-  <div class="req-flow-arrow">→</div>
-  <div class="req-flow-step"><div class="req-flow-ic">🧠</div><div class="req-flow-label">④ AI 임베딩</div><div class="req-flow-cnt" style="background:var(--g-dim);color:var(--g)">14건 완료</div></div>
+<!-- 업무 파이프라인 -->
+<div class="adm-pipeline">
+  <div class="adm-pipe-step active">
+    <div class="adm-pipe-circle" style="background:var(--a)">1</div>
+    <div class="adm-pipe-body">
+      <div class="adm-pipe-icon">📤</div>
+      <div class="adm-pipe-label">팀원 업로드</div>
+      <div class="adm-pipe-badge" style="background:var(--a-dim);color:var(--a)">5건 대기</div>
+    </div>
+  </div>
+  <div class="adm-pipe-arrow">▶</div>
+  <div class="adm-pipe-step">
+    <div class="adm-pipe-circle" style="background:var(--accent)">2</div>
+    <div class="adm-pipe-body">
+      <div class="adm-pipe-icon">👤</div>
+      <div class="adm-pipe-label">팀 Admin 검토</div>
+      <div class="adm-pipe-badge" style="background:var(--accent-dim);color:var(--accent)">3건 진행중</div>
+    </div>
+  </div>
+  <div class="adm-pipe-arrow">▶</div>
+  <div class="adm-pipe-step" onclick="at(document.querySelector('[onclick*=p-final]'),'p-final')" style="cursor:pointer">
+    <div class="adm-pipe-circle" style="background:var(--v)">3</div>
+    <div class="adm-pipe-body">
+      <div class="adm-pipe-icon">✅</div>
+      <div class="adm-pipe-label">최종 승인 · 배정</div>
+      <div class="adm-pipe-badge" style="background:var(--v-dim);color:var(--v)">2건 대기 →</div>
+    </div>
+  </div>
+  <div class="adm-pipe-arrow">▶</div>
+  <div class="adm-pipe-step">
+    <div class="adm-pipe-circle" style="background:var(--g)">4</div>
+    <div class="adm-pipe-body">
+      <div class="adm-pipe-icon">🧠</div>
+      <div class="adm-pipe-label">AI 임베딩 반영</div>
+      <div class="adm-pipe-badge" style="background:var(--g-dim);color:var(--g)">14건 완료</div>
+    </div>
+  </div>
 </div>
 
 <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px"><div style="font-size:13px;font-weight:600">공식 데이터 업로드 요청</div><div style="display:flex;gap:6px;align-items:center"><span style="font-size:11px;color:var(--text-3)">대기 <b style="color:var(--a)">5건</b></span><button class="tb-b" style="font-size:11px" onclick="batchApprove()">✅ 선택 일괄 승인</button><button class="tb-b" style="font-size:11px" onclick="batchReject()">❌ 선택 보완 요청</button></div></div>
@@ -486,24 +522,27 @@
 
 <div class="adm-b" id="p-usr">
 <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
-<div style="font-size:13px;font-weight:600">사용자 관리 <span style="color:var(--text-4);font-size:11px;font-weight:400">48명 · 8개 팀</span></div>
-<div style="display:flex;gap:4px"><button class="tb-b" style="font-size:11px">＋ 팀 추가</button><button class="tb-b" style="font-size:11px">＋ 사용자 추가</button></div>
+<div style="font-size:13px;font-weight:600">사용자 · 권한 관리 <span style="color:var(--text-4);font-size:11px;font-weight:400">48명 · 8개 팀</span></div>
+<div style="display:flex;gap:4px">
+  <button class="tb-b" style="font-size:11px" onclick="toast('팀 추가 기능은 시스템관리자만 사용할 수 있습니다.','🔐',2000)">＋ 팀 추가</button>
+  <button class="tb-b" style="font-size:11px" onclick="openAddUserModal()">＋ 사용자 추가</button>
 </div>
-<div style="font-size:11px;color:var(--text-3);margin-bottom:14px">팀별 <b style="color:var(--text-2)">팀장 + 팀관리자</b> 2인만 Admin 권한 부여. 일반 구성원은 SSO 인증으로 시스템 접속만 가능.</div>
+</div>
+<div style="font-size:11px;color:var(--text-3);margin-bottom:14px">팀별 <b style="color:var(--text-2)">팀장 + 팀관리자</b> 2인만 Admin 권한 부여. 일반 구성원은 SSO 인증으로 시스템 접속만 가능. <span style="color:var(--accent)">이름 클릭 → 권한 변경</span></div>
 
 <!-- 시스템관리자 -->
 <div class="org-team" style="border-color:var(--accent-bd)">
 <div class="org-team-hd" onclick="tf(this)"><span class="ft-ar op" style="font-size:10px;color:var(--text-4)">▶</span><span style="font-size:14px">🔐</span><div class="org-team-nm">시스템관리자</div><span class="bd bd-a" style="font-size:9px">전체 권한</span></div>
 <div class="org-team-bd" style="max-height:200px">
-<div class="org-m"><div class="org-m-av" style="background:var(--accent-g)">김</div><div class="org-m-info"><div class="org-m-nm">김현대 <span class="bd bd-a" style="font-size:8px">시스템관리자</span></div><div class="org-m-role">책임매니저 · 구매디지털추진팀</div></div><div class="org-m-scope"><span class="bd bd-h" style="font-size:8px">높음</span><span class="bd bd-md" style="font-size:8px">중간</span><span class="bd bd-l" style="font-size:8px">낮음</span></div><div class="org-act"><div class="tg on" onclick="this.classList.toggle('on')"></div></div></div>
+<div class="org-m" onclick="openUserEdit(this,'김현대','시스템관리자','책임매니저','구매디지털추진팀')"><div class="org-m-av" style="background:var(--accent-g)">김</div><div class="org-m-info"><div class="org-m-nm">김현대 <span class="bd bd-a" style="font-size:8px">시스템관리자</span></div><div class="org-m-role">책임매니저 · 구매디지털추진팀</div></div><div class="org-m-scope"><span class="bd bd-h" style="font-size:8px">높음</span><span class="bd bd-md" style="font-size:8px">중간</span><span class="bd bd-l" style="font-size:8px">낮음</span></div><div class="org-act"><button class="req-flow-go" onclick="event.stopPropagation();openUserEdit(this.closest('.org-m'),'김현대','시스템관리자','책임매니저','구매디지털추진팀')">변경</button></div></div>
 </div></div>
 
 <!-- 구매전략팀 -->
 <div class="org-team">
 <div class="org-team-hd" onclick="tf(this)"><span class="ft-ar op" style="font-size:10px;color:var(--text-4)">▶</span><span style="font-size:14px">📂</span><div class="org-team-nm">구매전략팀</div><span class="org-team-cnt">6명</span><span class="bd bd-md" style="font-size:9px;margin-left:4px">중간+낮음</span></div>
 <div class="org-team-bd" style="max-height:400px">
-<div class="org-m"><div class="org-m-av" style="background:linear-gradient(135deg,#C29B42,#D4B05E)">김</div><div class="org-m-info"><div class="org-m-nm">김전략 <span class="bd bd-m" style="font-size:8px">팀장</span></div><div class="org-m-role">팀장 · 구매전략팀</div></div><div class="org-m-scope"><span class="bd bd-h" style="font-size:8px">높음</span><span class="bd bd-md" style="font-size:8px">중간</span><span class="bd bd-l" style="font-size:8px">낮음</span></div><div class="org-act"><div class="tg on" onclick="this.classList.toggle('on')"></div></div></div>
-<div class="org-m"><div class="org-m-av" style="background:var(--bg-5)">이</div><div class="org-m-info"><div class="org-m-nm">이준혁 <span class="bd bd-m" style="font-size:8px">팀관리자</span></div><div class="org-m-role">책임매니저 · 구매전략팀</div></div><div class="org-m-scope"><span class="bd bd-md" style="font-size:8px">중간</span><span class="bd bd-l" style="font-size:8px">낮음</span></div><div class="org-act"><div class="tg on" onclick="this.classList.toggle('on')"></div></div></div>
+<div class="org-m" onclick="openUserEdit(this,'김전략','팀장','팀장','구매전략팀')"><div class="org-m-av" style="background:linear-gradient(135deg,#C29B42,#D4B05E)">김</div><div class="org-m-info"><div class="org-m-nm">김전략 <span class="bd bd-m" style="font-size:8px">팀장</span></div><div class="org-m-role">팀장 · 구매전략팀</div></div><div class="org-m-scope"><span class="bd bd-h" style="font-size:8px">높음</span><span class="bd bd-md" style="font-size:8px">중간</span><span class="bd bd-l" style="font-size:8px">낮음</span></div><div class="org-act"><button class="req-flow-go" onclick="event.stopPropagation();openUserEdit(this.closest('.org-m'),'김전략','팀장','팀장','구매전략팀')">변경</button></div></div>
+<div class="org-m" onclick="openUserEdit(this,'이준혁','팀관리자','책임매니저','구매전략팀')"><div class="org-m-av" style="background:var(--bg-5)">이</div><div class="org-m-info"><div class="org-m-nm">이준혁 <span class="bd bd-m" style="font-size:8px">팀관리자</span></div><div class="org-m-role">책임매니저 · 구매전략팀</div></div><div class="org-m-scope"><span class="bd bd-md" style="font-size:8px">중간</span><span class="bd bd-l" style="font-size:8px">낮음</span></div><div class="org-act"><button class="req-flow-go" onclick="event.stopPropagation();openUserEdit(this.closest('.org-m'),'이준혁','팀관리자','책임매니저','구매전략팀')">변경</button></div></div>
 <div style="padding:3px 10px;font-size:9px;color:var(--text-4);font-style:italic;border-top:1px solid var(--border-1);margin-top:4px">일반 구성원 4명 — SSO 접속 (Admin 권한 없음)</div>
 </div></div>
 
@@ -950,9 +989,113 @@
 • 모든 질의·응답 감사 로그 90일 보관<br>
 • 오답 의심 건 자동 감지 시 관리자 즉시 알림
 </div></div>
+
+<div style="margin-top:16px;font-size:13px;font-weight:600;margin-bottom:10px">📜 문서 관리 정책</div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px">
+<div style="background:var(--bg-2);border:1px solid var(--border-1);border-radius:var(--r-sm);padding:14px">
+  <div style="font-size:11px;font-weight:600;color:var(--text-1);margin-bottom:8px">📋 보안 등급 분류 기준</div>
+  <div style="font-size:10.5px;color:var(--text-2);line-height:1.8">
+    <div style="display:flex;gap:8px;align-items:flex-start;margin-bottom:4px"><span class="bd bd-h" style="font-size:9px;flex-shrink:0">높음</span><span>원가·단가, 계약조건, 임원 결재 내역, 공급사 협상 자료</span></div>
+    <div style="display:flex;gap:8px;align-items:flex-start;margin-bottom:4px"><span class="bd bd-md" style="font-size:9px;flex-shrink:0">중간</span><span>업무규정, 입찰운영 표준, 5스타 평가 기준, 내부 절차서</span></div>
+    <div style="display:flex;gap:8px;align-items:flex-start"><span class="bd bd-l" style="font-size:9px;flex-shrink:0">낮음</span><span>VAATZ 매뉴얼, 공개 양식, 구매용어사전, 교육 자료</span></div>
+  </div>
+</div>
+<div style="background:var(--bg-2);border:1px solid var(--border-1);border-radius:var(--r-sm);padding:14px">
+  <div style="font-size:11px;font-weight:600;color:var(--text-1);margin-bottom:8px">🗂 문서 수명 주기</div>
+  <div style="font-size:10.5px;color:var(--text-2);line-height:1.8">
+    • <b>유효기간</b>: 등록 후 2년 → 갱신 검토 알림 자동 발송<br>
+    • <b>자동 비활성화</b>: 갱신 없이 6개월 초과 시 AI 검색에서 제외<br>
+    • <b>삭제 정책</b>: 시스템관리자만 영구 삭제 가능, 90일 휴지통 보관<br>
+    • <b>버전 관리</b>: 동일 문서 재업로드 시 이전 버전 자동 아카이브
+  </div>
+</div>
+</div>
+<div style="background:var(--bg-2);border:1px solid var(--border-1);border-radius:var(--r-sm);padding:12px;font-size:10.5px;color:var(--text-2);line-height:1.8">
+<div style="font-weight:600;color:var(--text-1);margin-bottom:6px">🔄 보안 등급 변경 절차</div>
+• 등급 상향: 파일 담당자 신청 → 시스템관리자 최종 승인 필요<br>
+• 등급 하향: 파일 담당자가 자체 변경 가능 (로그 기록됨)<br>
+• 자동 등급: 특정 키워드 감지 시 AI가 등급 변경 제안 → 관리자 확정
+</div>
 </div>
 
 </div></div>
+
+<!-- ════ AI 모드별 DB 관리 ════ -->
+<div class="adm-b" id="p-aidb" style="display:none">
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+  <div>
+    <div style="font-size:13px;font-weight:600">🎛 AI 모드별 DB 관리</div>
+    <div style="font-size:11px;color:var(--text-3);margin-top:2px">각 AI 모드가 참조하는 문서 폴더와 데이터 소스를 모드별로 설정합니다.</div>
+  </div>
+  <button class="tb-b" onclick="toast('AI 모드 일괄 동기화를 시작합니다.','🔄',2000)">🔄 전체 동기화</button>
+</div>
+
+<div class="aidb-mode-grid">
+  <!-- 일반 모드 -->
+  <div class="aidb-mode-card">
+    <div class="aidb-mode-hd">
+      <div class="aidb-mode-icon" style="background:var(--accent-dim)">🤖</div>
+      <div><div class="aidb-mode-nm">일반 모드</div><div class="aidb-mode-desc">구매업무 전반 Q&A</div></div>
+      <div class="tg on" style="margin-left:auto" onclick="this.classList.toggle('on')"></div>
+    </div>
+    <div class="aidb-source-list">
+      <div class="aidb-src-row"><span class="aidb-src-ic">📂</span><span class="aidb-src-nm">구매업무규정</span><span class="aidb-src-cnt">3건</span><span class="aidb-src-ok">✓</span></div>
+      <div class="aidb-src-row"><span class="aidb-src-ic">📂</span><span class="aidb-src-nm">입찰관리</span><span class="aidb-src-cnt">2건</span><span class="aidb-src-ok">✓</span></div>
+      <div class="aidb-src-row"><span class="aidb-src-ic">📂</span><span class="aidb-src-nm">VAATZ 매뉴얼</span><span class="aidb-src-cnt">3건</span><span class="aidb-src-ok">✓</span></div>
+      <div class="aidb-src-row"><span class="aidb-src-ic">📂</span><span class="aidb-src-nm">용어사전·양식</span><span class="aidb-src-cnt">4건</span><span class="aidb-src-ok">✓</span></div>
+      <div class="aidb-src-row"><span class="aidb-src-ic">📖</span><span class="aidb-src-nm">Autopedia</span><span class="aidb-src-cnt">4,832건</span><span class="aidb-src-ok">✓</span></div>
+    </div>
+    <div class="aidb-mode-ft"><span style="color:var(--g)">활성 12건</span> · 마지막 동기화 10분 전<button class="req-flow-go" onclick="toast('일반 모드 동기화 완료','🔄',1800)">동기화</button></div>
+  </div>
+
+  <!-- 원가 모드 -->
+  <div class="aidb-mode-card">
+    <div class="aidb-mode-hd">
+      <div class="aidb-mode-icon" style="background:var(--a-dim)">💰</div>
+      <div><div class="aidb-mode-nm">원가 모드</div><div class="aidb-mode-desc">단가·원가 분석 특화</div></div>
+      <div class="tg on" style="margin-left:auto" onclick="this.classList.toggle('on')"></div>
+    </div>
+    <div class="aidb-source-list">
+      <div class="aidb-src-row"><span class="aidb-src-ic">📂</span><span class="aidb-src-nm">구매업무규정 <span class="bd bd-h" style="font-size:8px">높음</span></span><span class="aidb-src-cnt">3건</span><span class="aidb-src-ok">✓</span></div>
+      <div class="aidb-src-row"><span class="aidb-src-ic">🖥️</span><span class="aidb-src-nm">VAATZ 마스터 데이터</span><span class="aidb-src-cnt">연결 대기</span><span style="color:var(--a);font-size:11px">⏳</span></div>
+      <div class="aidb-src-row aidb-src-add" onclick="toast('원가 모드에 연결할 데이터 소스를 선택해주세요.','📂',2000)"><span>＋ 데이터 소스 추가</span></div>
+    </div>
+    <div class="aidb-mode-ft"><span style="color:var(--a)">부분 활성</span> · VAATZ 마스터 데이터 연결 후 완성<button class="req-flow-go" onclick="at(document.querySelector('[onclick*=p-int]'),'p-int')">연결 설정 →</button></div>
+  </div>
+
+  <!-- 5스타 모드 -->
+  <div class="aidb-mode-card">
+    <div class="aidb-mode-hd">
+      <div class="aidb-mode-icon" style="background:var(--g-dim)">⭐</div>
+      <div><div class="aidb-mode-nm">5스타 모드</div><div class="aidb-mode-desc">품질 평가 특화</div></div>
+      <div class="tg on" style="margin-left:auto" onclick="this.classList.toggle('on')"></div>
+    </div>
+    <div class="aidb-source-list">
+      <div class="aidb-src-row"><span class="aidb-src-ic">📂</span><span class="aidb-src-nm">품질 5스타</span><span class="aidb-src-cnt">2건</span><span class="aidb-src-ok">✓</span></div>
+      <div class="aidb-src-row"><span class="aidb-src-ic">📋</span><span class="aidb-src-nm">사내 업무표준</span><span class="aidb-src-cnt">312건</span><span class="aidb-src-ok">✓</span></div>
+    </div>
+    <div class="aidb-mode-ft"><span style="color:var(--g)">활성 2건</span> · 마지막 동기화 32분 전<button class="req-flow-go" onclick="toast('5스타 모드 동기화 완료','🔄',1800)">동기화</button></div>
+  </div>
+
+  <!-- 법규 모드 -->
+  <div class="aidb-mode-card">
+    <div class="aidb-mode-hd">
+      <div class="aidb-mode-icon" style="background:var(--v-dim)">⚖️</div>
+      <div><div class="aidb-mode-nm">법규 모드</div><div class="aidb-mode-desc">공정거래·규정 특화</div></div>
+      <div class="tg" style="margin-left:auto" onclick="this.classList.toggle('on')"></div>
+    </div>
+    <div class="aidb-source-list">
+      <div class="aidb-src-row"><span class="aidb-src-ic">📂</span><span class="aidb-src-nm">구매업무규정</span><span class="aidb-src-cnt">3건</span><span class="aidb-src-ok">✓</span></div>
+      <div class="aidb-src-row aidb-src-add" onclick="toast('법규 모드에 연결할 데이터 소스를 선택해주세요.','📂',2000)"><span>＋ 공정거래/법규 자료 추가</span></div>
+    </div>
+    <div class="aidb-mode-ft"><span style="color:var(--text-4)">비활성화</span> · 토글로 활성화 가능<button class="req-flow-go">설정</button></div>
+  </div>
+</div>
+
+<div style="margin-top:14px;padding:10px 14px;background:var(--bg-2);border:1px solid var(--border-1);border-radius:8px;font-size:10.5px;color:var(--text-3);line-height:1.7">
+💡 <b style="color:var(--text-2)">운영 팁</b>: 각 모드에 등록된 문서만 AI 검색에 활용됩니다. 동기화는 데이터 소스에 새 문서가 추가될 때마다 자동으로 진행됩니다. 모드 비활성화 시 해당 모드로 전환이 불가합니다.
+</div>
+</div>
 
 <!-- Question Write Modal -->
 <div class="rq-m" id="qWriteM" onclick="if(event.target===this)closeQuestionWrite()">
