@@ -24,5 +24,10 @@ export default function App() {
     document.body.appendChild(script)
   }, [])
 
-  return <div dangerouslySetInnerHTML={{ __html: vaatzHtml }} />
+  return (
+    <div
+      style={{ height: '100vh', overflow: 'hidden', display: 'contents' }}
+      dangerouslySetInnerHTML={{ __html: vaatzHtml }}
+    />
+  )
 }
