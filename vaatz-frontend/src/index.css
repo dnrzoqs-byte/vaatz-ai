@@ -1,5 +1,4 @@
-﻿<style>
-/* --- 기존 클로드 코드 스타일 (기반) --- */
+﻿/* --- 기존 클로드 코드 스타일 (기반) --- */
 :root,html[data-theme="dark"]{
 --bg-0:#080A0E;--bg-1:#0C0F15;--bg-2:#11151D;--bg-3:#171C27;--bg-4:#1D2333;--bg-5:#242C3D;
 --border-1:rgba(255,255,255,0.05);--border-2:rgba(255,255,255,0.08);--border-3:rgba(255,255,255,0.13);
@@ -1171,4 +1170,3 @@ html[data-theme="light"] .sc-btn.on{background:#fff}
   .tb-l{gap:8px}
 }
 
-</style>
