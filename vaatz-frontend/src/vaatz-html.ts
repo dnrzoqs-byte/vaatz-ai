@@ -432,6 +432,7 @@
       <option value="">폴더 선택 →</option>
       <option>구매업무규정</option><option>입찰관리</option><option>VAATZ 매뉴얼</option><option>품질 5스타</option><option>용어사전 · 양식</option>
     </select>
+    <button class="abtn" style="color:var(--accent)" onclick="openFinalPreview('공정거래법 하도급 관련 조항.pdf','정현수 · 구매품질기획팀 · 02.07','중간','pdf')">📋 미리보기</button>
     <button class="abtn no" onclick="toast('반려 사유를 입력해주세요.','⚠️',2500)">반려</button>
   </div>
   <div class="final-doc-row">
@@ -446,6 +447,7 @@
       <option value="">폴더 선택 →</option>
       <option>구매업무규정</option><option>입찰관리</option><option>VAATZ 매뉴얼</option><option>품질 5스타</option><option>용어사전 · 양식</option>
     </select>
+    <button class="abtn" style="color:var(--accent)" onclick="openFinalPreview('전동화 부품 단가 벤치마크.xlsx','한도윤 · PT제어부품구매팀 · 02.08','높음','xlsx')">📋 미리보기</button>
     <button class="abtn no" onclick="toast('반려 사유를 입력해주세요.','⚠️',2500)">반려</button>
   </div>
 </div>
@@ -459,6 +461,33 @@
   <div class="final-folder-card" onclick="toast('용어사전·양식 폴더 — 문서 2건 AI 반영 완료','📁',2000)"><div class="final-folder-icon">📂</div><div class="final-folder-name">용어사전 · 양식</div><div class="final-folder-cnt"><span style="color:var(--g)">2건</span> 반영</div></div>
   <div class="final-folder-card add-folder" onclick="toast('폴더 추가 기능은 시스템 Admin만 사용할 수 있습니다.','📁',2500)"><div class="final-folder-icon">＋</div><div class="final-folder-name" style="color:var(--accent)">폴더 추가</div></div>
 </div>
+</div>
+
+<!-- ════ 최종 승인 문서 미리보기 모달 ════ -->
+<div class="final-prev-ov" id="finalPreviewModal" onclick="if(event.target===this)closeFinalPreview()">
+  <div class="final-prev-box">
+    <div class="final-prev-hd">
+      <div class="final-prev-hd-l">
+        <div class="final-prev-icon" id="fpIcon">📄</div>
+        <div>
+          <div class="final-prev-title" id="fpTitle">문서명</div>
+          <div class="final-prev-meta" id="fpMeta">메타정보</div>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <span class="final-prev-sec-badge" id="fpSec">보안</span>
+        <button class="final-prev-close" onclick="closeFinalPreview()">✕</button>
+      </div>
+    </div>
+    <div class="final-prev-body" id="fpBody"></div>
+    <div class="final-prev-foot">
+      <div style="font-size:11px;color:var(--text-4)">팀 Admin 검토 완료 · VAATZ AI 시스템</div>
+      <div style="display:flex;gap:8px">
+        <button class="abtn no" onclick="closeFinalPreview();toast('반려 사유를 입력해주세요.','⚠️',2500)">❌ 반려</button>
+        <button class="abtn ok" style="padding:6px 18px;font-weight:700" onclick="closeFinalPreview();toast('최종 승인 완료 — AI 임베딩 대기열로 이동합니다.','✅',2500)">✅ 최종 승인</button>
+      </div>
+    </div>
+  </div>
 </div>
 
 <!-- ════ 팀 문서 검토 ════ -->

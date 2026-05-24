@@ -4052,6 +4052,82 @@ if (document.readyState === 'loading') {
     });
   };
 
+  /* 4b. Final doc preview modal */
+  var _finalPreviewData = {
+    'pdf': {
+      title: '공정거래법 하도급 관련 조항',
+      subtitle: '법무팀 공식 문서 · v1.2 · 구매품질기획팀',
+      type: '📄 PDF',
+      chunks: 48,
+      embed: '2026-01-15',
+      body: `<p>본 문서는 <span class="fp-highlight">공정거래법 제32조(하도급 거래 공정화)</span> 및 관련 조항을 정리한 구매 실무 참조 자료입니다.</p>
+<p><strong>1. 하도급 대금 지급 규정</strong><br>수급사업자에게 목적물 수령일로부터 <span class="fp-highlight">60일 이내</span>에 하도급 대금을 지급해야 합니다. 어음 교부 시에는 어음 만기 기간이 90일을 초과할 수 없습니다.</p>
+<p><strong>2. 부당 단가 인하 금지</strong><br>정당한 사유 없이 당초 약정 단가를 인하하는 행위는 금지됩니다. 원재료 가격 상승 등 불가피한 사유 발생 시에는 협의를 통해 단가를 조정할 수 있습니다.</p>
+<p><strong>3. 기술 자료 유용 금지</strong><br>수급사업자로부터 제공받은 기술 자료를 <span class="fp-highlight">정당한 이유 없이 사용하거나 제3자에게 제공하는 행위</span>는 엄격히 금지됩니다.</p>
+<p><strong>4. 서면 교부 의무</strong><br>하도급 계약 체결 시에는 반드시 계약서를 교부해야 하며, 구두 계약은 분쟁 발생 시 효력이 인정되지 않을 수 있습니다.</p>`
+    },
+    'xlsx': {
+      title: '전동화 부품 단가 벤치마크',
+      subtitle: 'PT제어부품구매팀 · 2026 Q1 자료 · v2.0',
+      type: '📊 Excel',
+      chunks: 31,
+      embed: '2026-02-08',
+      body: `<p>본 자료는 <span class="fp-highlight">전동화 핵심 부품 12종의 벤치마크 단가</span>를 정리한 구매 의사결정 참조 자료입니다.</p>
+<table><thead><tr><th>부품명</th><th>현재 단가</th><th>벤치마크</th><th>차이율</th><th>비고</th></tr></thead>
+<tbody>
+<tr><td>인버터 모듈 (150kW)</td><td class="fp-highlight">₩4,280,000</td><td>₩3,950,000</td><td style="color:var(--r)">+8.4%</td><td>재협상 필요</td></tr>
+<tr><td>BMS 컨트롤러</td><td>₩1,150,000</td><td>₩1,180,000</td><td style="color:var(--g)">-2.5%</td><td>적정</td></tr>
+<tr><td>모터 하우징 (알루미늄)</td><td class="fp-highlight">₩680,000</td><td>₩590,000</td><td style="color:var(--r)">+15.3%</td><td>대체 공급사 검토</td></tr>
+<tr><td>전력반도체 (SiC MOSFET)</td><td>₩92,000</td><td>₩88,000</td><td style="color:var(--a)">+4.5%</td><td>공급 부족</td></tr>
+<tr><td>냉각 플레이트</td><td>₩320,000</td><td>₩315,000</td><td style="color:var(--g)">+1.6%</td><td>적정</td></tr>
+</tbody></table>
+<p style="margin-top:14px;font-size:11.5px;color:var(--text-4)">* 벤치마크 기준: 동종 업계 3개사 평균 / 2026년 1월 기준 / 환율 USD 1,320원 적용</p>`
+    }
+  };
+
+  window.openFinalPreview = function(name, meta, sec, type){
+    var modal = document.getElementById('finalPreviewModal');
+    if(!modal) return;
+    var data = _finalPreviewData[type] || _finalPreviewData['pdf'];
+    var secCls = sec === '높음' ? 'sec-h' : sec === '중간' ? 'sec-m' : 'sec-l';
+    // Populate header
+    var fpIcon = document.getElementById('fpIcon');
+    var fpTitle = document.getElementById('fpTitle');
+    var fpMeta = document.getElementById('fpMeta');
+    var fpSec = document.getElementById('fpSec');
+    if(fpIcon) fpIcon.textContent = type === 'xlsx' ? '📊' : '📄';
+    if(fpTitle) fpTitle.textContent = name;
+    if(fpMeta) fpMeta.textContent = meta + ' · 팀 Admin 승인 완료';
+    if(fpSec){
+      fpSec.textContent = '🔒 보안 ' + sec;
+      fpSec.className = 'final-prev-sec-badge ' + secCls;
+    }
+    // Populate body
+    var fpBody = document.getElementById('fpBody');
+    if(fpBody){
+      fpBody.innerHTML =
+        '<div class="fp-info-grid">' +
+          '<div class="fp-info-card"><div class="fp-info-label">파일 형식</div><div class="fp-info-value">' + data.type + '</div></div>' +
+          '<div class="fp-info-card"><div class="fp-info-label">청크 수</div><div class="fp-info-value">' + data.chunks + '개</div></div>' +
+          '<div class="fp-info-card"><div class="fp-info-label">임베딩 예정</div><div class="fp-info-value">' + data.embed + '</div></div>' +
+        '</div>' +
+        '<div class="fp-doc-content">' +
+          '<div class="fp-doc-title">' + data.title + '</div>' +
+          '<div class="fp-doc-subtitle">' + data.subtitle + '</div>' +
+          '<div class="fp-doc-body">' + data.body + '</div>' +
+        '</div>' +
+        '<div class="fp-note">💡 <strong>AI 인용 표시:</strong> 노란색 하이라이트는 AI 답변 생성에 직접 활용될 가능성이 높은 핵심 내용입니다. 승인 시 선택된 AI 모드에 독립 반영됩니다.</div>';
+    }
+    modal.classList.add('sh');
+    document.body.style.overflow = 'hidden';
+  };
+
+  window.closeFinalPreview = function(){
+    var modal = document.getElementById('finalPreviewModal');
+    if(modal) modal.classList.remove('sh');
+    document.body.style.overflow = '';
+  };
+
   /* 5. Disable Aa font shortcut permanently */
   var _origInstallFont = window.installFontShortcut;
   window.installFontShortcut = function(){ /* disabled */ };
