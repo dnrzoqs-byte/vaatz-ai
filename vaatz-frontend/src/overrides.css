@@ -1,0 +1,380 @@
+/* ═══════════════════════════════════════════
+ * VAATZ AI — UX/UI Overrides
+ * 서비스 기획자 관점 개선
+ * ═══════════════════════════════════════════ */
+
+/* ── 전체 레이아웃 ── */
+html, body, #root {
+  height: 100vh;
+  overflow: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+/* 최소 너비 보장 */
+.app {
+  min-width: 960px;
+}
+
+/* ── 사이드바 비율 개선 ── */
+.sb {
+  width: 240px;
+  min-width: 240px;
+}
+.app {
+  grid-template-columns: 240px 1fr;
+}
+
+/* 브랜드 영역 */
+.brand-n {
+  font-size: 14px;
+  letter-spacing: -0.4px;
+}
+.brand-s {
+  font-size: 9.5px;
+  letter-spacing: 0.1px;
+  color: var(--text-4);
+}
+
+/* 새 대화 버튼 */
+.new-c {
+  font-size: 12.5px;
+  padding: 8.5px;
+  letter-spacing: -0.1px;
+}
+
+/* 사이드바 메뉴 */
+.sb-lb {
+  font-size: 9px;
+  letter-spacing: 1.5px;
+  padding: 0 8px 5px;
+  margin-top: 2px;
+}
+.sb-i {
+  font-size: 12.5px;
+  padding: 6.5px 10px;
+  border-radius: 6px;
+}
+
+/* 대화 히스토리 */
+.hi-t {
+  font-size: 11.5px;
+  line-height: 1.4;
+}
+.hi-m {
+  font-size: 9.5px;
+  margin-top: 2px;
+}
+
+/* 사용자 정보 */
+.sb-un { font-size: 11.5px; font-weight: 600; }
+.sb-ur { font-size: 10px; margin-top: 1px; }
+
+/* ── 상단 바 ── */
+.tb {
+  height: 50px;
+  padding: 0 20px;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+.tb-t {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: -0.3px;
+}
+.sc-btn {
+  font-size: 10.5px;
+  padding: 4px 11px;
+}
+.tb-b {
+  font-size: 10.5px;
+  padding: 5px 11px;
+  border-radius: 6px;
+}
+
+/* ── 채팅 콘텐츠 영역 ── */
+.cs {
+  scroll-behavior: smooth;
+}
+.cc {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 28px 32px 20px;
+}
+
+/* ── 웰컴 화면 ── */
+.wl {
+  padding: 60px 20px 40px;
+  max-width: 560px;
+  margin: 0 auto;
+}
+.wl-m {
+  width: 56px;
+  height: 56px;
+  border-radius: 15px;
+  margin-bottom: 20px;
+}
+.wl-ti {
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: -0.6px;
+  margin-bottom: 8px;
+}
+.wl-d {
+  font-size: 13.5px;
+  line-height: 1.75;
+  margin-bottom: 28px;
+  color: var(--text-3);
+}
+.wg {
+  gap: 8px;
+  max-width: 480px;
+}
+.wc {
+  padding: 16px 14px;
+  border-radius: 10px;
+}
+.wc-i { font-size: 18px; margin-bottom: 6px; }
+.wc-t { font-size: 12.5px; font-weight: 600; margin-bottom: 2px; }
+.wc-d { font-size: 10.5px; line-height: 1.55; color: var(--text-3); }
+.wt { margin-top: 22px; gap: 5px; max-width: 480px; }
+.wt-i { font-size: 11px; padding: 5px 12px; }
+
+/* ── 메시지 스타일 ── */
+.msg { margin-bottom: 20px; }
+.msg-b {
+  max-width: 64%;
+  font-size: 14px;
+  line-height: 1.75;
+  padding: 12px 16px;
+  border-radius: 16px 16px 4px 16px;
+}
+.aa {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+}
+.an { font-size: 11.5px; }
+.at0 { font-size: 9.5px; padding: 2px 6px; }
+
+/* AI 답변 텍스트 */
+.ai-tx {
+  font-size: 14px;
+  line-height: 1.95;
+  letter-spacing: -0.01em;
+}
+.ai-tx p { margin-bottom: 10px; }
+
+/* 인용 번호 */
+.cr {
+  font-size: 8.5px;
+  min-width: 15px;
+  height: 15px;
+  border-radius: 3px;
+}
+
+/* ── RAG 파이프라인 ── */
+.rag-pipeline {
+  margin-bottom: 14px;
+  border-radius: 10px;
+}
+.rag-step {
+  font-size: 11.5px;
+}
+.rag-step-mt {
+  font-size: 9.5px;
+}
+
+/* ── 정보 박스 ── */
+.ib {
+  border-radius: 9px;
+  padding: 13px 15px;
+  margin: 10px 0;
+}
+.ib-t { font-size: 13.5px; font-weight: 700; margin-bottom: 6px; }
+.ib-b { font-size: 13px; line-height: 1.9; }
+
+/* ── 테이블 ── */
+.ct { font-size: 11.5px; margin: 10px 0; }
+.ct th { font-size: 10px; padding: 9px 12px; }
+.ct td { padding: 8px 12px; font-size: 12.5px; }
+
+/* ── 프로세스 단계 ── */
+.pn { width: 30px; height: 30px; font-size: 11.5px; border-radius: 8px; }
+.pt { font-size: 13px; font-weight: 600; }
+.pd { font-size: 12px; line-height: 1.8; }
+.psy { font-size: 9.5px; padding: 2px 8px; margin-top: 4px; }
+
+/* ── AI 액션 버튼 ── */
+.ai-a { font-size: 10.5px; padding: 4px 8px; border-radius: 5px; }
+
+/* ── 팔로우업 칩 ── */
+.fu-c { font-size: 10.5px; padding: 5px 11px; border-radius: 13px; }
+
+/* ── 참조 문서 ── */
+.sr2-c { padding: 9px 12px; border-radius: 7px; }
+.sr2-c-nm { font-size: 12px; }
+.sr2-c-mt { font-size: 10px; }
+
+/* ── 입력 영역 ── */
+.iw {
+  padding: 0 0 20px;
+  max-width: 800px;
+  margin: 0 auto;
+  width: 100%;
+}
+.ibx {
+  border-radius: 13px;
+  border-width: 1.5px;
+  background: var(--bg-2);
+}
+.ibx:focus-within {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3.5px var(--accent-dim);
+}
+.ir {
+  padding: 12px 14px 8px;
+  gap: 10px;
+}
+.ir textarea {
+  font-size: 13.5px;
+  line-height: 1.65;
+  max-height: 120px;
+}
+.ir textarea::placeholder { font-size: 13px; }
+.sd {
+  width: 34px;
+  height: 34px;
+  border-radius: 9px;
+}
+.ib3 { padding: 2px 10px 8px; }
+.itb { font-size: 10.5px; padding: 4px 8px; }
+.ih { font-size: 9.5px; }
+.disc { font-size: 9.5px; padding: 5px; opacity: 0.7; }
+
+/* ── 우측 패널 ── */
+.rp {
+  width: 290px;
+  min-width: 290px;
+}
+.rp-h { padding: 10px 13px; }
+.rp-t { font-size: 12.5px; }
+.rp-tab { font-size: 11.5px; padding: 7px 10px; }
+
+/* 파일 목록 */
+.fl-file-nm { font-size: 11px; }
+.fl-file-meta { font-size: 9px; }
+.ft-nm { font-size: 12.5px; }
+
+/* ── 알림 패널 ── */
+.noti-item-title { font-size: 11.5px; }
+.noti-item-desc { font-size: 10px; line-height: 1.5; }
+.noti-item-time { font-size: 9px; }
+
+/* ── Admin 모달 ── */
+.adm { width: min(1020px, 95vw); }
+.adm-h h2 { font-size: 15px; }
+.atb { font-size: 11.5px; padding: 10px 14px; }
+.at2 th { font-size: 9px; padding: 8px 11px; }
+.at2 td { padding: 9px 11px; font-size: 11.5px; }
+
+/* ── 스크롤바 개선 ── */
+::-webkit-scrollbar { width: 3px; height: 3px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border-2); border-radius: 10px; }
+::-webkit-scrollbar-thumb:hover { background: var(--border-3); }
+
+/* ── 인용 툴팁 ── */
+.cr-tip {
+  font-size: 11px;
+  min-width: 220px;
+  max-width: 300px;
+  white-space: normal;
+  line-height: 1.6;
+}
+
+/* ── 통계 카드 ── */
+.st-v { font-size: 22px; }
+.st-l { font-size: 9.5px; }
+.st-d { font-size: 9.5px; }
+
+/* ── 반응형: 1280px 이상 ── */
+@media (min-width: 1280px) {
+  .cc, .iw {
+    max-width: 860px;
+  }
+  .sb { width: 256px; min-width: 256px; }
+  .app { grid-template-columns: 256px 1fr; }
+}
+
+/* ── 반응형: 1100px 이하 ── */
+@media (max-width: 1100px) {
+  .rp { width: 260px; min-width: 260px; }
+  .cc, .iw { max-width: 680px; }
+}
+
+/* ── 반응형: 900px 이하 ── */
+@media (max-width: 900px) {
+  .app {
+    grid-template-columns: 1fr;
+    min-width: 100%;
+  }
+  .sb { display: none; }
+  .tb { padding: 0 16px; }
+  .cc, .iw {
+    padding-left: 16px;
+    padding-right: 16px;
+    max-width: 100%;
+  }
+  .msg-b { max-width: 80%; }
+  .rp:not(.sh) { display: none; }
+  .rp.sh {
+    position: fixed;
+    right: 0;
+    top: 50px;
+    bottom: 0;
+    z-index: 100;
+    width: 100vw !important;
+    max-width: 360px;
+    box-shadow: -4px 0 24px rgba(0,0,0,0.3);
+  }
+}
+
+/* ── 포커스 & 접근성 ── */
+button:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+textarea:focus { outline: none; }
+
+/* ── 선택 영역 ── */
+::selection {
+  background: var(--accent-dim);
+  color: var(--accent);
+}
+
+/* ── 마이페이지 모달 ── */
+.mp-box { width: min(520px, 95vw); }
+.mp-name { font-size: 14px; }
+.mp-role { font-size: 10.5px; }
+.mp-stat-v { font-size: 18px; }
+.mp-stat-l { font-size: 9.5px; }
+
+/* ── 요청 모달 ── */
+.rq-b { width: min(460px, 95vw); }
+.rq-h { font-size: 15px; }
+.rq-d { font-size: 11.5px; }
+.frm-l { font-size: 11px; }
+.frm-i { font-size: 12.5px; padding: 9px 11px; }
+
+/* ── 배지/태그 ── */
+.bd { font-size: 9.5px; padding: 2px 7px; }
+
+/* ── 통합 미세 조정 ── */
+.sp { border-radius: 8px; padding: 11px 13px; }
+.sp-r { font-size: 11px; }
+.req-title { font-size: 12px; font-weight: 600; }
+.req-meta { font-size: 9.5px; }
+.org-m-nm { font-size: 11.5px; }
+.org-m-role { font-size: 10px; }
