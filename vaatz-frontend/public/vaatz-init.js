@@ -2844,22 +2844,43 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
     {emoji:'🏆',name:'챔피언'},
   ];
 
+  // 배경 키 → 그라디언트 매핑
+  const V33_BG_MAP={
+    'bg-office': {grad:'linear-gradient(180deg,#CFD8DC 0%,#ECEFF1 50%,#F5F5F5 100%)',emoji:'🏢'},
+    'bg-ocean':  {grad:'linear-gradient(180deg,#1565C0 0%,#1E90FF 35%,#87CEEB 65%,#B3E5FC 100%)',emoji:'🌊'},
+    'bg-cherry': {grad:'linear-gradient(180deg,#F8BBD0 0%,#FCE4EC 40%,#FFF0F5 100%)',emoji:'🌸'},
+    'bg-mountain':{grad:'linear-gradient(180deg,#90CAF9 0%,#B3E5FC 40%,#C8E6C9 70%,#FFFFFF 100%)',emoji:'🏔️'},
+    'bg-beach':  {grad:'linear-gradient(180deg,#29B6F6 0%,#4FC3F7 30%,#FFF9C4 60%,#FFE082 100%)',emoji:'🏖️'},
+    'bg-forest': {grad:'linear-gradient(180deg,#1B5E20 0%,#2E7D32 35%,#43A047 60%,#A5D6A7 100%)',emoji:'🌿'},
+    'bg-city':   {grad:'linear-gradient(180deg,#1A237E 0%,#283593 40%,#3949AB 70%,#5C6BC0 100%)',emoji:'🌃'},
+    'bg-sunset': {grad:'linear-gradient(180deg,#FF6F00 0%,#FF8F00 20%,#FFB300 45%,#FFD54F 65%,#87CEEB 100%)',emoji:'🌅'},
+    'bg-snow':   {grad:'linear-gradient(180deg,#B3E5FC 0%,#E1F5FE 40%,#F0F9FF 70%,#FFFFFF 100%)',emoji:'❄️'},
+    'bg-night':  {grad:'linear-gradient(180deg,#0D1B3E 0%,#162040 50%,#1E2A52 100%)',emoji:'🌌'},
+    'bg-galaxy': {grad:'linear-gradient(180deg,#0D0D2E 0%,#16083A 40%,#4A1B7A 80%,#673AB7 100%)',emoji:'🪐'},
+    'bg-factory':{grad:'linear-gradient(180deg,#78909C 0%,#90A4AE 40%,#B0BEC5 70%,#CFD8DC 100%)',emoji:'🏭'},
+  };
+  // 레거시 이모지 → bg키 호환
+  const V33_BG_LEGACY={'🌊':'bg-ocean','🌸':'bg-cherry','🏔️':'bg-mountain','🌌':'bg-night','🏭':'bg-factory','🏢':'bg-office','🌃':'bg-city','🏖️':'bg-beach'};
+
   // 현재 캐릭터 상태
   const v33CharState={
     char:'🐧',
     hat:'',
     side:'',
     effect:'',
-    bg:'🏢',
+    bg:'bg-office',
     nick:'프로큐어히어로'
   };
 
   function renderV33Character(){
     const charRoom=$('#charRoom');
     if(!charRoom) return;
-    // 모든 자식 제거 후 새로 렌더
+    const bgKey=V33_BG_LEGACY[v33CharState.bg]||v33CharState.bg||'bg-office';
+    const bgInfo=V33_BG_MAP[bgKey]||V33_BG_MAP['bg-office'];
     charRoom.innerHTML=`
-      <div class="v33-char-bg">${v33CharState.bg||'🏢'}</div>
+      <div class="v33-char-bg" style="${bgInfo.grad}">
+        <span class="v33-bg-emoji">${bgInfo.emoji}</span>
+      </div>
       <div class="v33-char-fg">
         <div class="v33-char-figure">
           ${v33CharState.hat?`<div class="v33-char-hat">${v33CharState.hat}</div>`:''}
@@ -2918,43 +2939,48 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
     say(`${name} 선택!`,'✨',1500);
   };
 
-  // 아이템 장착 - 카테고리별로 시각적으로 적용
+  // 아이템 장착 v2 - 카테고리별 + 배경 그라디언트 지원
   window.v33EquipItem=function(slot,emoji){
     if(!slot||!emoji) return;
-    const HATS=['🎩','👑','🎀','🎓','⛑️','🏆','🪖','👒'];
-    const PETS=['🐱','🐶','🐦','🐉','🦄','🦋','🐢'];
-    const EFFECTS=['⭐','💫','🔥','❄️','🎵','✨','💎','🌟'];
-    const BGS=['🌊','🌸','🏔️','🌌','🏭','🏢','🌃','🏖️'];
+    const HATS=['🎩','👑','🎀','🎓','⛑️','🏆','🪖','👒','🎅','✨'];
+    const FACES=['🕶️','👓','😷','🎭','🤿','🥽','🤓','🥸'];
+    const PETS=['🐱','🐶','🐦','🐉','🦄','🦋','🐢','🤖','👾','🐲'];
+    const EFFECTS=['⭐','💫','🔥','❄️','🎵','💎','🌟','⚡','🌈','🎇','☄️','🌠'];
+    const BGS=Object.keys(V33_BG_MAP); // bg-office, bg-ocean, etc.
+    const LEGACY_BGS=['🌊','🌸','🏔️','🌌','🏭','🏢','🌃','🏖️'];
+
+    const isBg=BGS.includes(emoji)||LEGACY_BGS.includes(emoji);
 
     if(HATS.includes(emoji)) v33CharState.hat=emoji;
+    else if(FACES.includes(emoji)) v33CharState.face=emoji;
     else if(PETS.includes(emoji)) v33CharState.side=emoji;
     else if(EFFECTS.includes(emoji)) v33CharState.effect=emoji;
-    else if(BGS.includes(emoji)) v33CharState.bg=emoji;
-    else v33CharState.side=emoji; // 기본은 사이드에 표시
+    else if(isBg){ v33CharState.bg=V33_BG_LEGACY[emoji]||emoji; }
+    else v33CharState.side=emoji; // 기타 아이템은 사이드에
 
-    // 슬롯 시각적 active 상태
+    // 슬롯 equipped 상태 갱신
     if(slot){
-      // 같은 카테고리 슬롯의 active 제거
       $$('.inv-slot').forEach(s=>{
         if(!s.classList.contains('empty')){
           const e=s.textContent.trim();
-          if(HATS.includes(emoji) && HATS.includes(e)) s.classList.remove('equipped');
-          else if(PETS.includes(emoji) && PETS.includes(e)) s.classList.remove('equipped');
-          else if(EFFECTS.includes(emoji) && EFFECTS.includes(e)) s.classList.remove('equipped');
-          else if(BGS.includes(emoji) && BGS.includes(e)) s.classList.remove('equipped');
+          if(HATS.includes(emoji)&&HATS.includes(e)) s.classList.remove('equipped');
+          else if(FACES.includes(emoji)&&FACES.includes(e)) s.classList.remove('equipped');
+          else if(PETS.includes(emoji)&&PETS.includes(e)) s.classList.remove('equipped');
+          else if(EFFECTS.includes(emoji)&&EFFECTS.includes(e)) s.classList.remove('equipped');
+          else if(isBg&&(BGS.includes(e)||LEGACY_BGS.includes(e))) s.classList.remove('equipped');
         }
       });
       slot.classList.add('equipped');
     }
     renderV33Character();
-    say(`${emoji} 장착!`,'✨',1200);
+    const label = emoji.startsWith('bg-') ? (V33_BG_MAP[emoji]?.emoji||'🖼️')+' 배경 변경!' : emoji+' 장착!';
+    say(label,'✨',1200);
   };
 
   // 기존 equipItem과 pickChar를 v33으로 라우팅
   function patchCharFunctions(){
     const origEquip=window.equipItem;
     window.equipItem=function(slot,emoji){
-      if(slot&&slot.title) slot.title=slot.title; // noop
       try{v33EquipItem(slot,emoji);}catch(e){
         if(origEquip) origEquip.call(this,slot,emoji);
       }
@@ -2967,6 +2993,30 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
       }catch(e){
         if(origPick) origPick.call(this,btn,emoji);
       }
+    };
+    // buyItem 오버라이드: bg-* 키 처리 + confirm → toast 확인창
+    const origBuy=window.buyItem;
+    window.buyItem=function(el,emoji,name,price){
+      if(el.classList.contains('owned')){
+        // 이미 보유한 배경/아이템: 즉시 장착
+        if(emoji.startsWith('bg-')){ v33EquipItem(el,emoji); el.classList.add('equipped'); }
+        return;
+      }
+      if(!confirm(name+' '+price+'pt로 구매하시겠습니까?')) return;
+      el.classList.add('owned');
+      const prEl=el.querySelector('.shop-pr'); if(prEl) prEl.textContent='✓ 보유';
+      // 인벤토리 빈 슬롯에 추가
+      const emptySlot=document.querySelector('#ct-char .inv-slot.empty');
+      if(emptySlot){
+        emptySlot.classList.remove('empty');
+        // bg 아이템은 표시 이모지 사용
+        const dispEmoji=emoji.startsWith('bg-')?(V33_BG_MAP[emoji]?.emoji||'🖼️'):emoji;
+        emptySlot.textContent=dispEmoji;
+        emptySlot.dataset.itemKey=emoji; // 실제 키 보존
+        emptySlot.title=name;
+        emptySlot.onclick=function(){ window.equipItem(this,emoji); };
+      }
+      if(window.toast) window.toast(name+' 구매! 인벤토리에서 장착하세요.','🎉',2200);
     };
   }
 
