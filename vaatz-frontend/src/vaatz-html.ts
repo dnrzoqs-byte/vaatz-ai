@@ -315,48 +315,155 @@
 <div class="adm">
 <div class="adm-h"><h2>Admin 관리</h2><button class="adm-x" onclick="ca()">✕</button></div>
 <div class="adm-t">
-<button class="atb on" onclick="at(this,'p-req')">📋 승인 대기 <span style="background:var(--accent);color:white;font-size:9px;padding:1px 4px;border-radius:4px;margin-left:4px">2</span></button>
+<button class="atb on" onclick="at(this,'p-home')">🏠 운영 홈</button>
+<button class="atb" onclick="at(this,'p-req')">📋 팀 문서 검토 <span class="adm-badge">5</span></button>
+<button class="atb" onclick="at(this,'p-final')">✅ 최종 승인 <span class="adm-badge adm-badge-g">2</span></button>
 <button class="atb" onclick="at(this,'p-doc')">📁 지식 베이스</button>
 <button class="atb" onclick="at(this,'p-usr')">👥 사용자 관리</button>
 <button class="atb" onclick="at(this,'p-adm')">🛡 권한 · 조직</button>
 <button class="atb" onclick="at(this,'p-int')">🔗 데이터 연계</button>
 <button class="atb" onclick="at(this,'p-mon')">📊 사용 현황</button>
-<button class="atb" onclick="at(this,'p-verify')">🧠 AI 답변 검증</button>
-<button class="atb" onclick="at(this,'p-sec')">🔐 보안 설정</button>
+<button class="atb" onclick="at(this,'p-verify')">🧠 AI 검증</button>
+<button class="atb" onclick="at(this,'p-sec')">🔐 보안</button>
 </div>
 
+<!-- ════ 운영 홈 ════ -->
+<div class="adm-b" id="p-home">
+<div class="adm-home-grid">
+  <div class="adm-kpi-row">
+    <div class="adm-kpi"><div class="adm-kpi-v" style="color:var(--a)">5</div><div class="adm-kpi-l">검토 대기</div><div class="adm-kpi-sub">팀 문서 요청</div></div>
+    <div class="adm-kpi"><div class="adm-kpi-v" style="color:var(--accent)">2</div><div class="adm-kpi-l">최종 승인 대기</div><div class="adm-kpi-sub">폴더 배정 필요</div></div>
+    <div class="adm-kpi"><div class="adm-kpi-v" style="color:var(--g)">14</div><div class="adm-kpi-l">AI 반영 완료</div><div class="adm-kpi-sub">이번 달</div></div>
+    <div class="adm-kpi"><div class="adm-kpi-v" style="color:var(--v)">94.2%</div><div class="adm-kpi-l">답변 신뢰도</div><div class="adm-kpi-sub">이번 달 평균</div></div>
+    <div class="adm-kpi"><div class="adm-kpi-v">2,847</div><div class="adm-kpi-l">총 질의</div><div class="adm-kpi-sub">이번 달</div></div>
+    <div class="adm-kpi"><div class="adm-kpi-v">48<span style="font-size:14px">명</span></div><div class="adm-kpi-l">활성 사용자</div><div class="adm-kpi-sub">월간</div></div>
+  </div>
+
+  <div class="adm-home-row">
+    <div class="adm-home-card" style="flex:1">
+      <div class="adm-home-card-t">📋 즉시 처리 필요</div>
+      <div class="adm-todo-list">
+        <div class="adm-todo urgent" onclick="at(document.querySelector('[onclick*=p-req]'),'p-req')">
+          <span class="adm-todo-dot r"></span>
+          <div class="adm-todo-body"><div class="adm-todo-title">구매전략팀 요청 2건 검토 대기</div><div class="adm-todo-meta">박성민 · 조달청 물품계약 외 1건 · 3일 경과</div></div>
+          <span class="adm-todo-badge" style="background:var(--r-dim);color:var(--r)">긴급</span>
+        </div>
+        <div class="adm-todo" onclick="at(document.querySelector('[onclick*=p-final]'),'p-final')">
+          <span class="adm-todo-dot a"></span>
+          <div class="adm-todo-body"><div class="adm-todo-title">최종 승인 대기 2건 — 폴더 미배정</div><div class="adm-todo-meta">공정거래법 조항, 전동화 단가 벤치마크</div></div>
+          <span class="adm-todo-badge" style="background:var(--a-dim);color:var(--a)">대기</span>
+        </div>
+        <div class="adm-todo" onclick="at(document.querySelector('[onclick*=p-verify]'),'p-verify')">
+          <span class="adm-todo-dot b"></span>
+          <div class="adm-todo-body"><div class="adm-todo-title">커뮤니티 AI 검증 후보 3건</div><div class="adm-todo-meta">채택 + 추천 10개 이상 · 승인 시 AI DB 반영</div></div>
+          <span class="adm-todo-badge" style="background:var(--accent-dim);color:var(--accent)">검증</span>
+        </div>
+        <div class="adm-todo" onclick="at(document.querySelector('[onclick*=p-int]'),'p-int')">
+          <span class="adm-todo-dot g"></span>
+          <div class="adm-todo-body"><div class="adm-todo-title">Learning Lounge 동기화 68% 진행 중</div><div class="adm-todo-meta">오류 2건 감지 — 확인 권장</div></div>
+          <span class="adm-todo-badge" style="background:var(--g-dim);color:var(--g)">진행중</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="adm-home-card" style="width:280px;flex-shrink:0">
+      <div class="adm-home-card-t">📣 공지사항 관리 <span style="font-size:9px;color:var(--text-4);font-weight:400">Admin 전용</span></div>
+      <div id="adminNoticeList" style="margin-bottom:10px">
+        <div class="adm-notice-item pinned"><span class="adm-notice-pin">📌 고정</span><div class="adm-notice-text">VAATZ AI 지식베이스 v2.0 오픈</div><div class="adm-notice-date">2026.02.10</div></div>
+        <div class="adm-notice-item"><span style="font-size:11px">🔔</span><div class="adm-notice-text">정기 데이터 동기화 완료</div><div class="adm-notice-date">2026.02.08</div></div>
+      </div>
+      <button class="btn btn-p" style="width:100%;font-size:11px" onclick="openNoticeEditor()">＋ 공지 등록 · 관리</button>
+    </div>
+  </div>
+
+  <div class="adm-home-card">
+    <div class="adm-home-card-t">🔄 최근 활동 로그</div>
+    <table class="at2" style="width:100%"><thead><tr><th>시간</th><th>구분</th><th>내용</th><th>처리자</th><th>상태</th></tr></thead><tbody>
+    <tr><td>15:42</td><td><span class="adm-type-badge req">요청</span></td><td>전동화 부품 단가 벤치마크.xlsx — PT제어부품구매팀</td><td>한도윤</td><td><span class="bd bd-a">검토 중</span></td></tr>
+    <tr><td>14:30</td><td><span class="adm-type-badge doc">문서</span></td><td>공정거래법 하도급 관련 조항 — 최종 승인 대기</td><td>정현수</td><td><span class="bd bd-a">대기</span></td></tr>
+    <tr><td>13:18</td><td><span class="adm-type-badge ai">AI</span></td><td>탄력적입찰 Q&A 채택 답변 → AI 학습 후보 등록</td><td>시스템</td><td><span class="bd bd-b">검증 대기</span></td></tr>
+    <tr><td>11:05</td><td><span class="adm-type-badge ok">승인</span></td><td>조달청 물품구매계약 특수조건 — 미분류 이동 완료</td><td>김현대</td><td><span class="bd bd-g">완료</span></td></tr>
+    <tr><td>09:30</td><td><span class="adm-type-badge doc">문서</span></td><td>반도체 수출규제 현황 2026 — 임베딩 완료</td><td>시스템</td><td><span class="bd bd-g">AI 반영</span></td></tr>
+    </tbody></table>
+  </div>
+</div>
+</div>
+
+<!-- ════ 최종 승인 탭 (폴더형 문서 배정) ════ -->
+<div class="adm-b" id="p-final" style="display:none">
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+  <div>
+    <div style="font-size:13px;font-weight:700">✅ 최종 승인 · 폴더 배정</div>
+    <div style="font-size:11px;color:var(--text-3);margin-top:2px">팀 Admin 승인 완료 → 시스템 Admin이 폴더를 지정하면 AI 학습에 반영됩니다.</div>
+  </div>
+  <div style="display:flex;gap:6px">
+    <button class="tb-b" onclick="batchFolderAssign()">📂 선택 일괄 배정</button>
+    <button class="tb-b" style="color:var(--r)" onclick="batchRejectFinal()">❌ 반려</button>
+  </div>
+</div>
+
+<div class="final-stage-bar">
+  <div class="final-stage active"><span class="final-stage-n">2</span><span>폴더 미지정</span></div>
+  <div class="final-stage-arrow">→</div>
+  <div class="final-stage"><span class="final-stage-n g">3</span><span>임베딩 대기</span></div>
+  <div class="final-stage-arrow">→</div>
+  <div class="final-stage"><span class="final-stage-n b">11</span><span>AI 반영 완료</span></div>
+</div>
+
+<div style="font-size:11px;font-weight:600;color:var(--text-3);margin:14px 0 6px">📥 폴더 미지정 문서 <span style="background:var(--a-dim);color:var(--a);padding:1px 7px;border-radius:4px;font-size:10px">2건</span></div>
+<div class="final-doc-list">
+  <div class="final-doc-row">
+    <input type="checkbox" class="fl-chk">
+    <div class="final-doc-icon">📄</div>
+    <div class="final-doc-info">
+      <div class="final-doc-name">공정거래법 하도급 관련 조항.pdf</div>
+      <div class="final-doc-meta">정현수 · 구매품질기획팀 · 팀 Admin 승인 완료 · 02.07</div>
+    </div>
+    <div class="final-doc-sec"><span class="bd bd-md">중간</span></div>
+    <select class="frm-i frm-sel final-folder-sel" onchange="if(this.value){this.closest('.final-doc-row').classList.add('assigned');toast(this.value+' 폴더로 배정됩니다.','📂',2000)}">
+      <option value="">폴더 선택 →</option>
+      <option>구매업무규정</option><option>입찰관리</option><option>VAATZ 매뉴얼</option><option>품질 5스타</option><option>용어사전 · 양식</option>
+    </select>
+    <button class="abtn no" onclick="toast('반려 사유를 입력해주세요.','⚠️',2500)">반려</button>
+  </div>
+  <div class="final-doc-row">
+    <input type="checkbox" class="fl-chk">
+    <div class="final-doc-icon">📊</div>
+    <div class="final-doc-info">
+      <div class="final-doc-name">전동화 부품 단가 벤치마크.xlsx</div>
+      <div class="final-doc-meta">한도윤 · PT제어부품구매팀 · 팀 Admin 승인 완료 · 02.08</div>
+    </div>
+    <div class="final-doc-sec"><span class="bd bd-h">높음</span></div>
+    <select class="frm-i frm-sel final-folder-sel" onchange="if(this.value){this.closest('.final-doc-row').classList.add('assigned');toast(this.value+' 폴더로 배정됩니다.','📂',2000)}">
+      <option value="">폴더 선택 →</option>
+      <option>구매업무규정</option><option>입찰관리</option><option>VAATZ 매뉴얼</option><option>품질 5스타</option><option>용어사전 · 양식</option>
+    </select>
+    <button class="abtn no" onclick="toast('반려 사유를 입력해주세요.','⚠️',2500)">반려</button>
+  </div>
+</div>
+
+<div style="font-size:11px;font-weight:600;color:var(--text-3);margin:18px 0 6px">📁 폴더별 AI 반영 현황 <span style="font-size:10px;color:var(--text-4);font-weight:400">— 클릭하면 문서 목록 확인</span></div>
+<div class="final-folder-grid">
+  <div class="final-folder-card" onclick="toast('구매업무규정 폴더 — 문서 4건 AI 반영 완료','📁',2000)"><div class="final-folder-icon">📂</div><div class="final-folder-name">구매업무규정</div><div class="final-folder-cnt"><span style="color:var(--g)">4건</span> 반영</div></div>
+  <div class="final-folder-card" onclick="toast('입찰관리 폴더 — 문서 3건 AI 반영 완료','📁',2000)"><div class="final-folder-icon">📂</div><div class="final-folder-name">입찰관리</div><div class="final-folder-cnt"><span style="color:var(--g)">3건</span> 반영</div></div>
+  <div class="final-folder-card" onclick="toast('VAATZ 매뉴얼 폴더 — 문서 2건 AI 반영 완료','📁',2000)"><div class="final-folder-icon">📂</div><div class="final-folder-name">VAATZ 매뉴얼</div><div class="final-folder-cnt"><span style="color:var(--g)">2건</span> 반영</div></div>
+  <div class="final-folder-card" onclick="toast('품질 5스타 폴더 — 문서 3건 AI 반영 완료','📁',2000)"><div class="final-folder-icon">📂</div><div class="final-folder-name">품질 5스타</div><div class="final-folder-cnt"><span style="color:var(--g)">3건</span> 반영</div></div>
+  <div class="final-folder-card" onclick="toast('용어사전·양식 폴더 — 문서 2건 AI 반영 완료','📁',2000)"><div class="final-folder-icon">📂</div><div class="final-folder-name">용어사전 · 양식</div><div class="final-folder-cnt"><span style="color:var(--g)">2건</span> 반영</div></div>
+  <div class="final-folder-card add-folder" onclick="toast('폴더 추가 기능은 시스템 Admin만 사용할 수 있습니다.','📁',2500)"><div class="final-folder-icon">＋</div><div class="final-folder-name" style="color:var(--accent)">폴더 추가</div></div>
+</div>
+</div>
+
+<!-- ════ 팀 문서 검토 (기존 p-req) ════ -->
 <div class="adm-b" id="p-req" style="display:none">
 <!-- v20: Approval Pipeline Visualization -->
-<div class="appv-flow">
-  <div class="appv-flow-hd">
-    <div class="appv-flow-ti">통합 지식 베이스 반영 흐름</div>
-    <div class="appv-flow-sub">팀 업로드 → 팀 Admin → 시스템 Admin → AI 학습 반영</div>
-  </div>
-  <div class="appv-pipe">
-    <div class="appv-stage stg-pending">
-      <div class="appv-stage-lb">① 팀 업로드</div>
-      <div class="appv-stage-nm">팀원 업로드 요청</div>
-      <div class="appv-stage-mt"><div><span class="appv-stage-cnt c-a">5</span><span class="appv-stage-unit">건 대기</span></div></div>
-    </div>
-    <div class="appv-arrow"><svg viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
-    <div class="appv-stage stg-review">
-      <div class="appv-stage-lb">② 팀 Admin</div>
-      <div class="appv-stage-nm">1차 검토 (담당자)</div>
-      <div class="appv-stage-mt"><div><span class="appv-stage-cnt c-b">3</span><span class="appv-stage-unit">건 검토 중</span></div></div>
-    </div>
-    <div class="appv-arrow"><svg viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
-    <div class="appv-stage stg-final">
-      <div class="appv-stage-lb">③ 시스템 Admin</div>
-      <div class="appv-stage-nm">최종 승인 · 폴더 배정</div>
-      <div class="appv-stage-mt"><div><span class="appv-stage-cnt c-v">2</span><span class="appv-stage-unit">건 폴더 미지정</span></div></div>
-    </div>
-    <div class="appv-arrow"><svg viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
-    <div class="appv-stage stg-done">
-      <div class="appv-stage-lb">④ 통합 지식</div>
-      <div class="appv-stage-nm">AI 임베딩 · 검색 활성화</div>
-      <div class="appv-stage-mt"><div><span class="appv-stage-cnt c-g">14</span><span class="appv-stage-unit">건 AI 검색 반영완료</span></div></div>
-    </div>
-  </div>
+<div class="req-flow-bar">
+  <div class="req-flow-step active"><div class="req-flow-ic">📤</div><div class="req-flow-label">① 팀원 업로드</div><div class="req-flow-cnt" style="background:var(--a-dim);color:var(--a)">5건 대기</div></div>
+  <div class="req-flow-arrow">→</div>
+  <div class="req-flow-step"><div class="req-flow-ic">👤</div><div class="req-flow-label">② 팀 Admin 검토</div><div class="req-flow-cnt" style="background:var(--accent-dim);color:var(--accent)">3건 검토중</div></div>
+  <div class="req-flow-arrow">→</div>
+  <div class="req-flow-step"><div class="req-flow-ic">✅</div><div class="req-flow-label">③ 최종 승인 · 폴더배정</div><div class="req-flow-cnt" style="background:var(--v-dim);color:var(--v)">2건 대기</div><button class="req-flow-go" onclick="at(document.querySelector('[onclick*=p-final]'),'p-final')">이동 →</button></div>
+  <div class="req-flow-arrow">→</div>
+  <div class="req-flow-step"><div class="req-flow-ic">🧠</div><div class="req-flow-label">④ AI 임베딩</div><div class="req-flow-cnt" style="background:var(--g-dim);color:var(--g)">14건 완료</div></div>
 </div>
 
 <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px"><div style="font-size:13px;font-weight:600">공식 데이터 업로드 요청</div><div style="display:flex;gap:6px;align-items:center"><span style="font-size:11px;color:var(--text-3)">대기 <b style="color:var(--a)">5건</b></span><button class="tb-b" style="font-size:11px" onclick="batchApprove()">✅ 선택 일괄 승인</button><button class="tb-b" style="font-size:11px" onclick="batchReject()">❌ 선택 보완 요청</button></div></div>
