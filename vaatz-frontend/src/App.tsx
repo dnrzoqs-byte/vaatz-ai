@@ -1,6 +1,5 @@
 import { useEffect, useRef } from 'react'
 import { vaatzHtml } from './vaatz-html'
-import { initVaatz } from './scripts/vaatz-init'
 
 export default function App() {
   const initialized = useRef(false)
@@ -9,17 +8,20 @@ export default function App() {
     if (initialized.current) return
     initialized.current = true
 
-    // 다크모드 기본값 설정 (JS 초기화 전에 먼저 적용)
+    // 테마 초기화 (깜빡임 방지)
     const saved = localStorage.getItem('vaatz-theme') || 'dark'
     document.documentElement.setAttribute('data-theme', saved)
 
-    // body 스타일 원본과 동일하게 설정
     document.body.style.margin = '0'
     document.body.style.padding = '0'
     document.body.style.height = '100vh'
     document.body.style.overflow = 'hidden'
 
-    initVaatz()
+    // JS를 전역 스코프로 로드 (inline onclick 핸들러가 함수에 접근 가능)
+    const script = document.createElement('script')
+    script.src = '/vaatz-init.js'
+    script.async = false
+    document.body.appendChild(script)
   }, [])
 
   return <div dangerouslySetInnerHTML={{ __html: vaatzHtml }} />
