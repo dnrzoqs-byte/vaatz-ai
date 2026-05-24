@@ -1,0 +1,52 @@
+# 환경변수 (민감 정보)
+.env
+*.env
+.env.production
+.env.local
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+*.db
+*.sqlite3
+
+# Node
+node_modules/
+dist/
+.next/
+build/
+
+# 개인 폴더 (홈 디렉토리이므로 제외)
+Contacts/
+Document/
+Documents/
+Downloads/
+Favorites/
+Intel/
+Links/
+OneDrive/
+Saved Games/
+Searches/
+.claude/
+.cline/
+.copilot/
+.ms-ad/
+.vscode/
+.vscode-shared/
+
+# 개인 파일
+.claude.json
+.gitconfig
+Foxit Reader SDK ActiveX.ini
+mrserver.log
+website_qr.png
+
+# Windows 시스템 파일
+NTUSER.DAT*
+ntuser.dat*
+ntuser.ini
+AppData/
+IntelGraphicsProfiles/
