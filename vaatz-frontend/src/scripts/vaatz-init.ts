@@ -1683,13 +1683,17 @@ sendMessage = function(){
   function buildAdminTabs(){
     const tab=$('.adm-t'); if(!tab) return;
     tab.innerHTML=`
+      <div class="adm-t-section-label">── 승인 프로세스</div>
       <button class="atb on" onclick="at(this,'p-req')">🏠 운영 홈</button>
-      <button class="atb" onclick="at(this,'p-team')">📁 팀별 폴더</button>
-      <button class="atb" onclick="at(this,'p-final')">✅ 최종 승인</button>
-      <button class="atb" onclick="at(this,'p-list')">📚 최종 리스트</button>
+      <button class="atb atb-flow" onclick="at(this,'p-team')">① 파일 업로드</button>
+      <button class="atb atb-flow" onclick="at(this,'p-final')">② 팀 Admin 승인 <span class="adm-badge">${teamDocs.filter(d=>d.status==='등록 요청됨').length}</span></button>
+      <button class="atb atb-flow" onclick="at(this,'p-sysapprove')">③ 시스템 승인</button>
+      <button class="atb atb-flow" onclick="at(this,'p-list')">④ AI DB 반영</button>
+      <div class="adm-t-section-label">── 시스템 관리</div>
       <button class="atb" onclick="at(this,'p-datamart')">🔗 데이터마트</button>
       <button class="atb" onclick="at(this,'p-mode')">🧭 AI 모드·DB</button>
       <button class="atb" onclick="at(this,'p-usr')">👥 사용자·권한</button>
+      <button class="atb" onclick="at(this,'p-sec')">🔐 보안 · 정책</button>
     `;
   }
   window.at=function(b,id){ $$('.atb').forEach(t=>t.classList.remove('on')); if(b)b.classList.add('on'); $$('.adm-b').forEach(e=>e.style.display='none'); const sec=$('#'+id); if(sec) sec.style.display='block'; };
@@ -1702,22 +1706,52 @@ sendMessage = function(){
 
   function renderAdmin(){
     const totalDocs=teams.reduce((a,t)=>a+t.docs,0), totalFinal=teams.reduce((a,t)=>a+t.finalReq,0), published=teams.reduce((a,t)=>a+t.published,0);
+    const uploadDocs=teamDocs.filter(d=>d.status==='검토중'||d.status==='업로드 완료');
+    const reqDocs=teamDocs.filter(d=>d.status==='등록 요청됨');
+    const sysApproveDocs=teamDocs.filter(d=>d.status==='시스템 검토중');
+    const aiDocs=teamDocs.filter(d=>d.status==='AI 검색 반영완료');
+    const stepDocList=(docs,limit=4)=>docs.length===0?`<div style="padding:10px 0;font-size:11px;color:var(--text-4);text-align:center">해당 단계 문서 없음</div>`:docs.slice(0,limit).map(d=>`<div class="v23-mini-row"><div class="v23-mini-icon">${d.type==='PPT'?'📊':d.type==='XLSX'?'📈':'📄'}</div><div class="v23-mini-main"><div class="v23-mini-title">${esc(d.name)}</div><div class="v23-mini-meta"><span>${esc(d.team)}</span><span>${esc(d.sec)}</span></div></div></div>`).join('')+(docs.length>limit?`<div style="font-size:10px;color:var(--text-4);padding:4px 0;text-align:right">+${docs.length-limit}건 더보기</div>`:'');
+
     addAdmSection('p-req', `
-      <div class="v23-admin-title"><div><div class="v23-title-main">VAATZ AI 지식 운영 홈</div><div class="v23-title-sub">복잡한 트리 대신 3단계 운영 흐름으로 관리합니다. 팀별 폴더에서 관리하고, 등록 요청됨 후 System Admin이 승인하면 최종 리스트와 AI 모드에 반영됩니다.</div></div><div class="v23-actions"><button class="v23-btn" onclick="openAdminTab('p-team')">📁 팀 폴더 보기</button><button class="v23-btn primary" onclick="openAdminTab('p-final')">✅ 최종 승인 처리</button></div></div>
+      <div class="v23-admin-title"><div><div class="v23-title-main">VAATZ AI 지식 운영 홈</div><div class="v23-title-sub">4단계 승인 흐름으로 문서를 AI DB에 반영합니다. 각 단계를 클릭하면 해당 문서 목록으로 바로 이동합니다.</div></div><div class="v23-actions"><button class="v23-btn" onclick="openAdminTab('p-team')">📁 팀 폴더 보기</button><button class="v23-btn primary" onclick="openAdminTab('p-sysapprove')">✅ 시스템 승인 처리</button></div></div>
       <div class="v23-hero-grid">
-        <div class="v23-kpi"><div class="v23-kpi-label">비정형 문서 총량</div><div class="v23-kpi-value">${totalDocs}<span>건</span></div><div class="v23-kpi-desc">팀별 PDF/PPT/DOCX/XLSX 문서함 전체</div><div class="spark"><i style="height:35%"></i><i style="height:45%"></i><i style="height:62%"></i><i style="height:51%"></i><i style="height:72%"></i><i style="height:85%"></i></div></div>
-        <div class="v23-kpi amber"><div class="v23-kpi-label">최종 승인 대기</div><div class="v23-kpi-value">${totalFinal}<span>건</span></div><div class="v23-kpi-desc">팀 Admin이 등록 요청됨한 문서</div><div class="spark"><i style="height:55%"></i><i style="height:72%"></i><i style="height:48%"></i><i style="height:62%"></i><i style="height:81%"></i></div></div>
-        <div class="v23-kpi green"><div class="v23-kpi-label">AI AI 검색 반영완료</div><div class="v23-kpi-value">${published}<span>건</span></div><div class="v23-kpi-desc">임베딩 완료 및 검색 활성화</div><div class="spark"><i style="height:42%"></i><i style="height:54%"></i><i style="height:68%"></i><i style="height:79%"></i><i style="height:88%"></i></div></div>
-        <div class="v23-kpi violet"><div class="v23-kpi-label">정형 I/F</div><div class="v23-kpi-value">7<span>개</span></div><div class="v23-kpi-desc">VAATZ DB, Autopedia, 타 부문 배치</div><div class="spark"><i style="height:60%"></i><i style="height:60%"></i><i style="height:60%"></i><i style="height:40%"></i><i style="height:80%"></i></div></div>
+        <div class="v23-kpi" style="cursor:pointer" onclick="openAdminTab('p-team')"><div class="v23-kpi-label">전체 문서</div><div class="v23-kpi-value">${totalDocs}<span>건</span></div><div class="v23-kpi-desc">팀별 업로드 문서 전체</div></div>
+        <div class="v23-kpi amber" style="cursor:pointer" onclick="openAdminTab('p-final')"><div class="v23-kpi-label">팀 승인 대기</div><div class="v23-kpi-value">${reqDocs.length}<span>건</span></div><div class="v23-kpi-desc">팀 Admin 검토 필요</div></div>
+        <div class="v23-kpi green" style="cursor:pointer" onclick="openAdminTab('p-list')"><div class="v23-kpi-label">AI 반영 완료</div><div class="v23-kpi-value">${published}<span>건</span></div><div class="v23-kpi-desc">임베딩 완료 활성</div></div>
+        <div class="v23-kpi violet" style="cursor:pointer" onclick="openAdminTab('p-sysapprove')"><div class="v23-kpi-label">시스템 승인 대기</div><div class="v23-kpi-value">${sysApproveDocs.length||totalFinal}<span>건</span></div><div class="v23-kpi-desc">System Admin 확정 필요</div></div>
       </div>
-      <div class="v23-process">
-        <div class="v23-step" onclick="openAdminTab('p-team')"><div class="v23-step-num">1</div><div class="v23-step-title">팀별 폴더 관리</div><div class="v23-step-desc">각 팀 Admin이 문서를 업로드·수정·버전관리합니다. 항목이 많기 때문에 팀 카드 클릭 시 큰 팝업 리스트로 확인합니다.</div><div class="v23-step-foot"><span class="v23-pill amber">${teams.length}개 팀</span><span>열기 →</span></div></div>
-        <div class="v23-arrow">→</div>
-        <div class="v23-step" onclick="openAdminTab('p-final')"><div class="v23-step-num">2</div><div class="v23-step-title">System Admin 최종 승인</div><div class="v23-step-desc">구매디지털추진팀 Admin이 보안등급, AI 모드, 통합 폴더를 지정하고 최종 승인합니다.</div><div class="v23-step-foot"><span class="v23-pill blue">${totalFinal}건 대기</span><span>승인 →</span></div></div>
-        <div class="v23-arrow">→</div>
-        <div class="v23-step" onclick="openAdminTab('p-list')"><div class="v23-step-num">3</div><div class="v23-step-title">최종 리스트 관리</div><div class="v23-step-desc">승인된 문서는 최종 지식 리스트에서 버전, 모드, 보안, 임베딩 상태를 운영합니다.</div><div class="v23-step-foot"><span class="v23-pill green">${published}건 활성</span><span>관리 →</span></div></div>
+
+      <div class="v23-4step-flow">
+        <div class="v23-4step" onclick="openAdminTab('p-team')">
+          <div class="v23-4step-hd"><div class="v23-4step-num">① STEP</div><div class="v23-4step-title">파일 업로드</div><span class="v23-pill amber">${uploadDocs.length||totalDocs}건</span></div>
+          <div class="v23-4step-desc">팀원이 문서를 팀 폴더에 업로드합니다</div>
+          <div class="v23-mini-list v23-step-list">${stepDocList(uploadDocs.length?uploadDocs:teamDocs.slice(0,4))}</div>
+          <div class="v23-4step-go">전체 목록 보기 →</div>
+        </div>
+        <div class="v23-4step-arrow">▶</div>
+        <div class="v23-4step" onclick="openAdminTab('p-final')">
+          <div class="v23-4step-hd"><div class="v23-4step-num">② STEP</div><div class="v23-4step-title">팀 Admin 승인</div><span class="v23-pill blue">${reqDocs.length}건 대기</span></div>
+          <div class="v23-4step-desc">팀 Admin이 검토 후 System Admin에 승인 요청합니다</div>
+          <div class="v23-mini-list v23-step-list">${stepDocList(reqDocs)}</div>
+          <div class="v23-4step-go">승인 처리 →</div>
+        </div>
+        <div class="v23-4step-arrow">▶</div>
+        <div class="v23-4step" onclick="openAdminTab('p-sysapprove')">
+          <div class="v23-4step-hd"><div class="v23-4step-num">③ STEP</div><div class="v23-4step-title">시스템 승인</div><span class="v23-pill ${totalFinal>0?'amber':'green'}">${totalFinal}건 대기</span></div>
+          <div class="v23-4step-desc">System Admin이 보안등급·AI 모드·폴더를 확정합니다</div>
+          <div class="v23-mini-list v23-step-list">${stepDocList(reqDocs.slice(0,3))}</div>
+          <div class="v23-4step-go">확정 처리 →</div>
+        </div>
+        <div class="v23-4step-arrow">▶</div>
+        <div class="v23-4step v23-4step-done" onclick="openAdminTab('p-list')">
+          <div class="v23-4step-hd"><div class="v23-4step-num">④ STEP</div><div class="v23-4step-title">AI DB 반영</div><span class="v23-pill green">${published}건 활성</span></div>
+          <div class="v23-4step-desc">임베딩 완료 후 AI 검색에 즉시 반영됩니다</div>
+          <div class="v23-mini-list v23-step-list">${stepDocList(aiDocs.slice(0,4))}</div>
+          <div class="v23-4step-go">전체 리스트 →</div>
+        </div>
       </div>
-      <div class="v23-workgrid"><div class="v23-panel"><div class="v23-panel-h"><div class="v23-panel-title">🚨 오늘 처리할 일</div><button class="v23-btn" onclick="openAdminTab('p-final')">전체 보기</button></div><div class="v23-panel-body"><div class="v23-mini-list">${teamDocs.filter(d=>d.status==='등록 요청됨').slice(0,5).map(d=>`<div class="v23-mini-row"><div class="v23-mini-icon">${d.type==='PPT'?'📊':d.type==='XLSX'?'📈':'📄'}</div><div class="v23-mini-main"><div class="v23-mini-title">${esc(d.name)}</div><div class="v23-mini-meta"><span>${esc(d.team)}</span><span>${esc(d.mode)}</span><span>${esc(d.sec)}</span></div></div><button class="v23-btn primary" onclick="openAdminTab('p-final')">검토</button></div>`).join('')}</div></div></div><div class="v23-panel"><div class="v23-panel-h"><div class="v23-panel-title">🔗 정형 데이터 배치 상태</div><button class="v23-btn" onclick="openAdminTab('p-datamart')">모니터링</button></div><div class="v23-panel-body"><div class="v23-mini-list"><div class="v23-mini-row"><div class="v23-mini-icon">🖥️</div><div class="v23-mini-main"><div class="v23-mini-title">VAATZ 업체·품목 마스터</div><div class="v23-mini-meta"><span>05:10 성공</span><span>+14,230 rows</span></div></div><span class="v23-pill green">정상</span></div><div class="v23-mini-row"><div class="v23-mini-icon">📖</div><div class="v23-mini-main"><div class="v23-mini-title">Autopedia 용어 DB</div><div class="v23-mini-meta"><span>06:00 성공</span><span>4,832 terms</span></div></div><span class="v23-pill green">정상</span></div><div class="v23-mini-row"><div class="v23-mini-icon">💰</div><div class="v23-mini-main"><div class="v23-mini-title">원가 DB 일 배치</div><div class="v23-mini-meta"><span>07:30 일부 실패</span><span>12 rows error</span></div></div><span class="v23-pill amber">확인</span></div></div></div></div></div>
+
+      <div class="v23-workgrid" style="margin-top:14px"><div class="v23-panel"><div class="v23-panel-h"><div class="v23-panel-title">🚨 즉시 처리 필요</div><button class="v23-btn" onclick="openAdminTab('p-sysapprove')">전체 보기</button></div><div class="v23-panel-body"><div class="v23-mini-list">${reqDocs.slice(0,5).map(d=>`<div class="v23-mini-row"><div class="v23-mini-icon">${d.type==='PPT'?'📊':d.type==='XLSX'?'📈':'📄'}</div><div class="v23-mini-main"><div class="v23-mini-title">${esc(d.name)}</div><div class="v23-mini-meta"><span>${esc(d.team)}</span><span>${esc(d.mode)}</span><span>${esc(d.sec)}</span></div></div><button class="v23-btn primary" onclick="openAdminTab('p-sysapprove')">검토</button></div>`).join('')||'<div style="padding:10px;font-size:11px;color:var(--text-4)">처리 대기 문서 없음</div>'}</div></div></div><div class="v23-panel"><div class="v23-panel-h"><div class="v23-panel-title">🔗 데이터마트 배치 상태</div><button class="v23-btn" onclick="openAdminTab('p-datamart')">모니터링</button></div><div class="v23-panel-body"><div class="v23-mini-list"><div class="v23-mini-row"><div class="v23-mini-icon">🖥️</div><div class="v23-mini-main"><div class="v23-mini-title">VAATZ 업체·품목 마스터</div><div class="v23-mini-meta"><span>05:10 성공</span><span>+14,230 rows</span></div></div><span class="v23-pill green">정상</span></div><div class="v23-mini-row"><div class="v23-mini-icon">💰</div><div class="v23-mini-main"><div class="v23-mini-title">원가 DB 일 배치</div><div class="v23-mini-meta"><span>07:30 일부 실패</span><span>12 rows error</span></div></div><span class="v23-pill amber">확인</span></div></div></div></div></div>
     `);
 
     addAdmSection('p-team', `
@@ -1747,6 +1781,40 @@ sendMessage = function(){
     addAdmSection('p-mode', `
       <div class="v23-admin-title"><div><div class="v23-title-main">AI 모드 · DB 매핑 관리</div><div class="v23-title-sub">비정형 문서와 정형 데이터 소스를 각 AI 모드에 드래그해서 연결합니다. 이후 팀/사용자별 접근 허용까지 통제할 수 있습니다.</div></div><div class="v23-actions"><button class="v23-btn">권한 미리보기</button><button class="v23-btn primary" onclick="safeV23Toast('AI 모드 매핑 정책을 저장했습니다.','🧭')">매핑 저장</button></div></div>
       <div class="mode-mapping"><div class="source-palette"><h4>연결 가능한 데이터 소스</h4>${['📄 구매업무규정 PDF','📊 VAATZ 입찰모듈 PPT','📈 품질 5스타 XLSX','🖥️ VAATZ 업체·품목 DB','📖 Autopedia 용어 DB','💰 원가 DB','🏭 생산부문 품질 DB','📦 일반자재 MRO DB'].map((s,i)=>`<div class="mode-source" draggable="true" data-source="${s}"><span>${s.split(' ')[0]}</span><span>${s.replace(/^\S+\s/,'')}</span></div>`).join('')}<div class="mode-note">비정형 문서는 System Admin 최종 승인 후 이 팔레트에 나타납니다. 정형 DB는 데이터마트 I/F 성공 후 연결 가능합니다.</div></div><div class="mode-board">${modeList.map((m,i)=>`<div class="mode-col" data-mode="${m}"><div class="mode-col-head"><div class="mode-col-title">${m}</div><span class="v23-pill ${i===0?'blue':i===1?'green':i===2?'violet':'red'}">${i===0?'기본':i===1?'생산':i===2?'일반':'보안'}</span></div><div class="mapped-list">${(i===0?['📄 구매업무규정 PDF','🖥️ VAATZ 업체·품목 DB','📖 Autopedia 용어 DB']:i===1?['🏭 생산부문 품질 DB','📈 품질 5스타 XLSX']:i===2?['📦 일반자재 MRO DB','📊 VAATZ 입찰모듈 PPT']:['💰 원가 DB']).map(x=>`<span class="mapped-chip">${x}<button onclick="this.parentElement.remove()">×</button></span>`).join('')}</div><div class="mode-note">${m} 접근은 사용자/팀 권한과 문서 보안등급을 모두 통과해야 활성화됩니다.</div></div>`).join('')}</div></div>
+    `);
+
+    // ③ 시스템 승인 탭
+    addAdmSection('p-sysapprove', `
+      <div class="v23-admin-title"><div><div class="v23-title-main">③ 시스템 승인</div><div class="v23-title-sub">System Admin이 보안등급·AI 모드·통합 폴더를 확정하면 AI DB에 반영됩니다.</div></div><div class="v23-actions"><button class="v23-btn warn">보완 요청 템플릿</button><button class="v23-btn primary" onclick="approveAllVisibleFinals()">✅ 일괄 승인</button></div></div>
+      <div class="final-layout"><div>${reqDocs.map((d,i)=>`<div class="approval-card" data-final-id="${d.id}"><div class="approval-card-top"><div><div class="approval-doc">${esc(d.name)}</div><div class="approval-meta">${esc(d.team)} · ${esc(d.owner)} · ${d.date} · ${d.chunks} chunks 예상</div></div>${statusPill(d.status)}</div><div class="approval-settings"><div class="setting-box"><div class="setting-label">통합 폴더</div><select><option>구매업무규정</option><option>입찰관리</option><option>VAATZ 매뉴얼</option><option>품질 5스타</option><option>원가/단가</option></select></div><div class="setting-box"><div class="setting-label">보안등급</div><select><option>${d.sec}</option><option>리더 전용</option><option>일반 공개</option></select></div><div class="setting-box"><div class="setting-label">AI 모드</div><select><option>${d.mode}</option>${modeList.map(m=>`<option>${m}</option>`).join('')}</select></div></div><div style="display:flex;gap:6px;margin-top:10px;justify-content:flex-end"><button class="v23-btn" onclick="previewFinalDoc('${d.id}')">원문 보기</button><button class="v23-btn danger" onclick="rejectFinalDoc(this)">보완 요청</button><button class="v23-btn primary" onclick="approveFinalDoc(this)">최종 승인 → AI 반영</button></div></div>`).join('')||`<div style="padding:30px;text-align:center;color:var(--text-4)">현재 시스템 승인 대기 문서가 없습니다</div>`}</div><div class="final-preview"><div class="v23-panel-title" style="margin-bottom:10px">🔎 검토 미리보기</div><div class="preview-doc-page" id="finalPreview"><p style="color:var(--text-4);font-size:11px">왼쪽 문서의 <b>원문 보기</b>를 클릭하면 요약·하이라이트가 표시됩니다.</p></div></div></div>
+    `);
+
+    // 보안 · 정책 탭
+    addAdmSection('p-sec', `
+      <div class="v23-admin-title"><div><div class="v23-title-main">🔐 보안 · 문서 등급 정책</div><div class="v23-title-sub">RAG 검색 시 사용자 직급·팀 기준으로 문서가 자동 필터됩니다. 권한 밖 문서는 LLM에 전달되지 않습니다.</div></div></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:16px">
+        <div style="background:var(--bg-2);border:1px solid var(--border-1);border-top:3px solid var(--r);border-radius:12px;padding:14px">
+          <div style="font-size:12px;font-weight:700;color:var(--r);margin-bottom:8px">🔴 높음</div>
+          <div style="font-size:11px;color:var(--text-2);line-height:1.75">• 팀장급 이상 직책자만 열람<br>• 파일 담당자 지정 시 해당 팀장 자동 포함<br>• 인사 DB 연동으로 팀장 변경 시 자동 반영<br>• 예: 구매업무규정, 원가 관련 자료</div>
+        </div>
+        <div style="background:var(--bg-2);border:1px solid var(--border-1);border-top:3px solid var(--a);border-radius:12px;padding:14px">
+          <div style="font-size:12px;font-weight:700;color:var(--a);margin-bottom:8px">🟡 중간</div>
+          <div style="font-size:11px;color:var(--text-2);line-height:1.75">• 허용된 팀 전원 열람 가능<br>• 팀관리자 + 일반 팀원 모두 접근<br>• 팀 단위 권한 부여 / 회수<br>• 예: 업무표준, 5스타 운영기준</div>
+        </div>
+        <div style="background:var(--bg-2);border:1px solid var(--border-1);border-top:3px solid var(--g);border-radius:12px;padding:14px">
+          <div style="font-size:12px;font-weight:700;color:var(--g);margin-bottom:8px">🟢 낮음</div>
+          <div style="font-size:11px;color:var(--text-2);line-height:1.75">• 전체 사용자 열람 가능<br>• 외부 협력사는 별도 지정 시 허용<br>• 공개 매뉴얼, 양식 등<br>• 예: VAATZ 매뉴얼, 양식</div>
+        </div>
+      </div>
+      <table class="at2" style="width:100%;margin-bottom:16px"><thead><tr><th>보안 등급</th><th>시스템관리자</th><th>팀장급</th><th>팀관리자</th><th>일반(허용팀)</th><th>일반(비허용)</th><th>외부</th></tr></thead><tbody>
+        <tr><td><span class="bd bd-h">높음</span></td><td style="color:var(--g)">✅</td><td style="color:var(--g)">✅ 파일담당자 지정 시</td><td style="color:var(--r)">❌</td><td style="color:var(--r)">❌</td><td style="color:var(--r)">❌</td><td style="color:var(--r)">❌</td></tr>
+        <tr><td><span class="bd bd-md">중간</span></td><td style="color:var(--g)">✅</td><td style="color:var(--g)">✅</td><td style="color:var(--g)">✅</td><td style="color:var(--g)">✅</td><td style="color:var(--r)">❌</td><td style="color:var(--r)">❌</td></tr>
+        <tr><td><span class="bd bd-l">낮음</span></td><td style="color:var(--g)">✅</td><td style="color:var(--g)">✅</td><td style="color:var(--g)">✅</td><td style="color:var(--g)">✅</td><td style="color:var(--g)">✅</td><td style="color:var(--g)">✅ 지정 시</td></tr>
+      </tbody></table>
+      <div style="background:var(--bg-2);border:1px solid var(--accent-bd);border-radius:10px;padding:14px">
+        <div style="font-size:12px;font-weight:700;margin-bottom:8px">⚠️ RAG 보안 정책 핵심</div>
+        <div style="font-size:11px;color:var(--text-2);line-height:1.8">• 검색 시 사용자 직급 + 소속팀 기준 문서 자동 필터<br>• 권한 밖 문서는 LLM에 전달되지 않아 유출 원천 차단<br>• 모든 질의·응답 감사 로그 90일 보관<br>• 오답 의심 자동 감지 시 관리자 즉시 알림</div>
+      </div>
     `);
 
     const pusr=$('#p-usr'); if(pusr){ pusr.style.display='none'; }

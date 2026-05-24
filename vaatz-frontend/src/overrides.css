@@ -283,10 +283,12 @@ html, body, #root {
 }
 /* 내 파일 패널: 상단 바/하단 바는 고정, 본문만 스크롤 */
 #rpPaneMy {
-  display: flex !important;
   flex-direction: column !important;
   padding: 0 !important;
   overflow: hidden !important;
+}
+#rpPaneMy.on {
+  display: flex !important;
 }
 #rpPaneMy > .rp-bar {
   flex: none !important;
@@ -343,7 +345,7 @@ html, body, #root {
   flex: 1 !important;
   min-height: 0 !important;
   overflow-y: auto !important;
-  padding: 18px 16px 52px !important;
+  padding: 18px 16px 80px !important;
   background: var(--bg-1) !important;
 }
 /* 출처 문서 카드 개선 */
@@ -2590,4 +2592,120 @@ html[data-theme="light"] .src-doc-meta {
 .float-char.changing {
   opacity: 0 !important;
   pointer-events: none !important;
+}
+
+/* ═══════════════════════════════════════
+ * 운영 홈 4단계 파이프라인
+ * ═══════════════════════════════════════ */
+.v23-4step-flow {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr auto 1fr auto 1fr;
+  gap: 0;
+  align-items: start;
+  margin: 14px 0;
+}
+.v23-4step {
+  background: var(--bg-2);
+  border: 1px solid var(--border-1);
+  border-radius: 14px;
+  padding: 14px;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s, transform 0.1s;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.v23-4step:hover {
+  border-color: var(--accent-bd);
+  background: var(--accent-dim);
+  transform: translateY(-2px);
+}
+.v23-4step-done {
+  border-color: rgba(78,173,123,0.3);
+  background: var(--g-dim);
+}
+.v23-4step-done:hover {
+  border-color: var(--g);
+  background: rgba(78,173,123,0.15);
+}
+.v23-4step-hd {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  flex-wrap: wrap;
+}
+.v23-4step-num {
+  font-size: 9px;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-4);
+  white-space: nowrap;
+}
+.v23-4step-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-1);
+  flex: 1;
+}
+.v23-4step-desc {
+  font-size: 11px;
+  color: var(--text-3);
+  line-height: 1.55;
+}
+.v23-step-list {
+  margin-top: 4px;
+  max-height: 130px;
+  overflow-y: auto;
+  border-radius: 8px;
+  background: var(--bg-1);
+  padding: 4px 0;
+}
+.v23-4step-go {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--accent);
+  text-align: right;
+  margin-top: 2px;
+}
+.v23-4step-arrow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-4);
+  font-size: 13px;
+  padding: 0 6px;
+  padding-top: 28px;
+}
+
+/* ═══════════════════════════════════════
+ * AI 모드 버튼 개선 (더 눈에 띄게)
+ * ═══════════════════════════════════════ */
+.v26-chat-controls {
+  padding: 10px 14px 8px !important;
+  gap: 14px !important;
+  background: linear-gradient(180deg, var(--bg-2), var(--bg-1)) !important;
+}
+.v26-mode-btn {
+  font-size: 12px !important;
+  font-weight: 700 !important;
+  padding: 6px 12px !important;
+  border-radius: 20px !important;
+  border-width: 1.5px !important;
+  letter-spacing: -0.01em !important;
+}
+.v26-mode-btn:hover {
+  transform: translateY(-1px) !important;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.12) !important;
+}
+.v26-mode-btn.on {
+  font-weight: 800 !important;
+  box-shadow: 0 2px 8px rgba(75,142,240,0.20) !important;
+}
+.v26-control-label {
+  font-size: 9px !important;
+  color: var(--text-4) !important;
+  font-weight: 800 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.08em !important;
 }
