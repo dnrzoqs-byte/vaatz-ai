@@ -1693,6 +1693,13 @@ sendMessage = function(){
     { id:'tg-materials', label:'자재·원가관리', icon:'📦',
       teams:['일반자재구매팀','원가관리팀'] }
   ];
+  const folderCats=[
+    {id:'rule',    label:'구매규정·제도', icon:'📕'},
+    {id:'bid',     label:'입찰관리',      icon:'🏷️'},
+    {id:'vaatz',   label:'VAATZ 매뉴얼',  icon:'🖥️'},
+    {id:'quality', label:'품질·5스타',    icon:'⭐'},
+    {id:'cost',    label:'원가·단가',     icon:'💰'}
+  ];
 
   let currentTeam = teams[0].name;
   let teamDocs = [];
@@ -1711,7 +1718,8 @@ sendMessage = function(){
         if(i < t.finalReq) status='등록 요청됨';
         if(i >= t.docs - t.published) status='AI 검색 반영완료';
         if(i===13 && ti%2===1) status='보완 요청';
-        rows.push({id:`${ti+1}-${i+1}`, team:t.name, name:`${name}_${String(i+1).padStart(3,'0')}.${type.toLowerCase()}`, type, sec, mode, version:`v${1+(i%4)}.${i%10}`, owner:i%3===0?t.owner:(i%3===1?'팀 Admin':'팀원 업로드'), date:`2026.05.${String(1+(i%22)).padStart(2,'0')}`, status, chunks:80+(i*7)%420});
+        const cat=['rule','bid','vaatz','quality','cost'][(i+ti)%5];
+        rows.push({id:`${ti+1}-${i+1}`, team:t.name, name:`${name}_${String(i+1).padStart(3,'0')}.${type.toLowerCase()}`, type, sec, mode, cat, version:`v${1+(i%4)}.${i%10}`, owner:i%3===0?t.owner:(i%3===1?'팀 Admin':'팀원 업로드'), date:`2026.05.${String(1+(i%22)).padStart(2,'0')}`, status, chunks:80+(i*7)%420});
       }
     });
     return rows;
@@ -1794,26 +1802,95 @@ sendMessage = function(){
       <div class="v23-workgrid"><div class="v23-panel"><div class="v23-panel-h"><div class="v23-panel-title">🚨 오늘 처리할 일</div><button class="v23-btn" onclick="openAdminTab('p-final')">전체 보기</button></div><div class="v23-panel-body"><div class="v23-mini-list">${teamDocs.filter(d=>d.status==='등록 요청됨').slice(0,5).map(d=>`<div class="v23-mini-row"><div class="v23-mini-icon">${d.type==='PPT'?'📊':d.type==='XLSX'?'📈':'📄'}</div><div class="v23-mini-main"><div class="v23-mini-title">${esc(d.name)}</div><div class="v23-mini-meta"><span>${esc(d.team)}</span><span>${esc(d.mode)}</span><span>${esc(d.sec)}</span></div></div><button class="v23-btn primary" onclick="openAdminTab('p-final')">검토</button></div>`).join('')}</div></div></div><div class="v23-panel"><div class="v23-panel-h"><div class="v23-panel-title">🔗 정형 데이터 배치 상태</div><button class="v23-btn" onclick="openAdminTab('p-datamart')">모니터링</button></div><div class="v23-panel-body"><div class="v23-mini-list"><div class="v23-mini-row"><div class="v23-mini-icon">🖥️</div><div class="v23-mini-main"><div class="v23-mini-title">VAATZ 업체·품목 마스터</div><div class="v23-mini-meta"><span>05:10 성공</span><span>+14,230 rows</span></div></div><span class="v23-pill green">정상</span></div><div class="v23-mini-row"><div class="v23-mini-icon">📖</div><div class="v23-mini-main"><div class="v23-mini-title">Autopedia 용어 DB</div><div class="v23-mini-meta"><span>06:00 성공</span><span>4,832 terms</span></div></div><span class="v23-pill green">정상</span></div><div class="v23-mini-row"><div class="v23-mini-icon">💰</div><div class="v23-mini-main"><div class="v23-mini-title">원가 DB 일 배치</div><div class="v23-mini-meta"><span>07:30 일부 실패</span><span>12 rows error</span></div></div><span class="v23-pill amber">확인</span></div></div></div></div></div>
     `);
 
-    // ── 팀별 폴더 뷰 헬퍼 ─────────────────────────────────────
-    function tfTeamRow(t){
+    // ── 팀별 폴더 뷰 헬퍼 v3: 파이프라인 배너 + 파일 트리 ──────
+    function pipelineBanner(active){
+      const pendCnt=teamDocs.filter(d=>d.status==='등록 요청됨').length;
+      const doneCnt=teamDocs.filter(d=>d.status==='AI 검색 반영완료').length;
+      const totCnt=teams.reduce((a,t)=>a+t.docs,0);
+      return `<div class="adm-pipeline">
+        <div class="adm-pipe-step${active==='team'?' adm-pipe-active':''}" onclick="openAdminTab('p-team')">
+          <span class="adm-pipe-ic">📁</span>
+          <div><div class="adm-pipe-label">팀별 폴더</div><div class="adm-pipe-count">${totCnt}건 관리중</div></div>
+        </div>
+        <div class="adm-pipe-arrow">→</div>
+        <div class="adm-pipe-step${active==='final'?' adm-pipe-active':' adm-pipe-pending'}" onclick="openAdminTab('p-final')">
+          <span class="adm-pipe-ic">⏳</span>
+          <div><div class="adm-pipe-label">최종 승인</div><div class="adm-pipe-count adm-pipe-pend-c">${pendCnt}건 대기</div></div>
+        </div>
+        <div class="adm-pipe-arrow">→</div>
+        <div class="adm-pipe-step${active==='list'?' adm-pipe-active':' adm-pipe-done'}" onclick="openAdminTab('p-list')">
+          <span class="adm-pipe-ic">✅</span>
+          <div><div class="adm-pipe-label">최종 리스트</div><div class="adm-pipe-count adm-pipe-done-c">${doneCnt}건 반영</div></div>
+        </div>
+      </div>`;
+    }
+    function tfFileRow(d){
+      const ic=d.type==='PDF'?'📄':d.type==='PPT'?'📊':d.type==='XLSX'?'📈':d.type==='DOCX'?'📝':'📋';
+      let btn='';
+      if(d.status==='작성·보완중')
+        btn=`<button class="v23-btn primary tf-req-btn" style="padding:3px 9px;font-size:10px;white-space:nowrap;flex-shrink:0" onclick="event.stopPropagation();requestAIDoc('${d.id}',this)">✈ AI 등록요청</button>`;
+      else if(d.status==='등록 요청됨')
+        btn=`<button class="v23-btn tf-req-btn" style="padding:3px 9px;font-size:10px;white-space:nowrap;flex-shrink:0;color:var(--accent)" onclick="event.stopPropagation();openAdminTab('p-final')">⏳ 승인대기 ↗</button>`;
+      else if(d.status==='보완 요청')
+        btn=`<button class="v23-btn warn tf-req-btn" style="padding:3px 9px;font-size:10px;white-space:nowrap;flex-shrink:0" onclick="event.stopPropagation();requestAIDoc('${d.id}',this)">↩ 보완 재요청</button>`;
+      else
+        btn=`<button class="v23-btn good tf-req-btn" style="padding:3px 9px;font-size:10px;white-space:nowrap;flex-shrink:0" onclick="event.stopPropagation();openAdminTab('p-list')">✅ 리스트 확인 ↗</button>`;
+      const sCls=d.status==='AI 검색 반영완료'?'green':d.status==='등록 요청됨'?'blue':d.status==='보완 요청'?'red':'amber';
+      return `<div class="tf-file-row" data-doc-id="${d.id}">
+        <span class="tf-file-ic">${ic}</span>
+        <div class="tf-file-info">
+          <div class="tf-file-nm">${esc(d.name)}</div>
+          <div class="tf-file-meta">${d.version} · ${esc(d.owner)} · ${d.date} · ${d.chunks} chunks</div>
+        </div>
+        <span class="v23-pill ${sCls} tf-file-status" style="flex-shrink:0;font-size:9px">${d.status}</span>
+        ${btn}
+      </div>`;
+    }
+    function tfTeamTree(t){
+      const tid='tft_'+t.name.replace(/[\s·]/g,'_');
       const hCls=t.health==='정상'?'green':t.health==='보안주의'?'red':'amber';
-      return `<div class="tf-team-row" onclick="openTeamFolderModal('${esc(t.name)}')">
-        <span class="tf-team-ic">${t.icon}</span>
-        <div class="tf-team-info">
-          <div class="tf-team-name">${esc(t.name)}</div>
-          <div class="tf-team-owner">Admin: ${esc(t.owner)}</div>
+      const tDocs=teamDocs.filter(d=>d.team===t.name);
+      const catBlocks=folderCats.map(cat=>{
+        const files=tDocs.filter(d=>d.cat===cat.id);
+        const pend=files.filter(d=>d.status==='등록 요청됨').length;
+        const done=files.filter(d=>d.status==='AI 검색 반영완료').length;
+        const cid=tid+'_'+cat.id;
+        return `<div class="tf-catfolder" id="${cid}">
+          <div class="tf-catfolder-hd" onclick="toggleCatFolder('${cid}')">
+            <span class="tf-catfolder-chev" id="${cid}-chev">▶</span>
+            <span>${cat.icon}</span>
+            <span class="tf-catfolder-label">${cat.label}</span>
+            <span class="v23-pill" style="font-size:9px;background:var(--bg-4);color:var(--text-3)">${files.length}건</span>
+            ${pend>0?`<span class="v23-pill amber" style="font-size:9px">${pend} 대기</span>`:''}
+            ${done>0?`<span class="v23-pill green" style="font-size:9px">${done} 완료</span>`:''}
+            <button class="v23-btn" style="padding:3px 8px;font-size:9.5px;margin-left:auto;flex-shrink:0" onclick="event.stopPropagation();simUploadToFolder('${esc(t.name)}','${cat.id}')">+ 업로드</button>
+          </div>
+          <div class="tf-catfolder-body" id="${cid}-body" style="display:none">
+            ${files.slice(0,6).map(d=>tfFileRow(d)).join('')}
+            ${files.length>6?`<div class="tf-more-row" onclick="openTeamFolderModal('${esc(t.name)}')">+ ${files.length-6}건 더 보기 (전체 목록 열기 →)</div>`:''}
+            <div class="tf-upload-zone" onclick="simUploadToFolder('${esc(t.name)}','${cat.id}')">☁️ 파일 드래그 또는 클릭하여 <b>${cat.label}</b> 폴더에 업로드</div>
+          </div>
+        </div>`;
+      }).join('');
+      return `<div class="tf-team-node" id="${tid}">
+        <div class="tf-team-row-hd" onclick="expandTFTeam('${tid}')">
+          <span class="tf-expand-ic" id="${tid}-chev">▶</span>
+          <span class="tf-team-ic">${t.icon}</span>
+          <div class="tf-team-info">
+            <div class="tf-team-name">${esc(t.name)}</div>
+            <div class="tf-team-owner">Admin: ${esc(t.owner)}</div>
+          </div>
+          <div class="tf-team-nums">
+            <span>${t.docs}<span class="tf-num-l">건</span></span>
+            <span class="tf-num-sep">·</span>
+            <span class="tf-num-req">${t.finalReq}<span class="tf-num-l">요청</span></span>
+            <span class="tf-num-sep">·</span>
+            <span class="tf-num-ok">${t.published}<span class="tf-num-l">완료</span></span>
+          </div>
+          <span class="v23-pill ${hCls}" style="flex-shrink:0;font-size:9px">${t.health}</span>
         </div>
-        <div class="tf-team-nums">
-          <span title="전체 문서">${t.docs}<span class="tf-num-l">건</span></span>
-          <span class="tf-num-sep">·</span>
-          <span class="tf-num-req" title="최종요청">${t.finalReq}<span class="tf-num-l">요청</span></span>
-          <span class="tf-num-sep">·</span>
-          <span class="tf-num-ok" title="반영완료">${t.published}<span class="tf-num-l">완료</span></span>
-        </div>
-        <span class="v23-pill ${hCls}" style="flex-shrink:0;font-size:9px">${t.health}</span>
-        <div class="tf-team-btns">
-          <button class="v23-btn" style="padding:4px 8px;font-size:10px" onclick="event.stopPropagation();openTeamFolderModal('${esc(t.name)}')">열기</button>
-          <button class="v23-btn primary" style="padding:4px 8px;font-size:10px" onclick="event.stopPropagation();openTeamFolderModal('${esc(t.name)}','request')">요청</button>
+        <div class="tf-team-tree-body" id="${tid}-tree" style="display:none">
+          ${catBlocks}
         </div>
       </div>`;
     }
@@ -1835,25 +1912,28 @@ sendMessage = function(){
           </div>
         </div>
         <div class="tf-group-body" id="${g.id}-body">
-          ${gTeams.map(t=>tfTeamRow(t)).join('')}
+          ${gTeams.map(t=>tfTeamTree(t)).join('')}
         </div>
       </div>`;
     }
 
     addAdmSection('p-team', `
-      <div class="v23-admin-title">
-        <div><div class="v23-title-main">팀별 폴더 관리</div><div class="v23-title-sub">폴더 보기로 부서별 전체 현황을 파악하고, 목록 보기로 전체 팀 카드를 한눈에 확인할 수 있습니다.</div></div>
+      ${pipelineBanner('team')}
+      <div class="v23-admin-title" style="margin-top:14px">
+        <div>
+          <div class="v23-title-main">팀별 폴더 관리</div>
+          <div class="v23-title-sub">📁 폴더 보기: 부서 → 팀 → 카테고리 폴더 → 파일까지 드릴다운. 파일마다 [AI 등록요청] → 최종 승인 → 최종 리스트로 자동 연결됩니다.</div>
+        </div>
         <div class="v23-actions">
           <div class="tf-view-toggle">
             <button id="tvFolderBtn" class="v23-btn primary" onclick="switchTeamView('folder')">📁 폴더 보기</button>
             <button id="tvListBtn" class="v23-btn" onclick="switchTeamView('list')">📋 목록 보기</button>
           </div>
-          <button class="v23-btn" onclick="openTeamFolderModal('구매전략팀')">📋 샘플 열기</button>
           <button class="v23-btn">＋ 팀 폴더 추가</button>
         </div>
       </div>
 
-      <!-- 📁 폴더 보기 (기본) -->
+      <!-- 📁 폴더 트리 보기 (기본) -->
       <div id="tvFolderPane">
         ${teamGroups.map(g=>tfGroupHtml(g)).join('')}
       </div>
@@ -1868,12 +1948,14 @@ sendMessage = function(){
 
     const finalDocs=teamDocs.filter(d=>d.status==='등록 요청됨').slice(0,10);
     addAdmSection('p-final', `
+      ${pipelineBanner('final')}
       <div class="v23-admin-title"><div><div class="v23-title-main">System Admin 최종 승인</div><div class="v23-title-sub">팀 Admin이 올린 등록 요청됨만 모아 검토합니다. 여기서 통합 폴더, 보안등급, AI 모드를 확정하면 최종 리스트로 이동합니다.</div></div><div class="v23-actions"><button class="v23-btn warn">보완 요청 사유 템플릿</button><button class="v23-btn primary" onclick="approveAllVisibleFinals()">✅ 화면 내 일괄 승인</button></div></div>
       <div class="final-layout"><div>${finalDocs.map((d,i)=>`<div class="approval-card" data-final-id="${d.id}"><div class="approval-card-top"><div><div class="approval-doc">${esc(d.name)}</div><div class="approval-meta">${esc(d.team)} · ${esc(d.owner)} · ${d.date} · ${d.chunks} chunks 예상</div></div>${statusPill(d.status)}</div><div class="approval-settings"><div class="setting-box"><div class="setting-label">통합 폴더</div><select><option>구매업무규정</option><option>입찰관리</option><option>VAATZ 매뉴얼</option><option>품질 5스타</option><option>원가/단가</option></select></div><div class="setting-box"><div class="setting-label">보안등급</div><select><option>${d.sec}</option><option>리더 전용</option><option>일반 공개</option><option>지정 사용자</option></select></div><div class="setting-box"><div class="setting-label">AI 모드</div><select><option>${d.mode}</option>${modeList.map(m=>`<option>${m}</option>`).join('')}</select></div></div><div style="display:flex;gap:6px;margin-top:10px;justify-content:flex-end"><button class="v23-btn" onclick="previewFinalDoc('${d.id}')">원문 보기</button><button class="v23-btn danger" onclick="rejectFinalDoc(this)">보완 요청</button><button class="v23-btn primary" onclick="approveFinalDoc(this)">최종 승인</button></div></div>`).join('')}</div><div class="final-preview"><div class="v23-panel-title" style="margin-bottom:10px">🔎 검토 미리보기</div><div class="preview-doc-page" id="finalPreview"><h4>문서 미리보기</h4><p>왼쪽 문서의 <span class="preview-highlight">원문 보기</span>를 클릭하면 여기에 요약·하이라이트·중복 문서 여부가 표시됩니다.</p><p>최종 승인 전 확인 항목: 최신 버전 여부, 중복 등록 여부, 보안등급, AI 모드 매핑, 임베딩 제외 문구.</p></div><div class="mode-note">Tip. 최종 승인 시 문서가 최종 리스트로 이동하고, 선택한 AI 모드의 RAG Index에 반영됩니다.</div></div></div>
     `);
 
     const publishedDocs=teamDocs.filter(d=>d.status==='AI 검색 반영완료').slice(0,36);
     addAdmSection('p-list', `
+      ${pipelineBanner('list')}
       <div class="v23-admin-title"><div><div class="v23-title-main">최종 리스트 관리</div><div class="v23-title-sub">실제 AI가 검색하는 최종 지식 목록입니다. 문서 버전·보안등급·AI 모드·임베딩 상태를 관리합니다.</div></div><div class="v23-actions"><button class="v23-btn">CSV 내보내기</button><button class="v23-btn primary">＋ 수동 등록</button></div></div>
       <div class="final-list-filter"><input id="finalListSearch" placeholder="최종 문서 검색" oninput="filterFinalList()"><select id="finalModeFilter" onchange="filterFinalList()"><option value="">전체 모드</option>${modeList.map(m=>`<option>${m}</option>`).join('')}</select><select id="finalSecFilter" onchange="filterFinalList()"><option value="">전체 보안</option>${secList.map(s=>`<option>${s}</option>`).join('')}</select></div>
       <div class="final-table-wrap"><table class="large-table" id="finalDocTable"><thead><tr><th>문서명</th><th>팀</th><th>유형</th><th>보안</th><th>AI 모드</th><th>버전</th><th>임베딩</th><th style="text-align:right">작업</th></tr></thead><tbody>${publishedDocs.map(d=>`<tr data-mode="${d.mode}" data-sec="${d.sec}" data-text="${(d.name+d.team+d.mode+d.sec).toLowerCase()}"><td><div class="doc-name-strong">${esc(d.name)}</div><div class="doc-subtle">최종 반영일 ${d.date} · ${d.chunks} chunks</div></td><td>${esc(d.team)}</td><td>${d.type}</td><td>${secPill(d.sec)}</td><td>${modeBadge(d.mode)}</td><td>${d.version}</td><td><span class="v23-pill green">활성</span></td><td><div class="row-actions"><button class="v23-btn" onclick="previewPublishedDoc(this)">상세</button><button class="v23-btn">재색인</button></div></td></tr>`).join('')}</tbody></table></div>
@@ -1916,6 +1998,46 @@ sendMessage = function(){
     var open = body.style.display!=='none';
     body.style.display = open ? 'none' : 'block';
     if(chev) chev.style.transform = open ? 'rotate(-90deg)' : '';
+  };
+  window.expandTFTeam = function(id) {
+    var body=$('#'+id+'-tree'), chev=$('#'+id+'-chev');
+    if(!body) return;
+    var open = body.style.display!=='none';
+    body.style.display = open ? 'none' : 'block';
+    if(chev) chev.style.transform = open ? '' : 'rotate(90deg)';
+  };
+  window.toggleCatFolder = function(id) {
+    var body=$('#'+id+'-body'), chev=$('#'+id+'-chev');
+    if(!body) return;
+    var open = body.style.display!=='none';
+    body.style.display = open ? 'none' : 'block';
+    if(chev) chev.textContent = open ? '▶' : '▼';
+  };
+  window.requestAIDoc = function(id, btn) {
+    var row = btn ? btn.closest('[data-doc-id]') : document.querySelector('[data-doc-id="'+id+'"]');
+    var statusEl = row ? row.querySelector('.tf-file-status') : null;
+    var btnEl = row ? row.querySelector('.tf-req-btn') : null;
+    if(statusEl){
+      statusEl.textContent = '등록 요청됨';
+      statusEl.className = 'v23-pill blue tf-file-status';
+    }
+    if(btnEl){
+      btnEl.textContent = '⏳ 승인대기 ↗';
+      btnEl.className = 'v23-btn tf-req-btn';
+      btnEl.style.color='var(--accent)';
+      btnEl.onclick = function(e){ e.stopPropagation(); openAdminTab('p-final'); };
+    }
+    document.querySelectorAll('.adm-pipe-pend-c').forEach(function(el){
+      var n=parseInt((el.textContent||'0').replace(/[^0-9]/g,''))||0;
+      el.textContent=(n+1)+'건 대기';
+    });
+    safeToast('AI 등록 요청됨이 최종 승인 대기열에 추가됐습니다. [최종 승인] 탭에서 검토하세요.','🚀');
+  };
+  window.simUploadToFolder = function(teamName, catId) {
+    var cats=[{id:'rule',label:'구매규정·제도'},{id:'bid',label:'입찰관리'},{id:'vaatz',label:'VAATZ 매뉴얼'},{id:'quality',label:'품질·5스타'},{id:'cost',label:'원가·단가'}];
+    var cat=cats.find(function(c){return c.id===catId;});
+    var label=cat?cat.label:catId;
+    safeToast(teamName+' › '+label+' 폴더에 파일을 업로드했습니다. 실제 연동 시 서버 업로드 API로 대체됩니다.','📤');
   };
 
   window.openTeamFolderModal=function(team, focus){

@@ -3323,3 +3323,168 @@ html:not([data-theme="light"]) .inv-slot.equipped {
 html:not([data-theme="light"]) #shopCharPreview {
   filter: drop-shadow(0 6px 16px rgba(75,142,240,0.4)) !important;
 }
+
+/* ══════════════════════════════════════════════════════
+ * Admin 팀별 폴더 트리 v3 (파이프라인 배너 + 파일 트리)
+ * ══════════════════════════════════════════════════════ */
+
+/* ── 파이프라인 배너 compact variant ── */
+.adm-pipe-ic {
+  font-size: 18px;
+  line-height: 1;
+  flex-shrink: 0;
+}
+.adm-pipe-count {
+  font-size: 9.5px;
+  color: var(--text-4);
+  margin-top: 1px;
+  line-height: 1;
+}
+.adm-pipe-active {
+  background: rgba(75,142,240,0.10);
+  border-radius: 8px;
+  padding: 4px 10px;
+}
+.adm-pipe-active .adm-pipe-label { color: var(--accent) !important; font-weight: 700 !important; }
+.adm-pipe-active .adm-pipe-count { color: rgba(75,142,240,0.7) !important; }
+.adm-pipe-pending .adm-pipe-label { color: var(--text-3); }
+.adm-pipe-done .adm-pipe-label { color: var(--g, #4ead7b); }
+.adm-pipe-step { cursor: pointer; transition: background .12s; }
+.adm-pipe-step:hover { background: var(--bg-3); border-radius: 8px; }
+
+/* ── 팀 노드 (그룹 바디 내부) ── */
+.tf-team-node {
+  border: 1px solid var(--border-1);
+  border-radius: 10px;
+  background: var(--bg-1);
+  margin-bottom: 6px;
+  overflow: hidden;
+  transition: box-shadow .12s;
+}
+.tf-team-node:hover { box-shadow: 0 3px 10px rgba(0,0,0,.18); }
+.tf-team-row-hd {
+  display: flex;
+  align-items: center;
+  padding: 10px 14px;
+  gap: 10px;
+  cursor: pointer;
+  background: var(--bg-2);
+  transition: background .12s;
+}
+.tf-team-row-hd:hover { background: var(--bg-3); }
+.tf-expand-ic {
+  font-size: 11px;
+  color: var(--text-4);
+  flex-shrink: 0;
+  transition: transform .18s;
+  width: 14px;
+}
+.tf-team-tree-body {
+  padding: 4px 10px 8px;
+  background: var(--bg-1);
+}
+
+/* ── 카테고리 폴더 ── */
+.tf-catfolder {
+  border-radius: 8px;
+  background: var(--bg-2);
+  border: 1px solid var(--border-1);
+  margin: 4px 0;
+  overflow: hidden;
+}
+.tf-catfolder-hd {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 7px 12px;
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-2);
+  background: var(--bg-2);
+  transition: background .12s;
+}
+.tf-catfolder-hd:hover { background: var(--bg-3); }
+.tf-catfolder-chev {
+  font-size: 9px;
+  color: var(--text-4);
+  flex-shrink: 0;
+  transition: transform .15s;
+}
+.tf-catfolder-label {
+  flex: 1;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-2);
+}
+.tf-catfolder-body {
+  padding: 4px 10px 6px 10px;
+  border-top: 1px solid var(--border-1);
+  background: var(--bg-1);
+}
+
+/* ── 파일 행 ── */
+.tf-file-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 8px;
+  border-radius: 7px;
+  cursor: default;
+  transition: background .1s;
+  border-bottom: 1px solid var(--border-1);
+}
+.tf-file-row:last-of-type { border-bottom: none; }
+.tf-file-row:hover { background: var(--bg-3); }
+.tf-file-ic {
+  font-size: 15px;
+  flex-shrink: 0;
+  line-height: 1;
+}
+.tf-file-info {
+  flex: 1;
+  min-width: 0;
+}
+.tf-file-nm {
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--text-1);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.tf-file-meta {
+  font-size: 9.5px;
+  color: var(--text-4);
+  margin-top: 2px;
+  line-height: 1.3;
+}
+
+/* ── 업로드 존 & 더보기 행 ── */
+.tf-upload-zone {
+  margin-top: 6px;
+  border: 1.5px dashed var(--border-2);
+  border-radius: 8px;
+  padding: 8px 14px;
+  text-align: center;
+  font-size: 10.5px;
+  color: var(--text-4);
+  cursor: pointer;
+  background: transparent;
+  transition: all .15s;
+}
+.tf-upload-zone:hover {
+  border-color: var(--accent-bd);
+  color: var(--accent);
+  background: rgba(75,142,240,0.04);
+}
+.tf-more-row {
+  padding: 6px 8px;
+  font-size: 10.5px;
+  color: var(--accent);
+  cursor: pointer;
+  text-align: center;
+  border-radius: 6px;
+  transition: background .1s;
+}
+.tf-more-row:hover { background: var(--bg-3); }
