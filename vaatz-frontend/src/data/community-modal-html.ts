@@ -107,16 +107,56 @@
 <div class="char-stat"><div class="char-stat-v" style="color:var(--accent)">10</div><div class="char-stat-l">채택</div></div>
 <div class="char-stat"><div class="char-stat-v">127</div><div class="char-stat-l">받은 추천</div></div>
 </div>
-<div style="font-size:11px;font-weight:600;margin:12px 0 8px">🚗 자동차 레벨 로드맵 <span style="font-weight:400;font-size:9px;color:var(--text-4)">Lv.1~100</span></div>
-<div style="display:grid;grid-template-columns:repeat(5,1fr);gap:4px;margin-bottom:6px">
-<div style="background:var(--bg-2);border:1px solid var(--border-1);border-radius:6px;padding:7px 4px;text-align:center"><div style="font-size:14px">🐣</div><div style="font-size:7px;font-weight:600;margin-top:2px">Lv.1</div><div style="font-size:6px;color:var(--text-4)">견습 바이어</div></div>
-<div style="background:var(--bg-2);border:1px solid var(--border-1);border-radius:6px;padding:7px 4px;text-align:center"><div style="font-size:14px">🌱</div><div style="font-size:7px;font-weight:600;margin-top:2px">Lv.5</div><div style="font-size:6px;color:var(--text-4)">구매 새싹</div></div>
-<div style="background:var(--accent-dim);border:2px solid var(--accent-bd);border-radius:6px;padding:7px 4px;text-align:center"><div style="font-size:14px">🔧</div><div style="font-size:7px;font-weight:700;margin-top:2px;color:var(--accent)">Lv.14 ←</div><div style="font-size:6px;color:var(--accent)">부품 탐험가</div></div>
-<div style="background:var(--bg-2);border:1px solid var(--border-1);border-radius:6px;padding:7px 4px;text-align:center"><div style="font-size:14px">🚀</div><div style="font-size:7px;font-weight:600;margin-top:2px">Lv.60</div><div style="font-size:6px;color:var(--text-4)">구매 에이스</div></div>
-<div style="background:var(--bg-2);border:1px solid var(--border-1);border-radius:6px;padding:7px 4px;text-align:center"><div style="font-size:14px">⚡</div><div style="font-size:7px;font-weight:600;margin-top:2px">Lv.100</div><div style="font-size:6px;color:#E8A000">VAATZ 챔피언</div></div>
+<div style="font-size:10px;font-weight:600;margin:10px 0 5px;display:flex;align-items:center;justify-content:space-between">
+  <span>🚗 자동차 레벨 로드맵</span>
+  <span style="font-size:8px;font-weight:400;color:var(--text-4)">Lv.1~100 전체 21단계</span>
 </div>
-<div style="background:var(--bg-2);border:1px solid var(--border-1);border-radius:6px;padding:8px 12px;font-size:9px;color:var(--text-3);line-height:1.7">
-🏎️ <b>F1 구매 파일럿</b>(Lv.95) · 🚗 <b>원가혁신 아이콘</b>(Lv.90) · 🏭 <b>공급망 아키텍트</b>(Lv.85) · 🌐 <b>글로벌 수석바이어</b>(Lv.80) · 🔧 <b>기술구매 전문가</b>(Lv.75) · 🤝 <b>협력사 총지휘관</b>(Lv.70)
+<div style="max-height:186px;overflow-y:auto;display:grid;grid-template-columns:repeat(3,1fr);gap:3px;margin-bottom:8px;padding-right:2px">
+<div style="background:var(--bg-2);border:1px solid var(--border-1);border-radius:6px;padding:5px 4px;display:flex;align-items:center;gap:4px"><span style="font-size:14px">🐣</span><div><div style="font-size:7px;font-weight:700;color:#D8DEE4">Lv.1~4</div><div style="font-size:7px;color:var(--text-4)">견습 바이어</div></div></div>
+<div style="background:var(--bg-2);border:1px solid var(--border-1);border-radius:6px;padding:5px 4px;display:flex;align-items:center;gap:4px"><span style="font-size:14px">🌱</span><div><div style="font-size:7px;font-weight:700;color:#CED4DA">Lv.5~9</div><div style="font-size:7px;color:var(--text-4)">구매 새싹</div></div></div>
+<div style="background:var(--accent-dim);border:2px solid var(--accent-bd);border-radius:6px;padding:5px 4px;display:flex;align-items:center;gap:4px"><span style="font-size:14px">🔧</span><div><div style="font-size:7px;font-weight:800;color:var(--accent)">Lv.10~14 ←</div><div style="font-size:7px;color:var(--accent)">부품 탐험가</div></div></div>
+<div style="background:var(--bg-2);border:1px solid var(--border-1);border-radius:6px;padding:5px 4px;display:flex;align-items:center;gap:4px"><span style="font-size:14px">📝</span><div><div style="font-size:7px;font-weight:700;color:#ABB4BD">Lv.15~19</div><div style="font-size:7px;color:var(--text-4)">신입 바이어</div></div></div>
+<div style="background:var(--bg-2);border:1px solid var(--border-1);border-radius:6px;padding:5px 4px;display:flex;align-items:center;gap:4px"><span style="font-size:14px">🔑</span><div><div style="font-size:7px;font-weight:700;color:#95A5A6">Lv.20~24</div><div style="font-size:7px;color:var(--text-4)">구매 어시스턴트</div></div></div>
+<div style="background:var(--bg-2);border:1px solid var(--border-1);border-radius:6px;padding:5px 4px;display:flex;align-items:center;gap:4px"><span style="font-size:14px">🚙</span><div><div style="font-size:7px;font-weight:700;color:#6C757D">Lv.25~29</div><div style="font-size:7px;color:var(--text-4)">주임 바이어</div></div></div>
+<div style="background:var(--bg-2);border:1px solid var(--border-1);border-radius:6px;padding:5px 4px;display:flex;align-items:center;gap:4px"><span style="font-size:14px">📋</span><div><div style="font-size:7px;font-weight:700;color:#7F8C8D">Lv.30~34</div><div style="font-size:7px;color:var(--text-4)">계약 매니저</div></div></div>
+<div style="background:var(--bg-2);border:1px solid var(--border-1);border-radius:6px;padding:5px 4px;display:flex;align-items:center;gap:4px"><span style="font-size:14px">🔍</span><div><div style="font-size:7px;font-weight:700;color:#D35400">Lv.35~39</div><div style="font-size:7px;color:var(--text-4)">협력사 탐정</div></div></div>
+<div style="background:var(--bg-2);border:1px solid var(--border-1);border-radius:6px;padding:5px 4px;display:flex;align-items:center;gap:4px"><span style="font-size:14px">🏷️</span><div><div style="font-size:7px;font-weight:700;color:#E67E22">Lv.40~44</div><div style="font-size:7px;color:var(--text-4)">단가 분석가</div></div></div>
+<div style="background:var(--bg-2);border:1px solid var(--border-1);border-radius:6px;padding:5px 4px;display:flex;align-items:center;gap:4px"><span style="font-size:14px">📦</span><div><div style="font-size:7px;font-weight:700;color:#138D75">Lv.45~49</div><div style="font-size:7px;color:var(--text-4)">부품 스페셜리스트</div></div></div>
+<div style="background:var(--bg-2);border:1px solid var(--border-1);border-radius:6px;padding:5px 4px;display:flex;align-items:center;gap:4px"><span style="font-size:14px">🔩</span><div><div style="font-size:7px;font-weight:700;color:#16A085">Lv.50~54</div><div style="font-size:7px;color:var(--text-4)">공급망 수호자</div></div></div>
+<div style="background:var(--bg-2);border:1px solid var(--border-1);border-radius:6px;padding:5px 4px;display:flex;align-items:center;gap:4px"><span style="font-size:14px">⚙️</span><div><div style="font-size:7px;font-weight:700;color:#3498DB">Lv.55~59</div><div style="font-size:7px;color:var(--text-4)">선임 바이어</div></div></div>
+<div style="background:var(--bg-2);border:1px solid var(--border-1);border-radius:6px;padding:5px 4px;display:flex;align-items:center;gap:4px"><span style="font-size:14px">🚀</span><div><div style="font-size:7px;font-weight:700;color:#2ECC71">Lv.60~64</div><div style="font-size:7px;color:var(--text-4)">구매 에이스</div></div></div>
+<div style="background:var(--bg-2);border:1px solid var(--border-1);border-radius:6px;padding:5px 4px;display:flex;align-items:center;gap:4px"><span style="font-size:14px">📊</span><div><div style="font-size:7px;font-weight:700;color:#27AE60">Lv.65~69</div><div style="font-size:7px;color:var(--text-4)">입찰 전략가</div></div></div>
+<div style="background:var(--bg-2);border:1px solid var(--border-1);border-radius:6px;padding:5px 4px;display:flex;align-items:center;gap:4px"><span style="font-size:14px">🤝</span><div><div style="font-size:7px;font-weight:700;color:#1ABC9C">Lv.70~74</div><div style="font-size:7px;color:var(--text-4)">협력사 총지휘관</div></div></div>
+<div style="background:var(--bg-2);border:1px solid var(--border-1);border-radius:6px;padding:5px 4px;display:flex;align-items:center;gap:4px"><span style="font-size:14px">🔧</span><div><div style="font-size:7px;font-weight:700;color:#2980B9">Lv.75~79</div><div style="font-size:7px;color:var(--text-4)">기술구매 전문가</div></div></div>
+<div style="background:var(--bg-2);border:1px solid var(--border-1);border-radius:6px;padding:5px 4px;display:flex;align-items:center;gap:4px"><span style="font-size:14px">🌐</span><div><div style="font-size:7px;font-weight:700;color:#8E44AD">Lv.80~84</div><div style="font-size:7px;color:var(--text-4)">글로벌 수석바이어</div></div></div>
+<div style="background:var(--bg-2);border:1px solid var(--border-1);border-radius:6px;padding:5px 4px;display:flex;align-items:center;gap:4px"><span style="font-size:14px">🏭</span><div><div style="font-size:7px;font-weight:700;color:#9B59B6">Lv.85~89</div><div style="font-size:7px;color:var(--text-4)">공급망 아키텍트</div></div></div>
+<div style="background:var(--bg-2);border:1px solid var(--border-1);border-radius:6px;padding:5px 4px;display:flex;align-items:center;gap:4px"><span style="font-size:14px">🚗</span><div><div style="font-size:7px;font-weight:700;color:#E74C3C">Lv.90~94</div><div style="font-size:7px;color:var(--text-4)">원가혁신 아이콘</div></div></div>
+<div style="background:var(--bg-2);border:1px solid var(--border-1);border-radius:6px;padding:5px 4px;display:flex;align-items:center;gap:4px"><span style="font-size:14px">🏎️</span><div><div style="font-size:7px;font-weight:700;color:#FF6B35">Lv.95~99</div><div style="font-size:7px;color:var(--text-4)">F1 구매 파일럿</div></div></div>
+<div style="background:linear-gradient(135deg,#2A1F00,#1A1200);border:2px solid #E8A000;border-radius:6px;padding:5px 4px;display:flex;align-items:center;gap:4px;grid-column:span 1"><span style="font-size:14px">⚡</span><div><div style="font-size:7px;font-weight:900;color:#E8A000">Lv.100</div><div style="font-size:7px;color:#FFD060">VAATZ 챔피언</div></div></div>
+</div>
+
+<!-- 다음 목표 + 활동 배지 -->
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:0">
+  <div style="background:var(--bg-2);border:1px solid var(--border-1);border-radius:8px;padding:8px">
+    <div style="font-size:9px;font-weight:700;color:var(--text-2);margin-bottom:5px">🎯 다음 목표</div>
+    <div style="display:flex;flex-direction:column;gap:3px">
+      <div style="display:flex;align-items:center;gap:5px;font-size:9px"><span>📝</span><span style="color:var(--text-2)">Lv.15 신입 바이어</span><span style="margin-left:auto;color:var(--accent);font-weight:700">−240pt</span></div>
+      <div style="display:flex;align-items:center;gap:5px;font-size:9px"><span>🔑</span><span style="color:var(--text-4)">Lv.20 구매 어시스턴트</span></div>
+      <div style="display:flex;align-items:center;gap:5px;font-size:9px"><span>🚙</span><span style="color:var(--text-4)">Lv.25 주임 바이어</span></div>
+    </div>
+  </div>
+  <div style="background:var(--bg-2);border:1px solid var(--border-1);border-radius:8px;padding:8px">
+    <div style="font-size:9px;font-weight:700;color:var(--text-2);margin-bottom:5px">🏅 획득 배지</div>
+    <div style="display:flex;flex-wrap:wrap;gap:4px">
+      <span style="font-size:16px" title="답변 채택 10회">🏆</span>
+      <span style="font-size:16px" title="질문 100개 작성">📋</span>
+      <span style="font-size:16px" title="추천 100개 달성">⭐</span>
+      <span style="font-size:16px" title="AI 학습 반영 1회">🤖</span>
+      <span style="font-size:16px;opacity:.3" title="미달성">🔒</span>
+      <span style="font-size:16px;opacity:.3" title="미달성">🔒</span>
+    </div>
+    <div style="font-size:8px;color:var(--text-4);margin-top:4px">4/12 배지 달성</div>
+  </div>
 </div>
 </div>
 
