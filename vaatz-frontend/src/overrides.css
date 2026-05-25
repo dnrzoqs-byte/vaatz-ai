@@ -61,6 +61,16 @@ html, body, #root {
 }
 .hi-t { font-size: 11.5px; line-height: 1.4; }
 .hi-m { font-size: 9.5px; }
+.sb-date-grp {
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+  color: var(--text-4);
+  padding: 10px 10px 4px;
+  margin-top: 2px;
+}
+.sb-date-grp:first-child { padding-top: 2px; }
 
 /* ── 사이드바 하단: 아바타 카드 ── */
 .sb-ft {
@@ -3488,3 +3498,404 @@ html:not([data-theme="light"]) #shopCharPreview {
   transition: background .1s;
 }
 .tf-more-row:hover { background: var(--bg-3); }
+
+/* ══════════════════════════════════════════════════════
+ * 전체 UX/UI 플랫폼 성격 다듬기
+ * Enterprise Procurement AI — Professional Dark Theme
+ * ══════════════════════════════════════════════════════ */
+
+/* ── 웰컴 화면 전면 개편 ── */
+.wl {
+  padding: 48px 24px 40px !important;
+  max-width: 680px !important;
+}
+.wl-m {
+  width: 58px !important;
+  height: 58px !important;
+  border-radius: 16px !important;
+  margin-bottom: 20px !important;
+  box-shadow: 0 12px 40px rgba(75,142,240,0.22) !important;
+}
+.wl-ti {
+  font-size: 23px !important;
+  font-weight: 900 !important;
+  letter-spacing: -0.8px !important;
+  margin-bottom: 10px !important;
+  /* 그라디언트 타이틀 */
+  background: linear-gradient(135deg, var(--text-1) 0%, rgba(75,142,240,0.85) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.wl-d {
+  font-size: 13px !important;
+  line-height: 1.8 !important;
+  margin-bottom: 28px !important;
+  color: var(--text-4) !important;
+  max-width: 420px;
+}
+/* 빠른 액션 카드 */
+.wg {
+  gap: 8px !important;
+  max-width: 560px !important;
+  grid-template-columns: repeat(2, 1fr) !important;
+}
+.wc {
+  padding: 16px 15px !important;
+  border-radius: 12px !important;
+  border: 1px solid var(--border-1) !important;
+  background: var(--bg-2) !important;
+  transition: all .2s ease !important;
+  position: relative;
+  overflow: hidden;
+}
+.wc::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: var(--accent-g);
+  opacity: 0;
+  transition: opacity .2s;
+}
+.wc:hover {
+  border-color: var(--accent-bd) !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.22) !important;
+}
+.wc:hover::before { opacity: 1; }
+.wc-i { font-size: 20px !important; margin-bottom: 8px !important; }
+.wc-t {
+  font-size: 12.5px !important;
+  font-weight: 700 !important;
+  margin-bottom: 4px !important;
+  color: var(--text-1) !important;
+  letter-spacing: -0.2px;
+}
+.wc-d {
+  font-size: 10.5px !important;
+  line-height: 1.6 !important;
+  color: var(--text-4) !important;
+}
+/* 추천 질문 pills */
+.wt {
+  margin-top: 22px !important;
+  max-width: 560px !important;
+  gap: 6px !important;
+}
+.wt-i {
+  font-size: 11px !important;
+  padding: 6px 13px !important;
+  border-radius: 20px !important;
+  border: 1px solid var(--border-1) !important;
+  background: var(--bg-2) !important;
+  color: var(--text-3) !important;
+  font-family: inherit;
+  letter-spacing: -0.1px;
+  transition: all .15s !important;
+}
+.wt-i:hover {
+  border-color: var(--accent-bd) !important;
+  color: var(--accent) !important;
+  background: rgba(75,142,240,0.06) !important;
+}
+
+/* ── 상단 바 개선 ── */
+.tb {
+  height: 52px !important;
+  padding: 0 24px !important;
+  border-bottom: 1px solid var(--border-1) !important;
+  background: rgba(12,15,21,0.92) !important;
+  backdrop-filter: blur(24px) !important;
+  -webkit-backdrop-filter: blur(24px) !important;
+}
+.tb-t {
+  font-size: 13.5px !important;
+  font-weight: 700 !important;
+  letter-spacing: -0.4px !important;
+}
+/* 상단 버튼 그룹 */
+.sc-btn {
+  font-size: 10.5px !important;
+  padding: 5px 12px !important;
+  border-radius: 7px !important;
+}
+.tb-b {
+  font-size: 10.5px !important;
+  padding: 5px 12px !important;
+  border-radius: 7px !important;
+}
+
+/* ── 채팅 메시지 컨테이너 ── */
+.cs {
+  padding-bottom: 12px;
+}
+.cc {
+  padding: 24px 36px 16px !important;
+  max-width: 860px !important;
+  margin: 0 auto !important;
+}
+/* 사용자 메시지 버블 */
+.msg { margin-bottom: 22px !important; }
+.msg-b {
+  max-width: 68% !important;
+  font-size: 14px !important;
+  line-height: 1.72 !important;
+  padding: 11px 16px !important;
+  border-radius: 16px 16px 3px 16px !important;
+  background: linear-gradient(135deg, var(--accent), #3b7fe0) !important;
+  box-shadow: 0 4px 14px rgba(75,142,240,0.22) !important;
+}
+/* AI 메시지 컨테이너 */
+.aa {
+  width: 30px !important;
+  height: 30px !important;
+  border-radius: 9px !important;
+  flex-shrink: 0 !important;
+  margin-top: 3px !important;
+}
+.ab {
+  flex: 1;
+  min-width: 0;
+}
+/* AI 답변 헤더 */
+.ah {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+}
+.an {
+  font-size: 12px !important;
+  font-weight: 700 !important;
+  letter-spacing: -0.2px !important;
+}
+.at0 {
+  font-size: 9.5px !important;
+  padding: 2px 7px;
+  border-radius: 5px;
+  font-weight: 600;
+}
+/* AI 답변 텍스트 */
+.ai-tx {
+  font-size: 14px !important;
+  line-height: 1.9 !important;
+  color: var(--text-2) !important;
+}
+.ai-tx p { margin: 0 0 10px !important; }
+.ai-tx p:last-child { margin-bottom: 0 !important; }
+.ai-tx strong, .ai-tx b { color: var(--text-1) !important; font-weight: 700; }
+.ai-tx ol, .ai-tx ul { padding-left: 18px; margin-bottom: 10px; }
+.ai-tx li { margin-bottom: 4px; line-height: 1.75; }
+/* AI 액션 버튼 */
+.ai-ac {
+  display: flex;
+  gap: 4px;
+  margin-top: 10px;
+  flex-wrap: wrap;
+}
+.ai-a {
+  font-size: 10.5px !important;
+  padding: 4px 9px !important;
+  border-radius: 7px !important;
+  border: 1px solid var(--border-1) !important;
+  background: var(--bg-2) !important;
+  color: var(--text-3) !important;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all .12s !important;
+}
+.ai-a:hover {
+  background: var(--bg-3) !important;
+  border-color: var(--border-2) !important;
+  color: var(--text-2) !important;
+}
+/* 후속 질문 버튼 */
+.fu-c {
+  font-size: 11px !important;
+  padding: 6px 13px !important;
+  border-radius: 20px !important;
+  background: var(--bg-2) !important;
+  border: 1px solid var(--border-1) !important;
+  color: var(--text-3) !important;
+  transition: all .15s !important;
+}
+.fu-c:hover {
+  background: rgba(75,142,240,0.08) !important;
+  border-color: var(--accent-bd) !important;
+  color: var(--accent) !important;
+}
+
+/* ── 입력창 개선 ── */
+.iw {
+  padding: 0 36px 18px !important;
+}
+.ibx {
+  background: var(--bg-2) !important;
+  border: 1.5px solid var(--border-2) !important;
+  border-radius: 14px !important;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.14) !important;
+  transition: all .2s !important;
+}
+.ibx:focus-within {
+  border-color: var(--accent-bd) !important;
+  box-shadow: 0 0 0 3px rgba(75,142,240,0.12), 0 2px 12px rgba(0,0,0,0.14) !important;
+}
+.ir textarea {
+  font-size: 13.5px !important;
+  line-height: 1.7 !important;
+  max-height: 140px !important;
+  color: var(--text-1) !important;
+}
+.ir textarea::placeholder { color: var(--text-4) !important; }
+.sd {
+  width: 36px !important;
+  height: 36px !important;
+  border-radius: 10px !important;
+}
+.disc {
+  font-size: 9.5px !important;
+  opacity: 0.6 !important;
+  letter-spacing: 0.1px;
+}
+
+/* ── 사이드바 채팅이력 개선 ── */
+.sb-hist {
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-1) transparent;
+}
+.sb-hist::-webkit-scrollbar { width: 3px; }
+.sb-hist::-webkit-scrollbar-thumb { background: var(--border-2); border-radius: 2px; }
+.hi {
+  padding: 7px 10px !important;
+  border-radius: 7px !important;
+  margin-bottom: 1px !important;
+  position: relative;
+}
+.hi::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 50%; transform: translateY(-50%);
+  width: 2px; height: 0;
+  background: var(--accent);
+  border-radius: 1px;
+  transition: height .15s;
+}
+.hi.on::before,
+.hi:hover::before { height: 60%; }
+.hi-t {
+  font-size: 11.5px !important;
+  line-height: 1.45 !important;
+  color: var(--text-3);
+}
+.hi.on .hi-t { color: var(--text-1) !important; font-weight: 600 !important; }
+.hi-m {
+  font-size: 9.5px !important;
+  color: var(--text-5, var(--text-4)) !important;
+  margin-top: 2px;
+}
+/* 새 대화 버튼 */
+.new-c {
+  background: linear-gradient(135deg, var(--accent), #3b7fe0) !important;
+  color: #fff !important;
+  font-weight: 700 !important;
+  letter-spacing: -0.2px !important;
+  border: none !important;
+  box-shadow: 0 4px 14px rgba(75,142,240,0.28) !important;
+  transition: all .15s !important;
+}
+.new-c:hover {
+  opacity: 0.9 !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 6px 18px rgba(75,142,240,0.35) !important;
+}
+
+/* ── 참조 문서 (sr2) 개선 ── */
+.sr2 {
+  background: var(--bg-2) !important;
+  border: 1px solid var(--border-1) !important;
+  border-radius: 12px !important;
+  overflow: hidden !important;
+  margin-bottom: 10px !important;
+}
+.sr2-h {
+  padding: 10px 14px !important;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.sr2-h:hover { background: var(--bg-3) !important; }
+.sr2-cnt {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 5px;
+  background: var(--accent);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  margin-right: 5px;
+}
+.sr2-c {
+  border-top: 1px solid var(--border-1) !important;
+  padding: 9px 14px !important;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  transition: background .12s;
+}
+.sr2-c:hover { background: var(--bg-3) !important; }
+.sr2-c-nm { font-size: 11.5px !important; font-weight: 600 !important; }
+.sr2-c-mt { font-size: 9.5px !important; color: var(--text-4) !important; margin-top: 2px; }
+
+/* ── RAG 파이프라인 박스 ── */
+.rag-pipeline {
+  background: var(--bg-2) !important;
+  border: 1px solid var(--border-1) !important;
+  border-radius: 12px !important;
+  padding: 12px 14px !important;
+  margin-bottom: 10px !important;
+}
+.rag-hd {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+.rag-hd-l { font-size: 11px !important; font-weight: 700 !important; }
+.rag-conf { display: flex; align-items: center; gap: 5px; }
+.rag-conf-v {
+  font-size: 11px !important;
+  font-weight: 700 !important;
+  color: var(--g) !important;
+}
+.rag-step { padding: 3px 0 !important; }
+.rag-step-tx { font-size: 11px !important; }
+.rag-step-mt { font-size: 9.5px !important; }
+
+/* ── 공통 pill / badge 일관성 ── */
+.v23-pill {
+  font-size: 9.5px !important;
+  padding: 2px 7px !important;
+  border-radius: 6px !important;
+  font-weight: 700 !important;
+  white-space: nowrap;
+}
+
+/* ── 스크롤바 전체 앱 통일 ── */
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+  background: var(--border-2, rgba(255,255,255,0.1));
+  border-radius: 2px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--border-3, rgba(255,255,255,0.18));
+}
+* { scrollbar-width: thin; scrollbar-color: var(--border-2) transparent; }

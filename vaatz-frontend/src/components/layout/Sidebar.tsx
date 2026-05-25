@@ -10,12 +10,47 @@ interface ChatHistory {
   active?: boolean
 }
 
-const CHAT_HISTORY: ChatHistory[] = [
-  { id: 1, title: '탄력적입찰 vs 경매입찰', date: '오늘 15:42', active: true },
-  { id: 2, title: '품질 5스타 평가기준',     date: '오늘 13:10' },
-  { id: 3, title: 'VAATZ 구매요청 생성',     date: '오늘 10:28' },
-  { id: 4, title: '수의계약 사유서 작성',     date: '어제' },
-  { id: 5, title: '해외구매 환율 적용',      date: '2월 5일' },
+interface ChatGroup {
+  label: string
+  items: ChatHistory[]
+}
+
+const CHAT_HISTORY_GROUPS: ChatGroup[] = [
+  {
+    label: '오늘',
+    items: [
+      { id: 1,  title: '탄력적입찰 vs 경매입찰',      date: '15:42', active: true },
+      { id: 2,  title: '품질 5스타 평가기준',          date: '13:10' },
+      { id: 3,  title: 'VAATZ 구매요청 생성',          date: '10:28' },
+      { id: 14, title: '협력사 긴급 거래정지 절차',    date: '09:15' },
+    ]
+  },
+  {
+    label: '어제',
+    items: [
+      { id: 4,  title: '수의계약 사유서 작성',         date: '17:30' },
+      { id: 7,  title: '반도체 부품 납기 지연 대응',   date: '14:22' },
+      { id: 8,  title: '구매위원회 안건 작성법',        date: '11:05' },
+      { id: 9,  title: 'SAP MM 발주서 정정 방법',      date: '09:40' },
+    ]
+  },
+  {
+    label: '이번 주',
+    items: [
+      { id: 5,  title: '해외구매 환율 적용',            date: '5월 23일' },
+      { id: 10, title: '5스타 현장심사 준비 체크리스트', date: '5월 22일' },
+      { id: 11, title: '입찰 심사위원 선정 기준',        date: '5월 21일' },
+      { id: 12, title: '협력사 가격 분쟁 해결 절차',    date: '5월 20일' },
+    ]
+  },
+  {
+    label: '지난달',
+    items: [
+      { id: 13, title: '연간 구매 계획 수립 가이드',    date: '4월 28일' },
+      { id: 15, title: 'BOM 변경 시 구매 영향 분석',   date: '4월 15일' },
+      { id: 16, title: '공정거래 자율준수 프로그램',    date: '4월 3일' },
+    ]
+  }
 ]
 
 // window.* 전역 함수 타입 선언
@@ -96,14 +131,19 @@ export default function Sidebar() {
         <div className="sb-lb">최근 대화</div>
       </div>
       <div className="sb-hist">
-        {CHAT_HISTORY.map(item => (
-          <div
-            key={item.id}
-            className={`hi${item.active ? ' on' : ''}`}
-            onClick={() => window.sv?.('ch')}
-          >
-            <div className="hi-t">{item.title}</div>
-            <div className="hi-m">{item.date}</div>
+        {CHAT_HISTORY_GROUPS.map(group => (
+          <div key={group.label}>
+            <div className="sb-date-grp">{group.label}</div>
+            {group.items.map(item => (
+              <div
+                key={item.id}
+                className={`hi${item.active ? ' on' : ''}`}
+                onClick={() => window.sv?.('ch')}
+              >
+                <div className="hi-t">{item.title}</div>
+                <div className="hi-m">{item.date}</div>
+              </div>
+            ))}
           </div>
         ))}
       </div>
