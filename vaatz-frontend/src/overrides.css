@@ -16,20 +16,14 @@ html, body, #root {
   min-width: 1024px;
 }
 
-/* ── 채팅 콘텐츠: 최적 가독성 너비로 중앙 정렬 ── */
+/* ── 채팅 콘텐츠: 좌우 공백, 꽉 채우기 ── */
 .cc {
-  max-width: 760px !important;
-  margin: 0 auto !important;
-  padding: 28px 32px 20px !important;
-  width: 100%;
-  box-sizing: border-box;
+  max-width: 100% !important;
+  padding: 28px 36px 20px !important;
 }
 .iw {
-  max-width: 760px !important;
-  margin: 0 auto !important;
-  padding: 0 0 20px !important;
-  width: 100%;
-  box-sizing: border-box;
+  max-width: 100% !important;
+  padding: 0 36px 20px !important;
 }
 
 /* ── 사이드바 ── */
