@@ -1,29 +1,30 @@
 // ─── App ─────────────────────────────────────────────────────────────────────
-// Phase 1 React Migration:
-//   - dangerouslySetInnerHTML({ __html: vaatzHtml }) 제거
-//   - 개별 React 컴포넌트로 분리
-//   - vaatz-init.js는 그대로 유지 (Bridge 패턴)
+// Phase 2 React Migration:
+//   - CommunityModal → React Context 기반 open/close
+//   - 나머지 모달(마이페이지·Admin·DB뷰어)은 여전히 VanillaModals
 //
 // 컴포넌트 트리:
 //   AppProvider
-//     Toast          (fixed overlay — vaatz-init.js가 DOM 직접 관리)
+//     Toast            (fixed overlay — vaatz-init.js가 DOM 직접 관리)
 //     .app
-//       Sidebar      (정적 레이아웃)
+//       Sidebar        (정적 레이아웃)
 //       .mn
-//         TopBar     (검색범위 스위치, 알림)
+//         TopBar       (검색범위 스위치, 알림)
 //         .mn-body
-//           ChatArea (웰컴뷰 + 채팅뷰 + 입력창)
+//           ChatArea   (웰컴뷰 + 채팅뷰 + 입력창)
 //           RightPanel (내 파일 / 답변 근거 패널)
-//     VanillaModals  (마이페이지·관리패널·커뮤니티 등 — vaatz-init.js 관리)
+//     CommunityModal   (Phase 2: Context 기반 열림/닫힘)
+//     VanillaModals    (마이페이지·Admin·DB뷰어 — vaatz-init.js 관리)
 // ─────────────────────────────────────────────────────────────────────────────
 import { useEffect, useRef } from 'react'
-import { AppProvider }    from './context/AppContext'
-import Sidebar            from './components/layout/Sidebar'
-import TopBar             from './components/layout/TopBar'
-import ChatArea           from './components/chat/ChatArea'
-import RightPanel         from './components/layout/RightPanel'
-import VanillaModals      from './components/modals/VanillaModals'
-import Toast              from './components/shared/Toast'
+import { AppProvider }      from './context/AppContext'
+import Sidebar              from './components/layout/Sidebar'
+import TopBar               from './components/layout/TopBar'
+import ChatArea             from './components/chat/ChatArea'
+import RightPanel           from './components/layout/RightPanel'
+import CommunityModal       from './components/modals/CommunityModal'
+import VanillaModals        from './components/modals/VanillaModals'
+import Toast                from './components/shared/Toast'
 
 // ─── 앱 본체 (AppProvider 안에서 실행) ──────────────────────
 function AppShell() {
@@ -64,7 +65,10 @@ function AppShell() {
         </div>
       </div>
 
-      {/* Vanilla 모달들 (vaatz-init.js 관리) */}
+      {/* Phase 2: 커뮤니티 모달 — React Context 기반 */}
+      <CommunityModal />
+
+      {/* 나머지 Vanilla 모달들 (vaatz-init.js 관리) */}
       <VanillaModals />
     </>
   )

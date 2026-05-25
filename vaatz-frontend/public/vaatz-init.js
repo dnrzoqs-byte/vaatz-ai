@@ -1,8 +1,35 @@
 ﻿
-// ═══════════════════════════════════════════
-// VAATZ AI v11 — Stabilized Prototype Script
-// ═══════════════════════════════════════════
+// ╔═══════════════════════════════════════════════════════════════════╗
+// ║  VAATZ AI — public/vaatz-init.js                                 ║
+// ║  App.tsx의 <script src="/vaatz-init.js">로 브라우저에서 직접 실행   ║
+// ║  ⚠️  src/scripts/vaatz-init.ts 는 실행되지 않음 — 수정 금지        ║
+// ╠═══════════════════════════════════════════════════════════════════╣
+// ║  수정 가이드                                                       ║
+// ║    JS 로직  →  이 파일만                                           ║
+// ║    CSS      →  src/overrides.css                                  ║
+// ║    HTML 구조 →  src/vaatz-html.ts                                 ║
+// ╠═══════════════════════════════════════════════════════════════════╣
+// ║  목차 (Table of Contents)                                         ║
+// ║  §01  전역 유틸리티              line ~6    toast, $, $$, esc       ║
+// ║  §02  네비게이션                 line ~21   sv(), currentView        ║
+// ║  §03  Admin 탭 전환             line ~36   at()                    ║
+// ║  §04  채팅 히스토리 샘플 데이터    line ~40   chatConversations{}     ║
+// ║  §05  v26 커뮤니티 기본 구조      line ~670  openComm, commTab 기초  ║
+// ║  §06  캐릭터 시스템              line ~719                          ║
+// ║  §07  소스 뷰어 / 우측 패널      line ~1100  sourceDocs, rpSwitchTab ║
+// ║  §08  [LEGACY] Admin 패널      line ~1800  v25/v26 Admin UI       ║
+// ║  §09  [LEGACY] v26/v27 커뮤니티  line ~1940  ⚠ openComm 덮어씌워짐  ║
+// ║  §10  [LEGACY] v28 상태텍스트    line ~2195  normText               ║
+// ║  §11  V29 채팅 도구 (활성)       line ~2220  installChatTools, mode  ║
+// ║  §12  [LEGACY] v29-v33 커뮤니티  line ~2269  ⚠ openComm 덮어씌워짐  ║
+// ║  §13  V33 캐릭터/상점 (활성)     line ~3089  setupV33CharacterPicker ║
+// ║  §14  [LEGACY] v34 패치         line ~3490  ⚠ openComm 덮어씌워짐  ║
+// ║  §15  ★ V36 Q&A (현재 권위버전)  line ~4182  openComm/closeComm 최종║
+// ╚═══════════════════════════════════════════════════════════════════╝
 
+// ─────────────────────────────────────────────────────
+// §01  전역 유틸리티
+// ─────────────────────────────────────────────────────
 // ─── Toast System (replaces all alert()) ───
 function toast(msg, icon='✅', duration=3500){
   const wrap=document.getElementById('toastWrap');
@@ -18,6 +45,9 @@ function dismissToast(el){
   setTimeout(()=>el.remove(), 260);
 }
 
+// ─────────────────────────────────────────────────────
+// §02  네비게이션
+// ─────────────────────────────────────────────────────
 // ─── Navigation ───
 let currentView='ch';
 function sv(v){
@@ -33,6 +63,9 @@ function sv(v){
 
 function oa(){document.getElementById('ao').classList.add('sh');document.body.style.overflow='hidden'}
 function ca(){document.getElementById('ao').classList.remove('sh');document.body.style.overflow=''}
+// ─────────────────────────────────────────────────────
+// §03  Admin 탭 전환
+// ─────────────────────────────────────────────────────
 function at(b,id){
   document.querySelectorAll('.atb').forEach(t=>t.classList.remove('on'));
   b.classList.add('on');
@@ -182,6 +215,10 @@ function addToHistory(text){
   hist.insertBefore(hi,hist.firstChild);
 }
 
+// ─────────────────────────────────────────────────────
+// §04  채팅 히스토리 샘플 데이터
+//      실제 RAG 연결 시 이 부분을 API 호출로 교체
+// ─────────────────────────────────────────────────────
 // ─── History item click ───
 const chatConversations = {
   '탄력적입찰 vs 경매입찰': {
@@ -684,6 +721,11 @@ rejReq=function(b){
 };
 
 
+// ─────────────────────────────────────────────────────
+// §05  v26 커뮤니티 기본 구조 + 테마/캐릭터
+//      openComm / commTab / voteQ 기초 선언
+//      ※ 실제 커뮤니티 렌더링은 §15 V36이 담당
+// ─────────────────────────────────────────────────────
 // ─── Theme Toggle ───
 function toggleTheme(){
   const html=document.documentElement;
@@ -4489,7 +4531,10 @@ window.renderCommunityV26 = window.renderCommunityV29;
 window.renderCommunityV27 = window.renderCommunityV29;
 
 /* ── V36 Community: openComm/closeComm/commTab 완전 교체 (이전 9개 레이어 충돌 제거) ── */
+/* Phase 2: React Context 상태 동기화 브릿지 추가 */
 window.openComm = function(tab) {
+  /* Phase 2 bridge: React communityOpen 상태 동기 */
+  if(typeof window.__reactOpenComm === 'function') window.__reactOpenComm(tab || 'qa');
   var ov = document.getElementById('commOv');
   if(!ov) return;
   ov.classList.add('sh');
@@ -4509,6 +4554,8 @@ window.openComm = function(tab) {
 };
 
 window.closeComm = function() {
+  /* Phase 2 bridge: React communityOpen 상태 동기 */
+  if(typeof window.__reactCloseComm === 'function') window.__reactCloseComm();
   var ov = document.getElementById('commOv');
   if(ov) ov.classList.remove('sh');
 };
