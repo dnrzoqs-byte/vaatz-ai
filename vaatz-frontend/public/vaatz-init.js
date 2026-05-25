@@ -4191,7 +4191,7 @@ var cats = ['전체','입찰','계약','VAATZ','5스타','원가','일반자재'
 var questions = [
   {id:1, cat:'입찰', title:'탄력적입찰에서 1회차 유찰 시 처리 절차가 궁금합니다',
    body:'구매업무규정 제23조에 따른 재공고 요건과 수의계약 전환 기준이 궁금합니다. VAATZ에서 유찰처리 메뉴는 어디서 찾나요?',
-   tags:['탄력적입찰','유찰','수의계약'], author:'계약초보', time:'3일 전', votes:47, adopted:true,
+   tags:['탄력적입찰','유찰','수의계약'], author:'계약초보', time:'3일 전', votes:47, views:312, adopted:true,
    answers:[
      {id:11, author:'프로큐어마스터', role:'CPO', lv:4, time:'3일 전', votes:42, adopted:true,
       body:'구매업무규정 제23조 4항에 따르면 1회차 유찰 시 참여 업체 확대 또는 수의계약 전환이 가능합니다.\n\n실무적으로는 구매위원회 사전 승인을 받고 진행해야 하며, VAATZ에서는 [입찰관리 → 유찰처리] 메뉴에서 처리합니다. 참여 업체 확대 후 재공고 기간은 최소 5영업일이 필요합니다.'},
@@ -4200,29 +4200,29 @@ var questions = [
    ]},
   {id:2, cat:'원가', title:'원가모드에서 단가 이력과 환율 기준을 같이 볼 수 있나요?',
    body:'원가 관련 질의 시 어떤 DB와 문서를 연결해야 하는지 궁금합니다.',
-   tags:['원가모드','단가','환율'], author:'원가분석러', time:'2시간 전', votes:34, adopted:false,
+   tags:['원가모드','단가','환율'], author:'원가분석러', time:'2시간 전', votes:34, views:178, adopted:false,
    answers:[
      {id:21, author:'VAATZ달인', role:'수석바이어', lv:3, time:'1시간 전', votes:12, adopted:false,
       body:'원가모드는 현재 단가 이력 DB 연동 중입니다. 설정 > AI 모드 > 원가 에서 VAATZ 마스터 데이터 연결을 활성화하면 가능합니다.'},
    ]},
   {id:3, cat:'5스타', title:'5스타 4→5등급 승급 시 IATF 16949가 필수인가요?',
    body:'2026년 기준으로 필수 요건인지, 기존 업체의 유예기간이 있는지 확인하고 싶습니다.',
-   tags:['5스타','IATF16949','협력사'], author:'품질매니저', time:'1일 전', votes:18, adopted:false,
+   tags:['5스타','IATF16949','협력사'], author:'품질매니저', time:'1일 전', votes:18, views:95, adopted:false,
    answers:[]},
   {id:4, cat:'VAATZ', title:'VAATZ 해외 발주 환율은 발주 시점과 결제 시점 중 어느 것이 기준인가요?',
    body:'글로벌 구매 모듈에서 환율 자동 적용 기준과 예외 처리 방법이 궁금합니다.',
-   tags:['VAATZ','환율','해외구매'], author:'해외구매담당', time:'오늘', votes:22, adopted:true,
+   tags:['VAATZ','환율','해외구매'], author:'해외구매담당', time:'오늘', votes:22, views:143, adopted:true,
    answers:[
      {id:41, author:'글로벌구매Pro', role:'책임매니저', lv:3, time:'오늘', votes:19, adopted:true,
       body:'VAATZ 글로벌 구매 모듈에서 환율은 매일 09시 기준으로 자동 갱신됩니다.\n\n발주 시점 기준이며, 결제 시점 환율 차이는 [글로벌구매 → 환율관리 → 차이 정산] 메뉴에서 처리합니다.'},
    ]},
   {id:5, cat:'일반자재', title:'MRO 반복 구매 시 경매입찰 생략 기준이 있나요?',
    body:'반복 구매 품목의 계약 활용 가능 여부와 예외 승인 조건이 궁금합니다.',
-   tags:['MRO','반복구매','경매입찰'], author:'MRO담당', time:'20분 전', votes:9, adopted:false,
+   tags:['MRO','반복구매','경매입찰'], author:'MRO담당', time:'20분 전', votes:9, views:41, adopted:false,
    answers:[]},
   {id:6, cat:'협력사', title:'협력사 평가 결과를 입찰 참여 조건에 자동 반영할 수 있나요?',
    body:'5스타 등급과 납품 품질 이슈를 VAATZ 입찰 초대 조건에 반영하는 방법이 궁금합니다.',
-   tags:['협력사','입찰초대','5스타'], author:'품질지킴이', time:'어제', votes:16, adopted:false,
+   tags:['협력사','입찰초대','5스타'], author:'품질지킴이', time:'어제', votes:16, views:88, adopted:false,
    answers:[]},
 ];
 
@@ -4260,7 +4260,7 @@ function renderList(ct){
             '<span class="qa36-hot-rank">' + (i+1) + '</span>' +
             '<div class="qa36-hot-info">' +
               '<div class="qa36-hot-title">' + esc(q.title) + '</div>' +
-              '<div class="qa36-hot-meta">' + (catIcons[q.cat]||'') + ' ' + esc(q.cat) + ' · 답변 ' + q.answers.length + ' · <b>▲ ' + q.votes + '</b></div>' +
+              '<div class="qa36-hot-meta">' + (catIcons[q.cat]||'') + ' ' + esc(q.cat) + ' · 👁 ' + (q.views||0) + ' · 답변 ' + q.answers.length + ' · <b>▲ ' + q.votes + '</b></div>' +
             '</div>' +
           '</div>';
         }).join('') +
@@ -4286,6 +4286,7 @@ function renderList(ct){
                   '<span>👤 ' + esc(q.author) + '</span>' +
                   '<span>' + q.time + '</span>' +
                   q.tags.map(function(t){ return '<span class="qa36-tag">#' + esc(t) + '</span>'; }).join('') +
+                  '<span class="qa36-view-badge">👁 ' + (q.views||0) + '</span>' +
                   '<span class="qa36-vote-badge">▲ ' + q.votes + '</span>' +
                 '</div>' +
               '</div>' +
@@ -4314,6 +4315,7 @@ function renderDetail(ct){
       '<div class="qa36-q-title">' + esc(q.title) + '</div>' +
       '<div class="qa36-q-body">' + esc(q.body) + '</div>' +
       '<div class="qa36-q-foot">' +
+        '<span class="qa36-view-count">👁 조회 ' + (q.views||0) + '</span>' +
         '<button class="qa36-vote-btn" onclick="qa36VoteQ(' + q.id + ',this)">👍 추천 ' + q.votes + '</button>' +
       '</div>' +
     '</div>' +
@@ -4358,7 +4360,11 @@ function renderQA(){
 }
 
 /* ── Public API ── */
-window.qa36Select = function(id){ qaS.view='detail'; qaS.selId=id; renderQA(); };
+window.qa36Select = function(id){
+  var q = questions.find(function(x){ return x.id===id; });
+  if(q) q.views = (q.views||0) + 1;
+  qaS.view='detail'; qaS.selId=id; renderQA();
+};
 window.qa36Back   = function(){ qaS.view='list'; qaS.selId=null; renderQA(); };
 window.qa36SetCat = function(c){ qaS.cat=c; qaS.view='list'; qaS.selId=null; renderQA(); };
 window.qa36Search = function(v){

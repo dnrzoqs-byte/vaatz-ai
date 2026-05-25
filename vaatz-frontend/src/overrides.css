@@ -240,7 +240,7 @@ html, body, #root {
   overflow: hidden;
 }
 .rp-h {
-  padding: 14px 16px 11px !important;
+  padding: 18px 16px 13px !important;
   background: var(--bg-2) !important;
   border-bottom: 1px solid var(--border-1) !important;
   flex-shrink: 0;
@@ -315,7 +315,7 @@ html, body, #root {
 #rpPaneSrc > .src-hd {
   flex: none !important;
   overflow: visible !important;
-  padding: 14px 16px 12px !important;
+  padding: 18px 16px 13px !important;
   background: var(--bg-2) !important;
   border-bottom: 1px solid var(--border-1) !important;
 }
@@ -529,6 +529,13 @@ html, body, #root {
   position: relative;
   transition: transform .18s cubic-bezier(.34,1.56,.64,1);
   filter: drop-shadow(0 6px 14px rgba(30,60,160,0.30));
+}
+/* 라이트 모드: 캐릭터 색감 보정 */
+[data-theme="light"] .float-char-body {
+  filter: brightness(1.08) drop-shadow(0 4px 12px rgba(80,130,220,0.18)) !important;
+}
+[data-theme="light"] .float-show-btn {
+  filter: brightness(1.08) drop-shadow(0 3px 8px rgba(80,130,220,0.14)) !important;
 }
 .float-char-body:hover {
   transform: translateY(-4px) scale(1.06);
@@ -2000,7 +2007,7 @@ textarea:focus { outline: none; }
 
 /* 패널 하단 footer 개선 */
 .rp-ft {
-  padding: 10px 16px !important;
+  padding: 13px 16px 16px !important;
   border-top: 1px solid var(--border-1) !important;
   font-size: 11px !important;
 }
@@ -2211,6 +2218,12 @@ textarea:focus { outline: none; }
 }
 
 /* 추천 배지 (카드 우측) */
+.qa36-view-badge {
+  font-size: 11px;
+  color: var(--text-4);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
 .qa36-vote-badge {
   margin-left: auto;
   font-size: 11px;
@@ -2219,6 +2232,17 @@ textarea:focus { outline: none; }
   opacity: 0.8;
   white-space: nowrap;
   flex-shrink: 0;
+}
+.qa36-view-count {
+  font-size: 11px;
+  color: var(--text-4);
+  margin-right: auto;
+}
+.qa36-q-foot {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 12px;
 }
 
 /* HOT 글 스트립 */
