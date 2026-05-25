@@ -4603,6 +4603,34 @@ window.commTab = function(btn, id) {
   else if(id === 'ct-shop') { try{ window.renderV33ShopItems && window.renderV33ShopItems(); }catch(e){} }
 };
 
+/* ─── hofTab: 명예의 전당 기간 탭 전환 ─── */
+window.hofTab = function(period) {
+  var now = new Date();
+  var yr = now.getFullYear();
+  var mo = now.getMonth() + 1;
+  var weekNum = Math.ceil(now.getDate() / 7);
+  var labels = {
+    week:  '📅 ' + yr + '년 ' + mo + '월 ' + weekNum + '주차',
+    month: '📆 ' + yr + '년 ' + mo + '월',
+    year:  '🏆 ' + yr + '년 연간 랭킹'
+  };
+  ['week','month','year'].forEach(function(p) {
+    var btn = document.getElementById('hof-tab-' + p);
+    if(!btn) return;
+    if(p === period) {
+      btn.style.background = 'var(--accent)';
+      btn.style.color = '#fff';
+      btn.style.boxShadow = '0 2px 8px rgba(75,142,240,0.35)';
+    } else {
+      btn.style.background = 'transparent';
+      btn.style.color = 'var(--text-3)';
+      btn.style.boxShadow = 'none';
+    }
+  });
+  var lbl = document.getElementById('hofPeriodLabel');
+  if(lbl) lbl.textContent = labels[period] || '';
+};
+
 /* boot */
 if(document.readyState === 'loading')
   document.addEventListener('DOMContentLoaded', function(){ setTimeout(renderQA, 300); });

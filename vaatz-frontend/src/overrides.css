@@ -311,7 +311,9 @@ html, body, #root {
   min-height: auto !important;
 }
 /* ── 출처 패널 레이아웃: src-hd/chips 고정, src-vw만 스크롤 ── */
-#rpPaneSrc { padding: 0 !important; display: flex; flex-direction: column; }
+/* display는 .rp-tab-pane.on 규칙에 위임 — 강제 flex 제거 (내 파일 탭에서 답변 근거 동시 표시 버그 수정) */
+#rpPaneSrc { padding: 0 !important; flex-direction: column; }
+#rpPaneSrc.on { display: flex !important; }
 #rpPaneSrc > .src-hd {
   flex: none !important;
   overflow: visible !important;
@@ -3062,4 +3064,97 @@ html[data-theme="light"] .src-doc-meta {
 .v26-mode-btn,
 .v26-size-btn {
   white-space: nowrap;
+}
+
+/* ══════════════════════════════════════════════════════
+ * 다크 모드 커뮤니티 모달 색상 개선 (Issue #2)
+ * 기본 테마가 dark이므로 html:not([data-theme="light"]) 스코핑
+ * ══════════════════════════════════════════════════════ */
+
+/* 모달 박스: 배경을 bg-2로 올려 깊이감 강조 */
+html:not([data-theme="light"]) .comm-box {
+  background: var(--bg-2) !important;
+  border: 1px solid var(--border-3) !important;
+  box-shadow: 0 28px 80px rgba(0,0,0,.85), 0 0 0 1px rgba(75,142,240,0.07) !important;
+}
+
+/* 헤더: 블루 뉘앙스 그라디언트 */
+html:not([data-theme="light"]) .comm-hd {
+  background: linear-gradient(135deg, #13192A, var(--bg-2)) !important;
+  border-bottom: 1px solid var(--border-2) !important;
+}
+
+/* 탭 바 */
+html:not([data-theme="light"]) .comm-tabs {
+  background: var(--bg-3) !important;
+  border-bottom: 1px solid var(--border-2) !important;
+}
+
+/* Q&A 카드: bg-2→bg-3으로 들어올려 배경과 구분 */
+html:not([data-theme="light"]) .qa-card {
+  background: var(--bg-3) !important;
+  border: 1px solid var(--border-2) !important;
+}
+html:not([data-theme="light"]) .qa-card:hover {
+  background: var(--bg-4) !important;
+  border-color: var(--border-3) !important;
+  box-shadow: 0 6px 20px rgba(0,0,0,.35) !important;
+}
+
+/* 채택 카드: 파란 틴트 강조 */
+html:not([data-theme="light"]) .qa-card.adopted {
+  background: linear-gradient(135deg, rgba(75,142,240,0.10), var(--bg-3)) !important;
+  border-left: 3px solid var(--accent) !important;
+}
+
+/* 상점 아이템 */
+html:not([data-theme="light"]) .shop-item {
+  background: var(--bg-3) !important;
+  border: 1px solid var(--border-2) !important;
+}
+html:not([data-theme="light"]) .shop-item:hover {
+  background: var(--bg-4) !important;
+  border-color: var(--accent-bd) !important;
+  box-shadow: 0 4px 14px rgba(75,142,240,0.15) !important;
+}
+html:not([data-theme="light"]) .shop-item.owned {
+  background: rgba(78,173,123,0.08) !important;
+  border-color: rgba(78,173,123,0.25) !important;
+}
+
+/* 명예의 전당 포디엄 */
+html:not([data-theme="light"]) .hof-p {
+  background: var(--bg-3) !important;
+  border: 1px solid var(--border-2) !important;
+}
+html:not([data-theme="light"]) .hof-p.gold {
+  background: linear-gradient(180deg, rgba(255,185,49,0.10), var(--bg-3)) !important;
+  border-color: rgba(255,185,49,0.22) !important;
+}
+html:not([data-theme="light"]) .hof-p.silver {
+  background: linear-gradient(180deg, rgba(180,190,200,0.08), var(--bg-3)) !important;
+}
+html:not([data-theme="light"]) .hof-p.bronze {
+  background: linear-gradient(180deg, rgba(210,105,65,0.08), var(--bg-3)) !important;
+}
+
+/* 랭킹 행 호버 */
+html:not([data-theme="light"]) .lb-row:hover {
+  background: var(--bg-4) !important;
+}
+
+/* 캐릭터/인벤토리 슬롯 */
+html:not([data-theme="light"]) .inv-slot {
+  background: var(--bg-3) !important;
+  border: 1px solid var(--border-2) !important;
+}
+html:not([data-theme="light"]) .inv-slot:hover,
+html:not([data-theme="light"]) .inv-slot.equipped {
+  border-color: var(--accent-bd) !important;
+  background: rgba(75,142,240,0.08) !important;
+}
+
+/* 상점 캐릭터 프리뷰 박스 추가 글로우 */
+html:not([data-theme="light"]) #shopCharPreview {
+  filter: drop-shadow(0 6px 16px rgba(75,142,240,0.4)) !important;
 }

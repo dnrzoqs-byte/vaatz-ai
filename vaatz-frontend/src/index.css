@@ -2008,21 +2008,21 @@ html[data-user-role="admin"] .v29-action-row button[onclick*="v29Nominate"]{
 .v35-utag button{border:none;background:none;cursor:pointer;color:var(--accent);padding:0;font-size:11px;line-height:1}
 
 /* ═══════ 5. AI CHAT POLISH ═══════ */
-.rag-pipeline{margin:8px 0 10px!important;background:var(--bg-2)!important;border:1px solid var(--border-1)!important;border-left:3px solid var(--accent)!important;border-radius:8px!important;overflow:hidden!important}
-.rag-hd{display:flex!important;align-items:center!important;justify-content:space-between!important;padding:6px 10px!important;background:var(--bg-3)!important;cursor:pointer!important}
-.rag-hd-l{display:flex;align-items:center;gap:6px;font-weight:600;color:var(--text-2);font-size:11px}
-.rag-hd-ic{font-size:13px}
-.rag-conf{display:flex;align-items:center;gap:5px;font-size:10.5px;font-weight:700;color:var(--g)}
-.rag-conf-dot{width:6px;height:6px;border-radius:50%;background:var(--g);animation:v35pulse 2s infinite}
+.rag-pipeline{margin:8px 0 12px!important;background:var(--bg-2)!important;border:1px solid var(--border-2)!important;border-left:3px solid var(--accent)!important;border-radius:10px!important;overflow:hidden!important}
+.rag-hd{display:flex!important;align-items:center!important;justify-content:space-between!important;padding:8px 12px!important;background:var(--bg-3)!important;cursor:pointer!important;border-bottom:1px solid var(--border-1)!important}
+.rag-hd-l{display:flex;align-items:center;gap:7px;font-weight:700;color:var(--text-1);font-size:11.5px;letter-spacing:-0.01em}
+.rag-hd-ic{font-size:13px;width:22px;height:22px;background:var(--accent-dim);border-radius:6px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.rag-conf{display:flex;align-items:center;gap:5px;font-size:10px;font-weight:700;color:var(--g);background:var(--g-dim);padding:3px 8px;border-radius:99px}
+.rag-conf-dot{width:5px;height:5px;border-radius:50%;background:var(--g);animation:v35pulse 2s infinite}
 .rag-conf-v{color:var(--g)}
 @keyframes v35pulse{0%,100%{opacity:1}50%{opacity:.35}}
-.rag-steps{display:flex!important;align-items:center!important;gap:0!important;padding:5px 10px!important;overflow-x:auto;scrollbar-width:none}
-.rag-steps::-webkit-scrollbar{display:none}
-.rag-step{display:flex!important;align-items:center!important;gap:3px!important;white-space:nowrap!important;font-size:10.5px!important;color:var(--text-3)!important;flex-shrink:0!important;padding:2px 0!important}
-.rag-step:not(:last-child)::after{content:'→';margin:0 6px;color:var(--text-4);font-size:9.5px}
-.rag-step-ic{color:var(--g);font-size:11px;font-weight:700}
-.rag-step-tx{color:var(--text-2)}
-.rag-step-mt{font-size:9.5px;color:var(--text-4);background:var(--bg-3);padding:1px 5px;border-radius:3px}
+.rag-steps{display:flex!important;flex-direction:column!important;align-items:stretch!important;gap:0!important;padding:6px 12px!important;}
+.rag-step{display:flex!important;align-items:flex-start!important;gap:8px!important;white-space:normal!important;font-size:11px!important;color:var(--text-2)!important;padding:5px 0!important;border-bottom:1px solid var(--border-1)!important}
+.rag-step:last-child{border-bottom:none!important}
+.rag-step-ic{width:18px;height:18px;border-radius:4px;background:var(--g-dim);color:var(--g);font-size:9px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
+.rag-step-tx{flex:1;color:var(--text-2);line-height:1.5;text-align:left}
+.rag-step-tx b{color:var(--text-1);font-weight:600}
+.rag-step-mt{font-size:9px;color:var(--text-4);background:var(--bg-4);padding:2px 6px;border-radius:4px;white-space:nowrap;flex-shrink:0;font-family:'JetBrains Mono',monospace;align-self:center;margin-left:auto}
 .sr2{margin:8px 0!important;border:1px solid var(--border-1)!important;border-radius:8px!important;overflow:hidden!important;background:var(--bg-2)!important}
 .sr2-h{display:flex!important;align-items:center!important;justify-content:space-between!important;padding:7px 10px!important;background:var(--bg-3)!important;cursor:pointer!important;font-size:11.5px!important}
 .sr2-hl{display:flex;align-items:center;gap:6px;font-weight:600;color:var(--text-2)}
