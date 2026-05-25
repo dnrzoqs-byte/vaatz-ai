@@ -11,6 +11,7 @@
   <div class="adm-t-section-label">── 승인 프로세스</div>
   <button class="atb on" onclick="at(this,'p-home')">🏠 운영 홈</button>
   <button class="atb atb-flow" onclick="at(this,'p-req')">📤 팀 문서 검토 <span class="adm-badge">5</span></button>
+  <button class="atb atb-flow" onclick="at(this,'p-list')">📋 팀별 목록 <span class="adm-badge" style="background:var(--text-5,#555)">8팀</span></button>
   <button class="atb atb-flow" onclick="at(this,'p-final')">✅ 최종 승인 <span class="adm-badge adm-badge-g">2</span></button>
   <button class="atb atb-flow" onclick="at(this,'p-verify')">🧠 AI 검증 <span class="adm-badge" style="background:var(--accent)">3</span></button>
   <div class="adm-t-section-label">── 시스템 관리</div>
@@ -38,25 +39,51 @@
     <div class="adm-home-card" style="flex:1">
       <div class="adm-home-card-t">📋 즉시 처리 필요</div>
       <div class="adm-todo-list">
-        <div class="adm-todo urgent" onclick="at(document.querySelector('[onclick*=p-req]'),'p-req')">
+        <div class="adm-todo urgent" onclick="homeDetailToggle(this,'homeDetail1')" style="cursor:pointer">
           <span class="adm-todo-dot r"></span>
           <div class="adm-todo-body"><div class="adm-todo-title">구매전략팀 요청 2건 검토 대기</div><div class="adm-todo-meta">박성민 · 조달청 물품계약 외 1건 · 3일 경과</div></div>
           <span class="adm-todo-badge" style="background:var(--r-dim);color:var(--r)">긴급</span>
+          <span class="adm-todo-chevron" style="font-size:10px;color:var(--text-4);margin-left:4px;transition:.15s">▾</span>
         </div>
-        <div class="adm-todo" onclick="at(document.querySelector('[onclick*=p-final]'),'p-final')">
+        <div class="adm-todo-detail" id="homeDetail1" style="display:none;padding:8px 10px 10px 32px;font-size:11px;color:var(--text-2);background:var(--bg-2);border-radius:0 0 6px 6px;border:1px solid var(--border-1);border-top:none;margin:-4px 0 4px">
+          <div style="font-weight:600;color:var(--r);margin-bottom:5px">📤 즉시 검토 필요 2건</div>
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--border-1)"><span>📎 조달청 물품구매계약 특수조건 <span class="bd bd-a" style="font-size:8px">대기 3일</span></span><button class="req-flow-go" onclick="event.stopPropagation();at(document.querySelector('[onclick*=p-req]'),'p-req')">검토 →</button></div>
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:4px 0"><span>📎 해외법인 구매 승인 프로세스 <span class="bd bd-a" style="font-size:8px">대기 2일</span></span><button class="req-flow-go" onclick="event.stopPropagation();at(document.querySelector('[onclick*=p-req]'),'p-req')">검토 →</button></div>
+        </div>
+        <div class="adm-todo" onclick="homeDetailToggle(this,'homeDetail2')" style="cursor:pointer">
           <span class="adm-todo-dot a"></span>
           <div class="adm-todo-body"><div class="adm-todo-title">최종 승인 대기 2건 — 폴더 미배정</div><div class="adm-todo-meta">공정거래법 조항, 전동화 단가 벤치마크</div></div>
           <span class="adm-todo-badge" style="background:var(--a-dim);color:var(--a)">대기</span>
+          <span class="adm-todo-chevron" style="font-size:10px;color:var(--text-4);margin-left:4px;transition:.15s">▾</span>
         </div>
-        <div class="adm-todo" onclick="at(document.querySelector('[onclick*=p-verify]'),'p-verify')">
+        <div class="adm-todo-detail" id="homeDetail2" style="display:none;padding:8px 10px 10px 32px;font-size:11px;color:var(--text-2);background:var(--bg-2);border-radius:0 0 6px 6px;border:1px solid var(--border-1);border-top:none;margin:-4px 0 4px">
+          <div style="font-weight:600;color:var(--a);margin-bottom:5px">✅ 폴더 배정 대기 문서</div>
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--border-1)"><span>📄 공정거래법 하도급 관련 조항 <span class="bd bd-md" style="font-size:8px">중간</span></span><button class="req-flow-go" onclick="event.stopPropagation();at(document.querySelector('[onclick*=p-final]'),'p-final')">배정 →</button></div>
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:4px 0"><span>📊 전동화 부품 단가 벤치마크 <span class="bd bd-h" style="font-size:8px">높음</span></span><button class="req-flow-go" onclick="event.stopPropagation();at(document.querySelector('[onclick*=p-final]'),'p-final')">배정 →</button></div>
+        </div>
+        <div class="adm-todo" onclick="homeDetailToggle(this,'homeDetail3')" style="cursor:pointer">
           <span class="adm-todo-dot b"></span>
           <div class="adm-todo-body"><div class="adm-todo-title">커뮤니티 AI 검증 후보 3건</div><div class="adm-todo-meta">채택 + 추천 10개 이상 · 승인 시 AI DB 반영</div></div>
           <span class="adm-todo-badge" style="background:var(--accent-dim);color:var(--accent)">검증</span>
+          <span class="adm-todo-chevron" style="font-size:10px;color:var(--text-4);margin-left:4px;transition:.15s">▾</span>
         </div>
-        <div class="adm-todo" onclick="at(document.querySelector('[onclick*=p-int]'),'p-int')">
+        <div class="adm-todo-detail" id="homeDetail3" style="display:none;padding:8px 10px 10px 32px;font-size:11px;color:var(--text-2);background:var(--bg-2);border-radius:0 0 6px 6px;border:1px solid var(--border-1);border-top:none;margin:-4px 0 4px">
+          <div style="font-weight:600;color:var(--accent);margin-bottom:5px">🧠 AI 학습 후보 답변</div>
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--border-1)"><span>Q. 탄력적입찰 1회 유찰 처리 <span style="color:var(--accent)">추천 47</span></span><button class="req-flow-go" onclick="event.stopPropagation();at(document.querySelector('[onclick*=p-verify]'),'p-verify')">검증 →</button></div>
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--border-1)"><span>Q. 5스타 4→5 승급 IATF 요건 <span style="color:var(--a)">추천 23</span></span><button class="req-flow-go" onclick="event.stopPropagation();at(document.querySelector('[onclick*=p-verify]'),'p-verify')">검증 →</button></div>
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:4px 0"><span>Q. VAATZ 해외 발주 환율 설정 <span style="color:var(--text-3)">추천 15</span></span><button class="req-flow-go" onclick="event.stopPropagation();at(document.querySelector('[onclick*=p-verify]'),'p-verify')">검증 →</button></div>
+        </div>
+        <div class="adm-todo" onclick="homeDetailToggle(this,'homeDetail4')" style="cursor:pointer">
           <span class="adm-todo-dot g"></span>
           <div class="adm-todo-body"><div class="adm-todo-title">Learning Lounge 동기화 68% 진행 중</div><div class="adm-todo-meta">오류 2건 감지 — 확인 권장</div></div>
           <span class="adm-todo-badge" style="background:var(--g-dim);color:var(--g)">진행중</span>
+          <span class="adm-todo-chevron" style="font-size:10px;color:var(--text-4);margin-left:4px;transition:.15s">▾</span>
+        </div>
+        <div class="adm-todo-detail" id="homeDetail4" style="display:none;padding:8px 10px 10px 32px;font-size:11px;color:var(--text-2);background:var(--bg-2);border-radius:0 0 6px 6px;border:1px solid var(--border-1);border-top:none;margin:-4px 0 4px">
+          <div style="font-weight:600;color:var(--g);margin-bottom:5px">🔗 동기화 상태</div>
+          <div style="padding:4px 0;border-bottom:1px solid var(--border-1)">진행률: 68% <div style="height:4px;background:var(--bg-4);border-radius:2px;margin-top:4px"><div style="width:68%;height:100%;background:var(--g);border-radius:2px"></div></div></div>
+          <div style="padding:4px 0;color:var(--r)">⚠️ 오류 2건 감지 — 교육과정 ID 충돌</div>
+          <div style="padding-top:4px"><button class="req-flow-go" onclick="event.stopPropagation();at(document.querySelector('[onclick*=p-int]'),'p-int')">연계 관리 →</button></div>
         </div>
       </div>
     </div>
@@ -120,7 +147,8 @@
       <option>구매업무규정</option><option>입찰관리</option><option>VAATZ 매뉴얼</option><option>품질 5스타</option><option>용어사전 · 양식</option>
     </select>
     <button class="abtn" style="color:var(--accent)" onclick="openFinalPreview('공정거래법 하도급 관련 조항.pdf','정현수 · 구매품질기획팀 · 02.07','중간','pdf')">📋 미리보기</button>
-    <button class="abtn no" onclick="toast('반려 사유를 입력해주세요.','⚠️',2500)">반려</button>
+    <button class="abtn" style="color:var(--a)" onclick="revertFinalDoc(this)" title="팀 검토 단계로 반려">↩ 이전 단계</button>
+    <button class="abtn no" onclick="deleteFinalDoc(this)">🗑 삭제</button>
   </div>
   <div class="final-doc-row">
     <input type="checkbox" class="fl-chk">
@@ -135,7 +163,8 @@
       <option>구매업무규정</option><option>입찰관리</option><option>VAATZ 매뉴얼</option><option>품질 5스타</option><option>용어사전 · 양식</option>
     </select>
     <button class="abtn" style="color:var(--accent)" onclick="openFinalPreview('전동화 부품 단가 벤치마크.xlsx','한도윤 · PT제어부품구매팀 · 02.08','높음','xlsx')">📋 미리보기</button>
-    <button class="abtn no" onclick="toast('반려 사유를 입력해주세요.','⚠️',2500)">반려</button>
+    <button class="abtn" style="color:var(--a)" onclick="revertFinalDoc(this)" title="팀 검토 단계로 반려">↩ 이전 단계</button>
+    <button class="abtn no" onclick="deleteFinalDoc(this)">🗑 삭제</button>
   </div>
 </div>
 
@@ -234,6 +263,52 @@
 <div class="ft-f" style="margin-bottom:4px"><div class="ft-fh" onclick="tf(this)" style="background:var(--bg-2);border:1px solid var(--border-1);border-radius:6px"><input type="checkbox" class="fl-chk team-chk" style="opacity:1" onclick="event.stopPropagation()"><span class="ft-ar">▶</span><span class="ft-ic">📂</span><span class="ft-nm">PT제어부품구매팀</span><span style="font-size:9px;color:var(--text-4);margin-left:4px">담당: 김현대</span><span style="font-size:10px;background:var(--a-dim);color:var(--a);padding:1px 6px;border-radius:4px;font-weight:600;margin-left:auto;margin-right:6px">대기 1</span></div><div class="ft-ds cl" style="max-height:0;padding-left:10px">
 <div class="req-card"><input type="checkbox" class="fl-chk req-chk" style="opacity:1" onclick="event.stopPropagation()"><div class="req-body"><div class="req-title">전동화 부품 단가 벤치마크</div><div class="req-meta">한도윤 매니저 · PT 부품 단가 · 02.08 · 📎 전동화부품_단가비교.xlsx</div></div><div class="req-acts"><button class="abtn ok" onclick="appReq(this)">승인</button><button class="abtn no" onclick="rejReq(this)">보완 요청</button></div></div>
 </div></div>
+</div>
+
+<!-- ════ 팀별 목록 ════ -->
+<div class="adm-b" id="p-list" style="display:none">
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+  <div style="font-size:13px;font-weight:600">📋 팀별 문서 목록 <span style="color:var(--text-4);font-size:11px;font-weight:400">— 전체 8팀 · 폴더별 요청/관리</span></div>
+  <div style="display:flex;gap:4px">
+    <button class="tb-b" style="font-size:11px" onclick="document.querySelectorAll('#p-list .ft-ds').forEach(d=>{d.style.maxHeight='2000px';d.classList.remove('cl')})">📂 전체 펼치기</button>
+    <button class="tb-b" style="font-size:11px" onclick="document.querySelectorAll('#p-list .ft-ds').forEach(d=>{d.style.maxHeight='0';d.classList.add('cl')})">📁 전체 접기</button>
+  </div>
+</div>
+<div style="font-size:11px;color:var(--text-3);margin-bottom:12px">팀별 폴더를 클릭하여 문서를 확인하고 승인·보완 요청·이전 단계 반려·삭제를 처리하세요.</div>
+
+<div class="ft-f" style="margin-bottom:4px"><div class="ft-fh" onclick="tf(this)" style="background:var(--bg-2);border:1px solid var(--border-1);border-radius:6px"><span class="ft-ar op">▶</span><span class="ft-ic">📂</span><span class="ft-nm">구매전략팀</span><span style="font-size:9px;color:var(--text-4);margin-left:4px">Admin: 김현대</span><span style="font-size:10px;background:var(--r-dim);color:var(--r);padding:1px 6px;border-radius:4px;font-weight:600;margin-left:auto;margin-right:6px">긴급 2</span></div>
+<div class="ft-ds" style="max-height:400px;padding-left:10px">
+  <div class="req-card"><div class="req-body"><div class="req-title">조달청 물품구매계약 특수조건</div><div class="req-meta">박성민 매니저 · 02.08 · <span class="bd bd-a" style="font-size:8px">대기 3일</span></div></div><div class="req-acts"><button class="abtn ok" onclick="appReq(this)">승인</button><button class="abtn" style="color:var(--a)" onclick="rejReq(this)">보완 요청</button><button class="abtn no" onclick="listDeleteDoc(this)">🗑 삭제</button></div></div>
+  <div class="req-card"><div class="req-body"><div class="req-title">해외법인 구매 승인 프로세스</div><div class="req-meta">이준혁 책임매니저 · 02.07 · <span class="bd bd-a" style="font-size:8px">대기 2일</span></div></div><div class="req-acts"><button class="abtn ok" onclick="appReq(this)">승인</button><button class="abtn" style="color:var(--a)" onclick="rejReq(this)">보완 요청</button><button class="abtn no" onclick="listDeleteDoc(this)">🗑 삭제</button></div></div>
+</div></div>
+
+<div class="ft-f" style="margin-bottom:4px"><div class="ft-fh" onclick="tf(this)" style="background:var(--bg-2);border:1px solid var(--border-1);border-radius:6px"><span class="ft-ar">▶</span><span class="ft-ic">📂</span><span class="ft-nm">반도체구매팀</span><span style="font-size:9px;color:var(--text-4);margin-left:4px">Admin: 김현대</span><span style="font-size:10px;background:var(--a-dim);color:var(--a);padding:1px 6px;border-radius:4px;font-weight:600;margin-left:auto;margin-right:6px">대기 2</span></div>
+<div class="ft-ds cl" style="max-height:0;padding-left:10px">
+  <div class="req-card"><div class="req-body"><div class="req-title">반도체 수출규제 국가별 현황</div><div class="req-meta">최유진 매니저 · 02.08 · <span class="bd bd-a" style="font-size:8px">대기</span></div></div><div class="req-acts"><button class="abtn ok" onclick="appReq(this)">승인</button><button class="abtn" style="color:var(--a)" onclick="rejReq(this)">보완 요청</button><button class="abtn no" onclick="listDeleteDoc(this)">🗑 삭제</button></div></div>
+  <div class="req-card"><div class="req-body"><div class="req-title">TSMC 납기 관리 가이드</div><div class="req-meta">최유진 매니저 · 02.06 · <span class="bd bd-a" style="font-size:8px">대기</span></div></div><div class="req-acts"><button class="abtn ok" onclick="appReq(this)">승인</button><button class="abtn" style="color:var(--a)" onclick="rejReq(this)">보완 요청</button><button class="abtn no" onclick="listDeleteDoc(this)">🗑 삭제</button></div></div>
+</div></div>
+
+<div class="ft-f" style="margin-bottom:4px"><div class="ft-fh" onclick="tf(this)" style="background:var(--bg-2);border:1px solid var(--border-1);border-radius:6px"><span class="ft-ar">▶</span><span class="ft-ic">📂</span><span class="ft-nm">구매품질기획팀</span><span style="font-size:9px;color:var(--text-4);margin-left:4px">Admin: 정현수</span><span style="font-size:10px;background:var(--g-dim);color:var(--g);padding:1px 6px;border-radius:4px;font-weight:600;margin-left:auto;margin-right:6px">완료 1</span></div>
+<div class="ft-ds cl" style="max-height:0;padding-left:10px">
+  <div class="req-card done"><div class="req-body"><div class="req-title">공정거래법 하도급 관련 조항</div><div class="req-meta">정현수 책임매니저 · 02.07</div></div><div class="req-acts"><span class="bd bd-g">승인됨</span><button class="abtn" style="color:var(--a)" onclick="listRevertDoc(this)">↩ 이전 단계</button><button class="abtn no" onclick="listDeleteDoc(this)">🗑 삭제</button></div></div>
+</div></div>
+
+<div class="ft-f" style="margin-bottom:4px"><div class="ft-fh" onclick="tf(this)" style="background:var(--bg-2);border:1px solid var(--border-1);border-radius:6px"><span class="ft-ar">▶</span><span class="ft-ic">📂</span><span class="ft-nm">PT제어부품구매팀</span><span style="font-size:9px;color:var(--text-4);margin-left:4px">Admin: 김현대</span><span style="font-size:10px;background:var(--a-dim);color:var(--a);padding:1px 6px;border-radius:4px;font-weight:600;margin-left:auto;margin-right:6px">대기 1</span></div>
+<div class="ft-ds cl" style="max-height:0;padding-left:10px">
+  <div class="req-card"><div class="req-body"><div class="req-title">전동화 부품 단가 벤치마크</div><div class="req-meta">한도윤 매니저 · 02.08 · <span class="bd bd-a" style="font-size:8px">대기</span></div></div><div class="req-acts"><button class="abtn ok" onclick="appReq(this)">승인</button><button class="abtn" style="color:var(--a)" onclick="rejReq(this)">보완 요청</button><button class="abtn no" onclick="listDeleteDoc(this)">🗑 삭제</button></div></div>
+</div></div>
+
+<div class="ft-f" style="margin-bottom:4px;opacity:.75"><div class="ft-fh" onclick="tf(this)" style="background:var(--bg-2);border:1px solid var(--border-1);border-radius:6px"><span class="ft-ar">▶</span><span class="ft-ic">📂</span><span class="ft-nm">구매역량개발팀</span><span style="font-size:9px;color:var(--text-4);margin-left:4px">Admin: 김현대</span><span style="font-size:10px;background:var(--bg-4);color:var(--text-4);padding:1px 6px;border-radius:4px;font-weight:600;margin-left:auto;margin-right:6px">요청 없음</span></div>
+<div class="ft-ds cl" style="max-height:0"><div style="padding:10px;font-size:11px;color:var(--text-4)">현재 요청된 문서가 없습니다.</div></div></div>
+
+<div class="ft-f" style="margin-bottom:4px;opacity:.75"><div class="ft-fh" onclick="tf(this)" style="background:var(--bg-2);border:1px solid var(--border-1);border-radius:6px"><span class="ft-ar">▶</span><span class="ft-ic">📂</span><span class="ft-nm">샤시부품구매1팀</span><span style="font-size:9px;color:var(--text-4);margin-left:4px">Admin: 이준혁</span><span style="font-size:10px;background:var(--bg-4);color:var(--text-4);padding:1px 6px;border-radius:4px;font-weight:600;margin-left:auto;margin-right:6px">요청 없음</span></div>
+<div class="ft-ds cl" style="max-height:0"><div style="padding:10px;font-size:11px;color:var(--text-4)">현재 요청된 문서가 없습니다.</div></div></div>
+
+<div class="ft-f" style="margin-bottom:4px;opacity:.75"><div class="ft-fh" onclick="tf(this)" style="background:var(--bg-2);border:1px solid var(--border-1);border-radius:6px"><span class="ft-ar">▶</span><span class="ft-ic">📂</span><span class="ft-nm">의장시스템부품개발팀</span><span style="font-size:9px;color:var(--text-4);margin-left:4px">Admin: 이준혁</span><span style="font-size:10px;background:var(--bg-4);color:var(--text-4);padding:1px 6px;border-radius:4px;font-weight:600;margin-left:auto;margin-right:6px">요청 없음</span></div>
+<div class="ft-ds cl" style="max-height:0"><div style="padding:10px;font-size:11px;color:var(--text-4)">현재 요청된 문서가 없습니다.</div></div></div>
+
+<div class="ft-f" style="margin-bottom:4px;opacity:.75"><div class="ft-fh" onclick="tf(this)" style="background:var(--bg-2);border:1px solid var(--border-1);border-radius:6px"><span class="ft-ar">▶</span><span class="ft-ic">📂</span><span class="ft-nm">구매디지털추진팀</span><span style="font-size:9px;color:var(--text-4);margin-left:4px">Admin: 김현대</span><span style="font-size:10px;background:var(--g-dim);color:var(--g);padding:1px 6px;border-radius:4px;font-weight:600;margin-left:auto;margin-right:6px">완료 6</span></div>
+<div class="ft-ds cl" style="max-height:0"><div style="padding:10px;font-size:11px;color:var(--text-4)">이미 처리된 문서 6건 — 최종 승인 탭에서 확인 가능합니다.</div></div></div>
 </div>
 
 <div class="adm-b" id="p-usr" style="display:none">

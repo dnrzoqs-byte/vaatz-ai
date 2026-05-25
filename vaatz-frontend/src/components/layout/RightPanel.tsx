@@ -50,9 +50,9 @@ const RightPanel = memo(function RightPanel() {
           className="rp-tab on"
           id="rpTabSrc"
           onClick={() => window.rpSwitchTab?.('src')}
+          style={{ opacity: 0.7 }}
         >
-          <span>🔍</span>답변 근거{' '}
-          <span className="rp-tab-count" id="rpSrcCnt">5</span>
+          <span>🔍</span>답변 근거
           <span className="rp-tab-dot" id="rpSrcDot" />
         </button>
       </div>
@@ -203,52 +203,29 @@ const RightPanel = memo(function RightPanel() {
           </span>
         </div>
 
-        {/* 커뮤니티 미니 위젯 */}
-        <div className="comm-mini">
-          <div className="comm-mini-hd">
-            <span>🔥 인기 질문</span>
-            <button className="comm-mini-more" onClick={() => (window as any).openComm?.('qa')}>
-              커뮤니티 →
-            </button>
-          </div>
-          <div className="comm-mini-item" onClick={() => (window as any).openComm?.('qa')}>
-            <span className="comm-mini-hot">🔥</span>
-            <span className="comm-mini-title">탄력적입찰 유찰 시 처리 절차</span>
-            <span className="comm-mini-tag" style={{ background: 'var(--accent-dim)', color: 'var(--accent)' }}>채택</span>
-            <span className="comm-mini-votes">47</span>
-          </div>
-          <div className="comm-mini-item" onClick={() => (window as any).openComm?.('qa')}>
-            <span className="comm-mini-hot">✨</span>
-            <span className="comm-mini-title">5스타 4→5등급 승급 심사항목</span>
-            <span className="comm-mini-tag" style={{ background: 'var(--g-dim)', color: 'var(--g)' }}>NEW</span>
-            <span className="comm-mini-votes">23</span>
-          </div>
-          <div className="comm-mini-item" onClick={() => (window as any).openComm?.('qa')}>
-            <span className="comm-mini-hot">💬</span>
-            <span className="comm-mini-title">해외 발주 시 환율 적용 방법</span>
-            <span className="comm-mini-tag" style={{ background: 'var(--bg-3)', color: 'var(--text-3)' }}>VAATZ</span>
-            <span className="comm-mini-votes">15</span>
-          </div>
-          <div className="comm-mini-item" onClick={() => (window as any).openComm?.('qa')}>
-            <span className="comm-mini-hot">📝</span>
-            <span className="comm-mini-title">수의계약 긴급 사유서 승인 기준</span>
-            <span className="comm-mini-tag" style={{ background: 'var(--a-dim)', color: 'var(--a)' }}>대기</span>
-            <span className="comm-mini-votes">8</span>
-          </div>
+        {/* 커뮤니티 바로가기 (미니) */}
+        <div style={{ padding: '8px 12px', borderTop: '1px solid var(--border-1)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <span style={{ fontSize: '11px', color: 'var(--text-4)' }}>💡 구매지식 커뮤니티</span>
+          <button className="comm-mini-more" onClick={() => (window as any).openComm?.('qa')} style={{ fontSize: '11px' }}>
+            Q&A 참여 →
+          </button>
         </div>
 
       </div>{/* /rpPaneMy */}
 
       {/* ── 답변 근거 탭 ── */}
       <div className="rp-tab-pane on" id="rpPaneSrc">
-        <div className="src-hd">
-          <div className="src-hd-q">현재 답변의 출처 문서</div>
-          <div className="src-hd-qt" id="srcHdQ">
+        <div className="src-hd" style={{ borderBottom: '1px solid var(--border-1)', paddingBottom: '10px' }}>
+          <div className="src-hd-q" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <span style={{ fontSize: '11px', background: 'var(--accent-dim)', color: 'var(--accent)', padding: '2px 7px', borderRadius: '999px', fontWeight: 700 }}>RAG</span>
+            <span>출처 문서</span>
+          </div>
+          <div className="src-hd-qt" id="srcHdQ" style={{ marginTop: '5px', lineHeight: 1.5 }}>
             탄력적입찰과 경매입찰의 차이점을 알려주세요. VAATZ에서 어떻게 진행하나요?
           </div>
         </div>
         {/* vaatz-init.js가 동적으로 채우는 영역 */}
-        <div className="src-chips" id="srcChips" />
+        <div className="src-chips" id="srcChips" style={{ padding: '10px 14px', display: 'flex', flexWrap: 'wrap', gap: '6px' }} />
         <div className="src-vw" id="srcVw" />
       </div>
 

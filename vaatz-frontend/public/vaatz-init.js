@@ -4611,3 +4611,211 @@ else
 
 })();
 
+/* ═══════════════════════════════════════════════════════════════
+ * §14  UI REFINEMENTS — home accordion, final-list actions,
+ *       character level-100 system, equip toggle
+ * ═══════════════════════════════════════════════════════════════ */
+(function(){
+'use strict';
+const $=(s,r=document)=>r.querySelector(s);
+const say=(m,i='✅',d=2200)=>{try{(window.toast||console.log)(m,i,d)}catch(e){}};
+
+/* ── 1. 운영 홈 스텝 아코디언 ────────────────────────────────── */
+window.homeDetailToggle = function(todoEl, detailId){
+  var detail = document.getElementById(detailId);
+  if(!detail) return;
+  var isOpen = detail.style.display !== 'none';
+  // 다른 모든 detail 닫기
+  ['homeDetail1','homeDetail2','homeDetail3','homeDetail4'].forEach(function(id){
+    var d = document.getElementById(id);
+    if(d && id !== detailId){ d.style.display='none'; }
+    // chevron 원복
+    var chev = d && d.previousElementSibling && d.previousElementSibling.querySelector('.adm-todo-chevron');
+    if(chev && id !== detailId) chev.style.transform='';
+  });
+  var chevron = todoEl.querySelector('.adm-todo-chevron');
+  if(isOpen){
+    detail.style.display='none';
+    if(chevron) chevron.style.transform='';
+  } else {
+    detail.style.display='block';
+    if(chevron) chevron.style.transform='rotate(180deg)';
+  }
+};
+
+/* ── 2. 최종 리스트 이전 단계 / 삭제 ─────────────────────────── */
+window.revertFinalDoc = function(btn){
+  var row = btn.closest('.final-doc-row');
+  var name = row && row.querySelector('.final-doc-name');
+  say((name?name.textContent:'문서')+'이(가) 팀 검토 단계로 반려되었습니다.','↩️',2500);
+  if(row){ row.style.opacity='0.4'; row.style.pointerEvents='none'; }
+};
+
+window.deleteFinalDoc = function(btn){
+  var row = btn.closest('.final-doc-row');
+  var name = row && row.querySelector('.final-doc-name');
+  if(!confirm((name?name.textContent:'이 문서')+'을(를) 삭제하시겠습니까?')) return;
+  if(row) row.remove();
+  say('문서가 삭제되었습니다.','🗑',2000);
+};
+
+/* 팀별 목록 탭 액션 */
+window.listDeleteDoc = function(btn){
+  var card = btn.closest('.req-card');
+  var name = card && card.querySelector('.req-title');
+  if(!confirm((name?name.textContent:'이 문서')+'을(를) 삭제하시겠습니까?')) return;
+  if(card) card.remove();
+  say('문서가 삭제되었습니다.','🗑',2000);
+};
+
+window.listRevertDoc = function(btn){
+  var card = btn.closest('.req-card');
+  var name = card && card.querySelector('.req-title');
+  say((name?name.textContent:'문서')+'이(가) 검토 단계로 반려되었습니다.','↩️',2500);
+  if(card){
+    card.classList.remove('done');
+    var badge = card.querySelector('.bd-g');
+    if(badge) badge.remove();
+    // 액션 버튼 복원
+    var acts = card.querySelector('.req-acts');
+    if(acts) acts.innerHTML = '<button class="abtn ok" onclick="appReq(this)">승인</button><button class="abtn" style="color:var(--a)" onclick="rejReq(this)">보완 요청</button><button class="abtn no" onclick="listDeleteDoc(this)">🗑 삭제</button>';
+  }
+};
+
+/* ── 3. 캐릭터 레벨 100 시스템 ──────────────────────────────── */
+var CHAR_LEVEL_TITLES = [
+  {min:100,title:'VAATZ 챔피언'},
+  {min:90, title:'구매 신화'},
+  {min:80, title:'구매 레전드'},
+  {min:70, title:'구매 그랜드마스터'},
+  {min:60, title:'구매 리더'},
+  {min:50, title:'구매 에이스'},
+  {min:40, title:'구매 전문가'},
+  {min:30, title:'구매 마스터'},
+  {min:20, title:'구매 전략가'},
+  {min:10, title:'구매 탐험가'},
+  {min:1,  title:'구매 신입'}
+];
+
+function calcCharLevel(xp){
+  // Lv 1 = 0pt, Lv 100 ≈ 10000pt
+  // level = min(100, floor(sqrt(xp/10)) + 1)
+  var lvl = Math.min(100, Math.floor(Math.sqrt(Math.max(0,xp)/10)) + 1);
+  var title = '구매 신입';
+  for(var i=0;i<CHAR_LEVEL_TITLES.length;i++){
+    if(lvl >= CHAR_LEVEL_TITLES[i].min){ title=CHAR_LEVEL_TITLES[i].title; break; }
+  }
+  // XP to next level
+  var nextXp = Math.pow(lvl, 2) * 10;
+  var prevXp = Math.pow(lvl-1, 2) * 10;
+  var pct = lvl>=100 ? 100 : Math.round((xp-prevXp)/(nextXp-prevXp)*100);
+  return {level:lvl, title:title, pct:Math.max(0,Math.min(100,pct))};
+};
+
+// 캐릭터 렌더 패치 — v33CharState가 있을 때 적용
+function patchCharacterLevel(){
+  var orig = window.renderV33Character;
+  if(!orig || window.__levelPatched) return;
+  window.__levelPatched = true;
+  window.renderV33Character = function(){
+    orig.apply(this, arguments);
+    // 레벨 뱃지 업그레이드
+    var lvDiv = document.querySelector('.v33-char-lv');
+    if(!lvDiv) return;
+    var xp = 1720; // 데모 XP (추후 상태 연동)
+    var info = calcCharLevel(xp);
+    lvDiv.innerHTML =
+      '<div style="display:flex;align-items:center;gap:6px;justify-content:center;margin-top:4px">' +
+        '<span style="background:var(--accent);color:#fff;font-size:10px;font-weight:900;padding:2px 8px;border-radius:999px;font-family:Outfit,sans-serif">Lv.' + info.level + '</span>' +
+        '<span style="font-size:11px;color:var(--text-2);font-weight:700">' + info.title + '</span>' +
+      '</div>' +
+      '<div style="margin:6px auto 0;width:140px;height:5px;background:var(--bg-4);border-radius:999px;overflow:hidden">' +
+        '<div style="width:' + info.pct + '%;height:100%;background:var(--accent);border-radius:999px;transition:.4s"></div>' +
+      '</div>' +
+      '<div style="font-size:10px;color:var(--text-4);margin-top:3px;text-align:center">' + xp + 'pt · 다음 레벨까지 ' + (info.level<100 ? (Math.pow(info.level,2)*10-xp) + 'pt' : 'MAX') + '</div>';
+  };
+  // 즉시 적용
+  try{ window.renderV33Character(); }catch(e){}
+}
+
+/* ── 4. 캐릭터 아이템 탈착(unequip) 토글 ───────────────────── */
+function patchInventoryUnequip(){
+  document.addEventListener('click', function(e){
+    var slot = e.target.closest('.inv-slot');
+    if(!slot || slot.classList.contains('empty')) return;
+    if(slot.closest('#ct-char') === null) return;
+
+    if(slot.classList.contains('equipped')){
+      // 이미 장착 → 탈착
+      slot.classList.remove('equipped');
+      var emoji = slot.dataset.itemKey || slot.textContent.trim();
+      // v33CharState 업데이트
+      try{
+        var state = window.__v33State || {};
+        var HATS=['🎩','👑','🎀','🎓','⛑️','🏆','🪖','👒','🎅','✨'];
+        var FACES=['🕶️','👓','😷','🎭','🤿','🥽','🤓','🥸'];
+        var PETS=['🐱','🐶','🐦','🐉','🦄','🦋','🐢','🤖','👾','🐲'];
+        var EFFECTS=['⭐','💫','🔥','❄️','🎵','💎','🌟','⚡','🌈','🎇','☄️','🌠'];
+        // charState는 §13 IIFE 스코프 내에 있으므로 renderV33Character를 통해 간접 조작
+        if(HATS.includes(emoji) && window.__v33CharHat !== undefined) window.__v33CharHat='';
+        if(PETS.includes(emoji) && window.__v33CharSide !== undefined) window.__v33CharSide='';
+        if(EFFECTS.includes(emoji) && window.__v33CharEffect !== undefined) window.__v33CharEffect='';
+      }catch(ex){}
+      try{ if(window.renderV33Character) window.renderV33Character(); }catch(ex){}
+      say(emoji + ' 탈착했습니다.','✓',1200);
+      e.stopPropagation();
+    }
+    // 장착 안 된 것은 기존 v33EquipItem 흐름이 처리
+  }, true);
+}
+
+/* ── 5. 답변 근거 패널 스타일 정돈 ─────────────────────────── */
+var srcStyle = document.getElementById('src-refine-style');
+if(!srcStyle){
+  srcStyle = document.createElement('style');
+  srcStyle.id = 'src-refine-style';
+  srcStyle.textContent = [
+    /* source chips — pill 스타일 정돈 */
+    '.src-chips{display:flex;flex-wrap:wrap;gap:6px;padding:10px 14px!important;border-bottom:1px solid var(--border-1)}',
+    '.src-chip{border-radius:999px!important;padding:5px 11px!important;font-size:12px!important;font-weight:700!important;display:inline-flex;align-items:center;gap:5px}',
+    /* source page viewer */
+    '.src-vw{padding:12px 14px!important}',
+    '.src-page{border-radius:12px!important;padding:22px 24px 18px!important;font-size:13.5px!important;line-height:1.85!important}',
+    '.src-page-ti{font-size:17px!important;font-weight:800!important;margin-bottom:8px!important}',
+    /* nav pagination */
+    '.src-pgnav{background:var(--bg-2);border:1px solid var(--border-1);border-radius:10px!important;padding:7px 10px!important;margin-bottom:10px}',
+    /* doc meta header */
+    '.src-doc-meta{background:var(--bg-2);border:1px solid var(--border-1);border-radius:10px!important;padding:10px 12px!important;margin-bottom:10px}',
+    /* mark highlight */
+    'mark,.src-hi,.src-mark{background:rgba(255,220,80,.22)!important;border-radius:3px!important;padding:0 2px!important}',
+    /* adm-todo accordion chevron */
+    '.adm-todo-chevron{display:inline-block;transition:transform .2s}',
+    /* adm-todo-detail fade */
+    '.adm-todo-detail{animation:fadeIn .18s ease}',
+    '@keyframes fadeIn{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:translateY(0)}}',
+  ].join('\n');
+  document.head.appendChild(srcStyle);
+}
+
+/* Boot */
+function bootRefinements(){
+  patchCharacterLevel();
+  patchInventoryUnequip();
+}
+if(document.readyState==='loading')
+  document.addEventListener('DOMContentLoaded', bootRefinements);
+else
+  bootRefinements();
+
+// 커뮤니티 캐릭터 탭 열릴 때 레벨 패치 재적용
+var _origCommTab2 = window.commTab;
+if(_origCommTab2 && !window.__§14CommWrapped){
+  window.__§14CommWrapped = true;
+  window.commTab = function(btn, id){
+    _origCommTab2.apply(this, arguments);
+    if(id === 'ct-char') setTimeout(function(){ patchCharacterLevel(); }, 100);
+  };
+}
+
+})();
+
