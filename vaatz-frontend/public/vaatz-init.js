@@ -1684,6 +1684,16 @@ sendMessage = function(){
   const modeList=['통합모드','생산자재 모드','일반자재 모드','원가모드'];
   const statusList=['작성·보완중','등록 요청됨','보완 요청','AI 검색 반영완료'];
   const docNames=['입찰운영 업무표준','수의계약 운영지침','협력사 품질 5스타 기준','전동화 부품 단가 벤치마크','VAATZ 발주 생성 매뉴얼','해외법인 구매 승인 프로세스','조달청 물품구매계약 특수조건','반도체 수출규제 국가별 현황','원가 산정 기준표','일반자재 MRO 구매 가이드','납기 리스크 대응 매뉴얼','검수확인 업무표준','업체 평가 데이터셋','구매용어 표준정의집','계약관리 규정'];
+  // ── 팀별 폴더 뷰: 부서 그룹핑 ──────────────────────────────
+  const teamGroups = [
+    { id:'tg-strategy', label:'구매전략·기획', icon:'🏛️',
+      teams:['구매전략팀','구매품질기획팀','구매역량개발팀'] },
+    { id:'tg-parts', label:'부품구매', icon:'⚙️',
+      teams:['PT제어부품구매팀','샤시부품구매1팀','의장시스템부품개발팀','반도체구매팀'] },
+    { id:'tg-materials', label:'자재·원가관리', icon:'📦',
+      teams:['일반자재구매팀','원가관리팀'] }
+  ];
+
   let currentTeam = teams[0].name;
   let teamDocs = [];
   let companionOpen=false;
@@ -1784,9 +1794,76 @@ sendMessage = function(){
       <div class="v23-workgrid"><div class="v23-panel"><div class="v23-panel-h"><div class="v23-panel-title">🚨 오늘 처리할 일</div><button class="v23-btn" onclick="openAdminTab('p-final')">전체 보기</button></div><div class="v23-panel-body"><div class="v23-mini-list">${teamDocs.filter(d=>d.status==='등록 요청됨').slice(0,5).map(d=>`<div class="v23-mini-row"><div class="v23-mini-icon">${d.type==='PPT'?'📊':d.type==='XLSX'?'📈':'📄'}</div><div class="v23-mini-main"><div class="v23-mini-title">${esc(d.name)}</div><div class="v23-mini-meta"><span>${esc(d.team)}</span><span>${esc(d.mode)}</span><span>${esc(d.sec)}</span></div></div><button class="v23-btn primary" onclick="openAdminTab('p-final')">검토</button></div>`).join('')}</div></div></div><div class="v23-panel"><div class="v23-panel-h"><div class="v23-panel-title">🔗 정형 데이터 배치 상태</div><button class="v23-btn" onclick="openAdminTab('p-datamart')">모니터링</button></div><div class="v23-panel-body"><div class="v23-mini-list"><div class="v23-mini-row"><div class="v23-mini-icon">🖥️</div><div class="v23-mini-main"><div class="v23-mini-title">VAATZ 업체·품목 마스터</div><div class="v23-mini-meta"><span>05:10 성공</span><span>+14,230 rows</span></div></div><span class="v23-pill green">정상</span></div><div class="v23-mini-row"><div class="v23-mini-icon">📖</div><div class="v23-mini-main"><div class="v23-mini-title">Autopedia 용어 DB</div><div class="v23-mini-meta"><span>06:00 성공</span><span>4,832 terms</span></div></div><span class="v23-pill green">정상</span></div><div class="v23-mini-row"><div class="v23-mini-icon">💰</div><div class="v23-mini-main"><div class="v23-mini-title">원가 DB 일 배치</div><div class="v23-mini-meta"><span>07:30 일부 실패</span><span>12 rows error</span></div></div><span class="v23-pill amber">확인</span></div></div></div></div></div>
     `);
 
+    // ── 팀별 폴더 뷰 헬퍼 ─────────────────────────────────────
+    function tfTeamRow(t){
+      const hCls=t.health==='정상'?'green':t.health==='보안주의'?'red':'amber';
+      return `<div class="tf-team-row" onclick="openTeamFolderModal('${esc(t.name)}')">
+        <span class="tf-team-ic">${t.icon}</span>
+        <div class="tf-team-info">
+          <div class="tf-team-name">${esc(t.name)}</div>
+          <div class="tf-team-owner">Admin: ${esc(t.owner)}</div>
+        </div>
+        <div class="tf-team-nums">
+          <span title="전체 문서">${t.docs}<span class="tf-num-l">건</span></span>
+          <span class="tf-num-sep">·</span>
+          <span class="tf-num-req" title="최종요청">${t.finalReq}<span class="tf-num-l">요청</span></span>
+          <span class="tf-num-sep">·</span>
+          <span class="tf-num-ok" title="반영완료">${t.published}<span class="tf-num-l">완료</span></span>
+        </div>
+        <span class="v23-pill ${hCls}" style="flex-shrink:0;font-size:9px">${t.health}</span>
+        <div class="tf-team-btns">
+          <button class="v23-btn" style="padding:4px 8px;font-size:10px" onclick="event.stopPropagation();openTeamFolderModal('${esc(t.name)}')">열기</button>
+          <button class="v23-btn primary" style="padding:4px 8px;font-size:10px" onclick="event.stopPropagation();openTeamFolderModal('${esc(t.name)}','request')">요청</button>
+        </div>
+      </div>`;
+    }
+    function tfGroupHtml(g){
+      const gTeams=teams.filter(t=>g.teams.includes(t.name));
+      const tot=gTeams.reduce((a,t)=>a+t.docs,0);
+      const req=gTeams.reduce((a,t)=>a+t.finalReq,0);
+      const pub=gTeams.reduce((a,t)=>a+t.published,0);
+      return `<div class="tf-group" id="${g.id}">
+        <div class="tf-group-hd" onclick="toggleTFGroup('${g.id}')">
+          <span class="tf-group-ic">${g.icon}</span>
+          <div class="tf-group-info">
+            <div class="tf-group-label">${g.label}</div>
+            <div class="tf-group-meta">${gTeams.length}개 팀 &nbsp;·&nbsp; 전체 <b>${tot}</b>건 &nbsp;·&nbsp; 요청 <b style="color:var(--a)">${req}</b>건 &nbsp;·&nbsp; 완료 <b style="color:var(--g)">${pub}</b>건</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:6px">
+            <span class="v23-pill blue" style="font-size:10px">${gTeams.length}팀</span>
+            <span class="tf-chev" id="${g.id}-chev">▼</span>
+          </div>
+        </div>
+        <div class="tf-group-body" id="${g.id}-body">
+          ${gTeams.map(t=>tfTeamRow(t)).join('')}
+        </div>
+      </div>`;
+    }
+
     addAdmSection('p-team', `
-      <div class="v23-admin-title"><div><div class="v23-title-main">팀별 폴더 관리</div><div class="v23-title-sub">팀별 문서가 많아도 카드로 현황만 보고, 클릭하면 큰 팝업에서 리스트를 검색·필터·최종요청할 수 있습니다.</div></div><div class="v23-actions"><button class="v23-btn">＋ 팀 폴더 추가</button><button class="v23-btn primary" onclick="openTeamFolderModal('구매전략팀')">📋 샘플 폴더 열기</button></div></div>
-      <div class="team-folder-grid">${teams.map(t=>`<div class="team-folder-card"><div class="team-folder-top"><div class="team-folder-ic">${t.icon}</div><span class="v23-pill ${t.health==='정상'?'green':t.health==='보안주의'?'red':'amber'}">${t.health}</span></div><div class="team-folder-name">${t.name}</div><div class="team-folder-owner">Admin: ${t.owner}</div><div class="team-folder-stats"><div class="team-stat"><div class="team-stat-v">${t.docs}</div><div class="team-stat-l">전체</div></div><div class="team-stat"><div class="team-stat-v" style="color:var(--a)">${t.finalReq}</div><div class="team-stat-l">최종요청</div></div><div class="team-stat"><div class="team-stat-v" style="color:var(--g)">${t.published}</div><div class="team-stat-l">반영완료</div></div></div><div class="team-folder-actions"><button class="v23-btn" onclick="openTeamFolderModal('${t.name}')">크게 보기</button><button class="v23-btn primary" onclick="openTeamFolderModal('${t.name}','request')">등록 요청됨</button></div></div>`).join('')}</div>
+      <div class="v23-admin-title">
+        <div><div class="v23-title-main">팀별 폴더 관리</div><div class="v23-title-sub">폴더 보기로 부서별 전체 현황을 파악하고, 목록 보기로 전체 팀 카드를 한눈에 확인할 수 있습니다.</div></div>
+        <div class="v23-actions">
+          <div class="tf-view-toggle">
+            <button id="tvFolderBtn" class="v23-btn primary" onclick="switchTeamView('folder')">📁 폴더 보기</button>
+            <button id="tvListBtn" class="v23-btn" onclick="switchTeamView('list')">📋 목록 보기</button>
+          </div>
+          <button class="v23-btn" onclick="openTeamFolderModal('구매전략팀')">📋 샘플 열기</button>
+          <button class="v23-btn">＋ 팀 폴더 추가</button>
+        </div>
+      </div>
+
+      <!-- 📁 폴더 보기 (기본) -->
+      <div id="tvFolderPane">
+        ${teamGroups.map(g=>tfGroupHtml(g)).join('')}
+      </div>
+
+      <!-- 📋 목록 보기 (카드 그리드) -->
+      <div id="tvListPane" style="display:none">
+        <div class="team-folder-grid">
+          ${teams.map(t=>`<div class="team-folder-card"><div class="team-folder-top"><div class="team-folder-ic">${t.icon}</div><span class="v23-pill ${t.health==='정상'?'green':t.health==='보안주의'?'red':'amber'}">${t.health}</span></div><div class="team-folder-name">${t.name}</div><div class="team-folder-owner">Admin: ${t.owner}</div><div class="team-folder-stats"><div class="team-stat"><div class="team-stat-v">${t.docs}</div><div class="team-stat-l">전체</div></div><div class="team-stat"><div class="team-stat-v" style="color:var(--a)">${t.finalReq}</div><div class="team-stat-l">최종요청</div></div><div class="team-stat"><div class="team-stat-v" style="color:var(--g)">${t.published}</div><div class="team-stat-l">반영완료</div></div></div><div class="team-folder-actions"><button class="v23-btn" onclick="openTeamFolderModal('${t.name}')">크게 보기</button><button class="v23-btn primary" onclick="openTeamFolderModal('${t.name}','request')">등록 요청됨</button></div></div>`).join('')}
+        </div>
+      </div>
     `);
 
     const finalDocs=teamDocs.filter(d=>d.status==='등록 요청됨').slice(0,10);
@@ -1817,6 +1894,29 @@ sendMessage = function(){
     $$('.adm-b').forEach(e=>{ if(!['p-req'].includes(e.id)) e.style.display='none'; });
     $('#p-req').style.display='block';
   }
+
+  // ── 팀 뷰 전환 & 폴더 접기/펼치기 ──────────────────────────
+  window.switchTeamView = function(view) {
+    var fp=$('#tvFolderPane'), lp=$('#tvListPane');
+    var fb=$('#tvFolderBtn'), lb=$('#tvListBtn');
+    if(!fp||!lp) return;
+    if(view==='folder'){
+      fp.style.display='block'; lp.style.display='none';
+      if(fb){fb.classList.add('primary'); fb.style.background=''; fb.style.color='';}
+      if(lb){lb.classList.remove('primary'); lb.style.background='var(--bg-3)'; lb.style.color='var(--text-2)';}
+    } else {
+      fp.style.display='none'; lp.style.display='block';
+      if(lb){lb.classList.add('primary'); lb.style.background=''; lb.style.color='';}
+      if(fb){fb.classList.remove('primary'); fb.style.background='var(--bg-3)'; fb.style.color='var(--text-2)';}
+    }
+  };
+  window.toggleTFGroup = function(id) {
+    var body=$('#'+id+'-body'), chev=$('#'+id+'-chev');
+    if(!body) return;
+    var open = body.style.display!=='none';
+    body.style.display = open ? 'none' : 'block';
+    if(chev) chev.style.transform = open ? 'rotate(-90deg)' : '';
+  };
 
   window.openTeamFolderModal=function(team, focus){
     currentTeam=team||teams[0].name;

@@ -334,9 +334,9 @@
 <!-- ② 캐릭터 선택 + 커스터마이징 행 -->
 <div style="display:flex;gap:8px;margin-bottom:10px">
   <!-- 캐릭터 픽커 -->
-  <div style="flex:1;background:var(--bg-2);border:1px solid var(--border-1);border-radius:10px;padding:8px">
-    <div style="font-size:9px;font-weight:700;color:var(--text-3);margin-bottom:5px">🎨 캐릭터 선택</div>
-    <div class="v33-char-picker" style="display:flex;flex-wrap:wrap;gap:3px">
+  <div style="flex:1;background:var(--bg-2);border:1px solid var(--border-1);border-radius:10px;padding:10px">
+    <div style="font-size:10px;font-weight:700;color:var(--text-3);letter-spacing:0.02em;margin-bottom:7px">🎨 캐릭터 선택</div>
+    <div class="v33-char-picker" style="display:grid;grid-template-columns:repeat(6,1fr);gap:5px">
       <button class="char-sel active" onclick="pickChar(this,'🚗')" title="현대 블루카">🚗</button>
       <button class="char-sel" onclick="pickChar(this,'🏎️')" title="기아 레이서">🏎️</button>
       <button class="char-sel" onclick="pickChar(this,'👨‍💼')" title="남성 바이어">👨‍💼</button>
@@ -352,26 +352,26 @@
     </div>
   </div>
   <!-- 포인트 미니 -->
-  <div style="background:var(--bg-2);border:1px solid var(--border-1);border-radius:10px;padding:8px;min-width:80px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px">
-    <div style="font-family:Outfit;font-size:18px;font-weight:700;color:var(--accent)">520</div>
-    <div style="font-size:8px;color:var(--text-4)">사용 가능 pt</div>
-    <button style="font-size:9px;padding:3px 8px;background:var(--accent);color:#fff;border:none;border-radius:5px;cursor:pointer;font-family:inherit;font-weight:600" onclick="if(window.commTab)commTab(document.querySelectorAll('.comm-tab')[4],'ct-shop')">🛒 상점</button>
+  <div style="background:var(--bg-2);border:1px solid var(--border-1);border-radius:10px;padding:10px;min-width:84px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px">
+    <div style="font-family:Outfit;font-size:20px;font-weight:700;color:var(--accent);line-height:1">520</div>
+    <div style="font-size:9.5px;color:var(--text-4);line-height:1.2;text-align:center">사용 가능 pt</div>
+    <button style="font-size:9.5px;padding:4px 10px;background:var(--accent);color:#fff;border:none;border-radius:6px;cursor:pointer;font-family:inherit;font-weight:600;white-space:nowrap" onclick="if(window.commTab)commTab(document.querySelectorAll('.comm-tab')[4],'ct-shop')">🛒 상점</button>
   </div>
 </div>
 
 <!-- ③ 인벤토리 (카테고리 탭 포함) -->
 <div style="background:var(--bg-2);border:1px solid var(--border-1);border-radius:10px;padding:8px;margin-bottom:8px">
-  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
-    <div style="font-size:10px;font-weight:700;color:var(--text-2)">🎒 내 인벤토리</div>
-    <div id="invCatTabs" style="display:flex;gap:3px">
-      <button class="v17-cat on" onclick="v17Cat(this,'all')" style="font-size:8px;padding:2px 7px;border-radius:999px;border:1px solid var(--accent);background:var(--accent);color:#fff;cursor:pointer;font-family:inherit">전체</button>
-      <button class="v17-cat" onclick="v17Cat(this,'hat')" style="font-size:8px;padding:2px 7px;border-radius:999px;border:1px solid var(--border-2);background:transparent;color:var(--text-3);cursor:pointer;font-family:inherit">🎩 모자</button>
-      <button class="v17-cat" onclick="v17Cat(this,'pet')" style="font-size:8px;padding:2px 7px;border-radius:999px;border:1px solid var(--border-2);background:transparent;color:var(--text-3);cursor:pointer;font-family:inherit">🐾 펫</button>
-      <button class="v17-cat" onclick="v17Cat(this,'fx')" style="font-size:8px;padding:2px 7px;border-radius:999px;border:1px solid var(--border-2);background:transparent;color:var(--text-3);cursor:pointer;font-family:inherit">✨ 이펙트</button>
-      <button class="v17-cat" onclick="v17Cat(this,'bg')" style="font-size:8px;padding:2px 7px;border-radius:999px;border:1px solid var(--border-2);background:transparent;color:var(--text-3);cursor:pointer;font-family:inherit">🖼️ 배경</button>
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+    <div style="font-size:10.5px;font-weight:700;color:var(--text-2);letter-spacing:-0.01em">🎒 내 인벤토리</div>
+    <div id="invCatTabs" style="display:flex;gap:4px">
+      <button class="v17-cat on" onclick="v17Cat(this,'all')" style="font-size:9.5px;padding:3px 9px;border-radius:999px;border:1px solid var(--accent);background:var(--accent);color:#fff;cursor:pointer;font-family:inherit;line-height:1.4">전체</button>
+      <button class="v17-cat" onclick="v17Cat(this,'hat')" style="font-size:9.5px;padding:3px 9px;border-radius:999px;border:1px solid var(--border-2);background:transparent;color:var(--text-3);cursor:pointer;font-family:inherit;line-height:1.4">🎩 모자</button>
+      <button class="v17-cat" onclick="v17Cat(this,'pet')" style="font-size:9.5px;padding:3px 9px;border-radius:999px;border:1px solid var(--border-2);background:transparent;color:var(--text-3);cursor:pointer;font-family:inherit;line-height:1.4">🐾 펫</button>
+      <button class="v17-cat" onclick="v17Cat(this,'fx')" style="font-size:9.5px;padding:3px 9px;border-radius:999px;border:1px solid var(--border-2);background:transparent;color:var(--text-3);cursor:pointer;font-family:inherit;line-height:1.4">✨ 이펙트</button>
+      <button class="v17-cat" onclick="v17Cat(this,'bg')" style="font-size:9.5px;padding:3px 9px;border-radius:999px;border:1px solid var(--border-2);background:transparent;color:var(--text-3);cursor:pointer;font-family:inherit;line-height:1.4">🖼️ 배경</button>
     </div>
   </div>
-  <div class="inv-grid" id="invGrid" style="display:grid;grid-template-columns:repeat(8,1fr);gap:4px">
+  <div class="inv-grid" id="invGrid" style="display:grid;grid-template-columns:repeat(6,1fr);gap:5px">
     <div class="inv-slot" data-cat="hat" title="신사 모자" onclick="v33EquipItem(this,'🎩')">🎩</div>
     <div class="inv-slot" data-cat="hat" title="왕관" onclick="v33EquipItem(this,'👑')">👑</div>
     <div class="inv-slot" data-cat="hat" title="학사모" onclick="v33EquipItem(this,'🎓')">🎓</div>
@@ -393,13 +393,13 @@
     <div class="inv-slot empty"></div>
     <div class="inv-slot empty"></div>
   </div>
-  <div style="font-size:9px;color:var(--text-4);margin-top:5px">💡 클릭하면 즉시 장착 · 상점에서 더 많은 아이템 구매 가능</div>
+  <div style="font-size:9.5px;color:var(--text-4);margin-top:7px;line-height:1.45">💡 클릭하면 즉시 장착 · 상점에서 더 많은 아이템 구매 가능</div>
 </div>
 
 <!-- ④ 미니룸 소품 꾸미기 (싸이월드 핵심!) -->
 <div style="background:var(--bg-2);border:1px solid var(--border-1);border-radius:10px;padding:8px;margin-bottom:8px">
-  <div style="font-size:10px;font-weight:700;color:var(--text-2);margin-bottom:6px">🛋️ 미니룸 소품 <span style="font-size:8px;font-weight:400;color:var(--text-4)">방에 배치되는 인테리어 아이템</span></div>
-  <div style="display:grid;grid-template-columns:repeat(10,1fr);gap:3px" id="roomDecoGrid">
+  <div style="font-size:10.5px;font-weight:700;color:var(--text-2);letter-spacing:-0.01em;margin-bottom:8px">🛋️ 미니룸 소품 <span style="font-size:9.5px;font-weight:400;color:var(--text-4)">방에 배치되는 인테리어 아이템</span></div>
+  <div style="display:grid;grid-template-columns:repeat(8,1fr);gap:4px" id="roomDecoGrid">
     <button class="room-deco-btn" onclick="v17PlaceDeco(this,'🛋️')" title="소파" style="font-size:18px;background:var(--bg-3);border:1px solid var(--border-1);border-radius:6px;padding:4px;cursor:pointer;transition:.1s">🛋️</button>
     <button class="room-deco-btn" onclick="v17PlaceDeco(this,'🖥️')" title="컴퓨터" style="font-size:18px;background:var(--bg-3);border:1px solid var(--border-1);border-radius:6px;padding:4px;cursor:pointer;transition:.1s">🖥️</button>
     <button class="room-deco-btn" onclick="v17PlaceDeco(this,'🌿')" title="화분" style="font-size:18px;background:var(--bg-3);border:1px solid var(--border-1);border-radius:6px;padding:4px;cursor:pointer;transition:.1s">🌿</button>
@@ -424,24 +424,24 @@
 </div>
 
 <!-- ⑤ 포인트 현황 (컴팩트) -->
-<div style="display:flex;gap:6px;margin-bottom:8px">
-  <div style="flex:1;background:var(--bg-2);border:1px solid var(--border-1);border-radius:8px;padding:8px;text-align:center"><div style="font-family:Outfit;font-size:17px;font-weight:700;color:var(--accent)">1,720</div><div style="font-size:8px;color:var(--text-4)">총 적립</div></div>
-  <div style="flex:1;background:var(--bg-2);border:1px solid var(--border-1);border-radius:8px;padding:8px;text-align:center"><div style="font-family:Outfit;font-size:17px;font-weight:700;color:var(--g)">520</div><div style="font-size:8px;color:var(--text-4)">사용 가능</div></div>
-  <div style="flex:1;background:var(--bg-2);border:1px solid var(--border-1);border-radius:8px;padding:8px;text-align:center"><div style="font-family:Outfit;font-size:17px;font-weight:700;color:var(--a)">1,200</div><div style="font-size:8px;color:var(--text-4)">사용함</div></div>
+<div style="display:flex;gap:6px;margin-bottom:10px">
+  <div style="flex:1;background:var(--bg-2);border:1px solid var(--border-1);border-radius:8px;padding:10px 8px;text-align:center"><div style="font-family:Outfit;font-size:18px;font-weight:700;color:var(--accent);line-height:1.2">1,720</div><div style="font-size:9px;color:var(--text-4);margin-top:3px">총 적립</div></div>
+  <div style="flex:1;background:var(--bg-2);border:1px solid var(--border-1);border-radius:8px;padding:10px 8px;text-align:center"><div style="font-family:Outfit;font-size:18px;font-weight:700;color:var(--g);line-height:1.2">520</div><div style="font-size:9px;color:var(--text-4);margin-top:3px">사용 가능</div></div>
+  <div style="flex:1;background:var(--bg-2);border:1px solid var(--border-1);border-radius:8px;padding:10px 8px;text-align:center"><div style="font-family:Outfit;font-size:18px;font-weight:700;color:var(--a);line-height:1.2">1,200</div><div style="font-size:9px;color:var(--text-4);margin-top:3px">사용함</div></div>
 </div>
 
 <!-- ⑥ 포인트 획득 방법 (컴팩트) -->
-<div style="background:var(--bg-2);border:1px solid var(--border-1);border-radius:10px;padding:8px">
-  <div style="font-size:10px;font-weight:700;color:var(--text-2);margin-bottom:6px">💰 포인트 획득 방법</div>
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;font-size:10px">
-    <div style="display:flex;justify-content:space-between;padding:4px 8px;background:var(--bg-3);border-radius:5px"><span style="color:var(--text-2)">질문 작성</span><span style="font-weight:700;color:var(--accent)">+3pt</span></div>
-    <div style="display:flex;justify-content:space-between;padding:4px 8px;background:var(--bg-3);border-radius:5px"><span style="color:var(--text-2)">답변 작성</span><span style="font-weight:700;color:var(--accent)">+5pt</span></div>
-    <div style="display:flex;justify-content:space-between;padding:4px 8px;background:var(--bg-3);border-radius:5px"><span style="color:var(--text-2)">추천 받기</span><span style="font-weight:700;color:var(--accent)">+3pt</span></div>
-    <div style="display:flex;justify-content:space-between;padding:4px 8px;background:var(--bg-3);border-radius:5px"><span style="color:var(--text-2)">답변 채택</span><span style="font-weight:700;color:var(--g)">+30pt</span></div>
-    <div style="display:flex;justify-content:space-between;padding:4px 8px;background:var(--bg-3);border-radius:5px"><span style="color:var(--text-2)">AI 학습 반영</span><span style="font-weight:700;color:var(--a)">+100pt</span></div>
-    <div style="display:flex;justify-content:space-between;padding:4px 8px;background:var(--bg-3);border-radius:5px"><span style="color:var(--text-2)">업로드 승인</span><span style="font-weight:700;color:var(--accent)">+20pt</span></div>
+<div style="background:var(--bg-2);border:1px solid var(--border-1);border-radius:10px;padding:10px">
+  <div style="font-size:10.5px;font-weight:700;color:var(--text-2);letter-spacing:-0.01em;margin-bottom:8px">💰 포인트 획득 방법</div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:5px;font-size:10.5px">
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:5px 10px;background:var(--bg-3);border-radius:6px"><span style="color:var(--text-2)">질문 작성</span><span style="font-weight:700;color:var(--accent)">+3pt</span></div>
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:5px 10px;background:var(--bg-3);border-radius:6px"><span style="color:var(--text-2)">답변 작성</span><span style="font-weight:700;color:var(--accent)">+5pt</span></div>
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:5px 10px;background:var(--bg-3);border-radius:6px"><span style="color:var(--text-2)">추천 받기</span><span style="font-weight:700;color:var(--accent)">+3pt</span></div>
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:5px 10px;background:var(--bg-3);border-radius:6px"><span style="color:var(--text-2)">답변 채택</span><span style="font-weight:700;color:var(--g)">+30pt</span></div>
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:5px 10px;background:var(--bg-3);border-radius:6px"><span style="color:var(--text-2)">AI 학습 반영</span><span style="font-weight:700;color:var(--a)">+100pt</span></div>
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:5px 10px;background:var(--bg-3);border-radius:6px"><span style="color:var(--text-2)">업로드 승인</span><span style="font-weight:700;color:var(--accent)">+20pt</span></div>
   </div>
-  <div style="margin-top:6px;font-size:8px;color:var(--text-4)">⚠️ 일일 획득 상한 80pt · 어뷰징 시 미지급</div>
+  <div style="margin-top:7px;font-size:9.5px;color:var(--text-4);line-height:1.45">⚠️ 일일 획득 상한 80pt · 어뷰징 시 미지급</div>
 </div>
 
 </div>

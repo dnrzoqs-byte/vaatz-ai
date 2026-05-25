@@ -3067,6 +3067,171 @@ html[data-theme="light"] .src-doc-meta {
 }
 
 /* ══════════════════════════════════════════════════════
+ * Admin 팀별 폴더 뷰 (tf-group / tf-team-row)
+ * ══════════════════════════════════════════════════════ */
+
+/* 뷰 토글 */
+.tf-view-toggle {
+  display: flex;
+  gap: 4px;
+  background: var(--bg-3);
+  border: 1px solid var(--border-2);
+  border-radius: 8px;
+  padding: 3px;
+}
+.tf-view-toggle .v23-btn {
+  border: none !important;
+  background: transparent !important;
+  color: var(--text-3) !important;
+  border-radius: 6px !important;
+  padding: 5px 12px !important;
+  font-size: 11px !important;
+  transition: all .15s !important;
+}
+.tf-view-toggle .v23-btn.primary {
+  background: var(--accent-g) !important;
+  color: #fff !important;
+  box-shadow: 0 2px 6px rgba(75,142,240,.25) !important;
+}
+
+/* 폴더 그룹 */
+.tf-group {
+  background: var(--bg-2);
+  border: 1px solid var(--border-2);
+  border-radius: 12px;
+  overflow: hidden;
+  margin-bottom: 8px;
+  transition: box-shadow .15s;
+}
+.tf-group:hover {
+  box-shadow: 0 4px 16px rgba(0,0,0,.15);
+}
+
+/* 그룹 헤더 */
+.tf-group-hd {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 13px 16px;
+  cursor: pointer;
+  background: linear-gradient(135deg, var(--bg-3), var(--bg-2));
+  border-bottom: 1px solid var(--border-1);
+  transition: background .12s;
+  user-select: none;
+}
+.tf-group-hd:hover {
+  background: linear-gradient(135deg, var(--bg-4), var(--bg-3));
+}
+.tf-group-ic {
+  font-size: 22px;
+  flex-shrink: 0;
+}
+.tf-group-info {
+  flex: 1;
+  min-width: 0;
+}
+.tf-group-label {
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--text-1);
+  letter-spacing: -0.2px;
+}
+.tf-group-meta {
+  font-size: 10.5px;
+  color: var(--text-3);
+  margin-top: 2px;
+  line-height: 1.4;
+}
+.tf-chev {
+  font-size: 12px;
+  color: var(--text-4);
+  transition: transform .2s var(--ease);
+}
+
+/* 그룹 바디 (팀 목록) */
+.tf-group-body {
+  padding: 6px 10px;
+  display: block;
+}
+
+/* 팀 행 */
+.tf-team-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background .12s;
+  margin-bottom: 2px;
+}
+.tf-team-row:hover {
+  background: var(--bg-3);
+}
+.tf-team-ic {
+  font-size: 18px;
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: var(--bg-3);
+  border: 1px solid var(--border-1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.tf-team-info {
+  flex: 1;
+  min-width: 0;
+}
+.tf-team-name {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--text-1);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.tf-team-owner {
+  font-size: 10px;
+  color: var(--text-4);
+  margin-top: 1px;
+}
+.tf-team-nums {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+  font-family: 'Outfit', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-2);
+  flex-shrink: 0;
+}
+.tf-num-l {
+  font-size: 9px;
+  font-weight: 500;
+  color: var(--text-4);
+  margin-left: 1px;
+  font-family: 'Noto Sans KR', sans-serif;
+}
+.tf-num-sep {
+  font-size: 10px;
+  color: var(--border-3);
+  font-weight: 400;
+}
+.tf-num-req {
+  color: var(--a);
+}
+.tf-num-ok {
+  color: var(--g);
+}
+.tf-team-btns {
+  display: flex;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+/* ══════════════════════════════════════════════════════
  * 다크 모드 커뮤니티 모달 색상 개선 (Issue #2)
  * 기본 테마가 dark이므로 html:not([data-theme="light"]) 스코핑
  * ══════════════════════════════════════════════════════ */
