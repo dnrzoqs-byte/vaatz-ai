@@ -836,10 +836,7 @@ textarea:focus { outline: none; }
 }
 
 /* ── 커뮤니티 전체 개선 ── */
-.comm-box {
-  width: min(800px, 96vw) !important;
-  max-height: 90vh !important;
-}
+/* comm-box 크기는 v34-css(inline style)에 위임 — 여기서 덮지 않음 */
 .comm-tabs {
   display: flex;
   gap: 2px;
@@ -2023,6 +2020,12 @@ textarea:focus { outline: none; }
 /* ════════════════════════════════════════
    Q&A v36 — 지식IN 스타일 재설계
    ════════════════════════════════════════ */
+
+/* #ct-qa: fill comm-body height so qa36-wrap can scroll */
+#ct-qa {
+  height: 100%;
+  overflow: hidden;
+}
 
 /* 레이아웃 wrapper */
 .qa36-wrap {

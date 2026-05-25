@@ -4479,12 +4479,15 @@ window.qa36SubmitAsk = function(){
   say('질문이 등록되었습니다.','✅',1800);
 };
 
-/* ── renderCommunityV29 override ── */
+/* ── renderCommunityV29 override + redirect V26/V27 to V36 ── */
 window.renderCommunityV29 = function(){
   var box = document.querySelector('.comm-box');
   if(box){ box.classList.add('v29-wide'); box.classList.remove('v27-wide','v26-wide'); }
   renderQA();
 };
+/* Redirect older renderers so they never overwrite V36 content */
+window.renderCommunityV26 = window.renderCommunityV29;
+window.renderCommunityV27 = window.renderCommunityV29;
 
 /* boot */
 if(document.readyState === 'loading')
