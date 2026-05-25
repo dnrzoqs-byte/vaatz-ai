@@ -1,32 +1,39 @@
 // ─── VanillaModals Component ─────────────────────────────────────────────────
-// vaatz-init.js가 관리하는 모달들을 한 번만 렌더링하는 컴포넌트.
+// Phase 4 이후: 개별 React 컴포넌트로 분리 완료.
+// 이 컴포넌트는 플로팅 캐릭터·컴패니언·인라인 스타일·comm-side 버튼만 담당.
 //
-// Phase 1 Bridge 패턴:
-//   - React는 이 컴포넌트를 단 한 번만 렌더링 (memo + () => true)
-//   - 이후 vaatz-init.js가 #commOv, #ao 등에 직접 DOM 조작 가능
-//   - React의 리렌더링이 vaatz-init.js 변경 사항을 덮어쓰지 않음
-//
-// 마이그레이션 계획:
-//   - Phase 2: CommunityModal.tsx → React 컴포넌트 전환
-//   - Phase 3: AdminPanel.tsx → React 컴포넌트 전환
-//   - Phase 4: 나머지 모달 전환
+// Phase 4 이전: modalsHtml 블롭에 모든 모달이 포함되어 있었음.
+// Phase 4 이후: 각 모달이 개별 컴포넌트로 분리됨:
+//   - MypageModal.tsx    (#mpOv)
+//   - RequestModal.tsx   (#rqM)
+//   - QAWriteModal.tsx   (#qWriteM)
+//   - DBOverlay.tsx      (#dbOv)
+//   - CommunityModal.tsx (#commOv) ← Phase 2
+//   - AdminPanel.tsx     (#ao)     ← Phase 3
 // ─────────────────────────────────────────────────────────────────────────────
 import { memo } from 'react'
-import { modalsHtml }       from '../../data/modals-html'
 import { companionHtml }    from '../../data/companion-html'
 import { inlineStylesHtml } from '../../data/inline-styles-html'
 
 const VanillaModals = memo(() => {
   return (
     <>
-      {/* 마이페이지, 요청모달, Admin패널, Q&A작성, DB뷰어, 커뮤니티 */}
-      <div dangerouslySetInnerHTML={{ __html: modalsHtml }} />
-
       {/* 플로팅 캐릭터 + 컴패니언 허브 */}
       <div dangerouslySetInnerHTML={{ __html: companionHtml }} />
 
       {/* 인라인 스타일 (v34-css 등) */}
       <div dangerouslySetInnerHTML={{ __html: inlineStylesHtml }} />
+
+      {/* 커뮤니티 사이드 버튼 (화면 우측 고정) */}
+      <div className="comm-side">
+        <div
+          className="comm-side-btn"
+          onClick={() => (window as any).openComm?.('qa')}
+          title="구매 커뮤니티 Q&A"
+        >
+          <span>💡</span><span>Q&A</span>
+        </div>
+      </div>
     </>
   )
 }, () => true) // 절대 리렌더링 안 함
