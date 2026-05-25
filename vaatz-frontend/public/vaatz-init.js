@@ -4617,29 +4617,29 @@ else
  * ═══════════════════════════════════════════════════════════════ */
 (function(){
 'use strict';
-const $=(s,r=document)=>r.querySelector(s);
-const say=(m,i='✅',d=2200)=>{try{(window.toast||console.log)(m,i,d)}catch(e){}};
+var say=function(m,i,d){try{(window.toast||window.safeToast||console.log)(m,i,d)}catch(e){}};
 
 /* ── 1. 운영 홈 스텝 아코디언 ────────────────────────────────── */
 window.homeDetailToggle = function(todoEl, detailId){
   var detail = document.getElementById(detailId);
   if(!detail) return;
-  var isOpen = detail.style.display !== 'none';
-  // 다른 모든 detail 닫기
+  var isOpen = detail.style.display === 'block';
   ['homeDetail1','homeDetail2','homeDetail3','homeDetail4'].forEach(function(id){
+    if(id === detailId) return;
     var d = document.getElementById(id);
-    if(d && id !== detailId){ d.style.display='none'; }
-    // chevron 원복
-    var chev = d && d.previousElementSibling && d.previousElementSibling.querySelector('.adm-todo-chevron');
-    if(chev && id !== detailId) chev.style.transform='';
+    if(!d) return;
+    d.style.display = 'none';
+    var prev = d.previousElementSibling;
+    var chev = prev && prev.querySelector('.adm-todo-chevron');
+    if(chev) chev.style.transform = '';
   });
   var chevron = todoEl.querySelector('.adm-todo-chevron');
   if(isOpen){
-    detail.style.display='none';
-    if(chevron) chevron.style.transform='';
+    detail.style.display = 'none';
+    if(chevron) chevron.style.transform = '';
   } else {
-    detail.style.display='block';
-    if(chevron) chevron.style.transform='rotate(180deg)';
+    detail.style.display = 'block';
+    if(chevron) chevron.style.transform = 'rotate(180deg)';
   }
 };
 
@@ -4659,7 +4659,6 @@ window.deleteFinalDoc = function(btn){
   say('문서가 삭제되었습니다.','🗑',2000);
 };
 
-/* 팀별 목록 탭 액션 */
 window.listDeleteDoc = function(btn){
   var card = btn.closest('.req-card');
   var name = card && card.querySelector('.req-title');
@@ -4676,145 +4675,209 @@ window.listRevertDoc = function(btn){
     card.classList.remove('done');
     var badge = card.querySelector('.bd-g');
     if(badge) badge.remove();
-    // 액션 버튼 복원
     var acts = card.querySelector('.req-acts');
     if(acts) acts.innerHTML = '<button class="abtn ok" onclick="appReq(this)">승인</button><button class="abtn" style="color:var(--a)" onclick="rejReq(this)">보완 요청</button><button class="abtn no" onclick="listDeleteDoc(this)">🗑 삭제</button>';
   }
 };
 
 /* ── 3. 캐릭터 레벨 100 시스템 ──────────────────────────────── */
-var CHAR_LEVEL_TITLES = [
-  {min:100,title:'VAATZ 챔피언'},
-  {min:90, title:'구매 신화'},
-  {min:80, title:'구매 레전드'},
-  {min:70, title:'구매 그랜드마스터'},
-  {min:60, title:'구매 리더'},
-  {min:50, title:'구매 에이스'},
-  {min:40, title:'구매 전문가'},
-  {min:30, title:'구매 마스터'},
-  {min:20, title:'구매 전략가'},
-  {min:10, title:'구매 탐험가'},
-  {min:1,  title:'구매 신입'}
+var CHAR_LEVELS = [
+  {min:100,title:'VAATZ 챔피언'},{min:90,title:'구매 신화'},{min:80,title:'구매 레전드'},
+  {min:70,title:'구매 그랜드마스터'},{min:60,title:'구매 리더'},{min:50,title:'구매 에이스'},
+  {min:40,title:'구매 전문가'},{min:30,title:'구매 마스터'},{min:20,title:'구매 전략가'},
+  {min:10,title:'구매 탐험가'},{min:1,title:'구매 신입'}
 ];
 
-function calcCharLevel(xp){
-  // Lv 1 = 0pt, Lv 100 ≈ 10000pt
-  // level = min(100, floor(sqrt(xp/10)) + 1)
-  var lvl = Math.min(100, Math.floor(Math.sqrt(Math.max(0,xp)/10)) + 1);
+function calcLevel(xp){
+  var lvl = Math.min(100, Math.floor(Math.sqrt(Math.max(0,xp)/10))+1);
   var title = '구매 신입';
-  for(var i=0;i<CHAR_LEVEL_TITLES.length;i++){
-    if(lvl >= CHAR_LEVEL_TITLES[i].min){ title=CHAR_LEVEL_TITLES[i].title; break; }
+  for(var i=0;i<CHAR_LEVELS.length;i++){
+    if(lvl>=CHAR_LEVELS[i].min){title=CHAR_LEVELS[i].title;break;}
   }
-  // XP to next level
-  var nextXp = Math.pow(lvl, 2) * 10;
-  var prevXp = Math.pow(lvl-1, 2) * 10;
-  var pct = lvl>=100 ? 100 : Math.round((xp-prevXp)/(nextXp-prevXp)*100);
-  return {level:lvl, title:title, pct:Math.max(0,Math.min(100,pct))};
-};
-
-// 캐릭터 렌더 패치 — v33CharState가 있을 때 적용
-function patchCharacterLevel(){
-  var orig = window.renderV33Character;
-  if(!orig || window.__levelPatched) return;
-  window.__levelPatched = true;
-  window.renderV33Character = function(){
-    orig.apply(this, arguments);
-    // 레벨 뱃지 업그레이드
-    var lvDiv = document.querySelector('.v33-char-lv');
-    if(!lvDiv) return;
-    var xp = 1720; // 데모 XP (추후 상태 연동)
-    var info = calcCharLevel(xp);
-    lvDiv.innerHTML =
-      '<div style="display:flex;align-items:center;gap:6px;justify-content:center;margin-top:4px">' +
-        '<span style="background:var(--accent);color:#fff;font-size:10px;font-weight:900;padding:2px 8px;border-radius:999px;font-family:Outfit,sans-serif">Lv.' + info.level + '</span>' +
-        '<span style="font-size:11px;color:var(--text-2);font-weight:700">' + info.title + '</span>' +
-      '</div>' +
-      '<div style="margin:6px auto 0;width:140px;height:5px;background:var(--bg-4);border-radius:999px;overflow:hidden">' +
-        '<div style="width:' + info.pct + '%;height:100%;background:var(--accent);border-radius:999px;transition:.4s"></div>' +
-      '</div>' +
-      '<div style="font-size:10px;color:var(--text-4);margin-top:3px;text-align:center">' + xp + 'pt · 다음 레벨까지 ' + (info.level<100 ? (Math.pow(info.level,2)*10-xp) + 'pt' : 'MAX') + '</div>';
-  };
-  // 즉시 적용
-  try{ window.renderV33Character(); }catch(e){}
+  var next=Math.pow(lvl,2)*10, prev=Math.pow(Math.max(0,lvl-1),2)*10;
+  var pct=lvl>=100?100:Math.round((xp-prev)/(next-prev)*100);
+  return {level:lvl,title:title,pct:Math.max(0,Math.min(100,pct)),xp:xp,toNext:lvl<100?next-xp:0};
 }
 
-/* ── 4. 캐릭터 아이템 탈착(unequip) 토글 ───────────────────── */
-function patchInventoryUnequip(){
-  document.addEventListener('click', function(e){
-    var slot = e.target.closest('.inv-slot');
-    if(!slot || slot.classList.contains('empty')) return;
-    if(slot.closest('#ct-char') === null) return;
+function applyLevelBadge(){
+  var lvDiv = document.querySelector('#charRoom .v33-char-lv');
+  if(!lvDiv) return;
+  var info = calcLevel(1720);
+  lvDiv.innerHTML=
+    '<div style="display:flex;align-items:center;gap:6px;justify-content:center;margin-top:4px">'+
+      '<span style="background:var(--accent);color:#fff;font-size:10px;font-weight:900;padding:2px 8px;border-radius:999px;font-family:Outfit,sans-serif">Lv.'+info.level+'</span>'+
+      '<span style="font-size:11px;color:var(--text-2);font-weight:700">'+info.title+'</span>'+
+    '</div>'+
+    '<div style="margin:6px auto 0;width:140px;height:5px;background:var(--bg-4);border-radius:999px;overflow:hidden">'+
+      '<div style="width:'+info.pct+'%;height:100%;background:var(--accent);border-radius:999px;transition:.4s"></div>'+
+    '</div>'+
+    '<div style="font-size:10px;color:var(--text-4);margin-top:3px;text-align:center">'+
+      info.xp+'pt · '+(info.level<100?'다음 레벨까지 '+info.toNext+'pt':'MAX 달성!')+
+    '</div>';
+}
 
-    if(slot.classList.contains('equipped')){
-      // 이미 장착 → 탈착
-      slot.classList.remove('equipped');
-      var emoji = slot.dataset.itemKey || slot.textContent.trim();
-      // v33CharState 업데이트
-      try{
-        var state = window.__v33State || {};
-        var HATS=['🎩','👑','🎀','🎓','⛑️','🏆','🪖','👒','🎅','✨'];
-        var FACES=['🕶️','👓','😷','🎭','🤿','🥽','🤓','🥸'];
-        var PETS=['🐱','🐶','🐦','🐉','🦄','🦋','🐢','🤖','👾','🐲'];
-        var EFFECTS=['⭐','💫','🔥','❄️','🎵','💎','🌟','⚡','🌈','🎇','☄️','🌠'];
-        // charState는 §13 IIFE 스코프 내에 있으므로 renderV33Character를 통해 간접 조작
-        if(HATS.includes(emoji) && window.__v33CharHat !== undefined) window.__v33CharHat='';
-        if(PETS.includes(emoji) && window.__v33CharSide !== undefined) window.__v33CharSide='';
-        if(EFFECTS.includes(emoji) && window.__v33CharEffect !== undefined) window.__v33CharEffect='';
-      }catch(ex){}
-      try{ if(window.renderV33Character) window.renderV33Character(); }catch(ex){}
-      say(emoji + ' 탈착했습니다.','✓',1200);
-      e.stopPropagation();
+function setupLevelObserver(){
+  if(window.__s14LvObs) return;
+  var charRoom = document.getElementById('charRoom');
+  if(!charRoom) return;
+  window.__s14LvObs = true;
+  applyLevelBadge();
+  new MutationObserver(function(){ applyLevelBadge(); }).observe(charRoom, {childList:true});
+}
+
+/* ── 4. 캐릭터 아이템 탈착(unequip) ────────────────────────── */
+function setupUnequip(){
+  if(window.__s14Uneq) return;
+  window.__s14Uneq = true;
+  var HATS=['🎩','👑','🎀','🎓','⛑️','🏆','🪖','👒','🎅','✨'];
+  var PETS=['🐱','🐶','🐦','🐉','🦄','🦋','🐢','🤖','👾','🐲'];
+  var EFFECTS=['⭐','💫','🔥','❄️','🎵','💎','🌟','⚡','🌈','🎇','☄️','🌠'];
+  document.addEventListener('click',function(e){
+    var slot=e.target.closest('.inv-slot');
+    if(!slot||slot.classList.contains('empty')) return;
+    if(!slot.closest('#ct-char')) return;
+    if(!slot.classList.contains('equipped')) return;
+    slot.classList.remove('equipped');
+    var emojiEl=slot.querySelector('span,.inv-slot-ic');
+    var emoji=(emojiEl?emojiEl.textContent:slot.textContent).trim().split('\n')[0].trim();
+    var cr=document.getElementById('charRoom');
+    if(cr){
+      if(HATS.includes(emoji)) cr.querySelectorAll('.v33-char-hat').forEach(function(el){el.remove();});
+      else if(PETS.includes(emoji)) cr.querySelectorAll('.v33-char-side').forEach(function(el){el.remove();});
+      else if(EFFECTS.includes(emoji)) cr.querySelectorAll('.v33-char-effect').forEach(function(el){el.remove();});
     }
-    // 장착 안 된 것은 기존 v33EquipItem 흐름이 처리
-  }, true);
+    say(emoji+' 탈착했습니다.','✓',1200);
+    e.stopPropagation();
+  },true);
 }
 
-/* ── 5. 답변 근거 패널 스타일 정돈 ─────────────────────────── */
-var srcStyle = document.getElementById('src-refine-style');
-if(!srcStyle){
-  srcStyle = document.createElement('style');
-  srcStyle.id = 'src-refine-style';
-  srcStyle.textContent = [
-    /* source chips — pill 스타일 정돈 */
+/* ── 5. 스타일 정돈 ─────────────────────────────────────────── */
+if(!document.getElementById('s14-style')){
+  var st=document.createElement('style');
+  st.id='s14-style';
+  st.textContent=[
     '.src-chips{display:flex;flex-wrap:wrap;gap:6px;padding:10px 14px!important;border-bottom:1px solid var(--border-1)}',
     '.src-chip{border-radius:999px!important;padding:5px 11px!important;font-size:12px!important;font-weight:700!important;display:inline-flex;align-items:center;gap:5px}',
-    /* source page viewer */
     '.src-vw{padding:12px 14px!important}',
     '.src-page{border-radius:12px!important;padding:22px 24px 18px!important;font-size:13.5px!important;line-height:1.85!important}',
     '.src-page-ti{font-size:17px!important;font-weight:800!important;margin-bottom:8px!important}',
-    /* nav pagination */
     '.src-pgnav{background:var(--bg-2);border:1px solid var(--border-1);border-radius:10px!important;padding:7px 10px!important;margin-bottom:10px}',
-    /* doc meta header */
     '.src-doc-meta{background:var(--bg-2);border:1px solid var(--border-1);border-radius:10px!important;padding:10px 12px!important;margin-bottom:10px}',
-    /* mark highlight */
     'mark,.src-hi,.src-mark{background:rgba(255,220,80,.22)!important;border-radius:3px!important;padding:0 2px!important}',
-    /* adm-todo accordion chevron */
     '.adm-todo-chevron{display:inline-block;transition:transform .2s}',
-    /* adm-todo-detail fade */
-    '.adm-todo-detail{animation:fadeIn .18s ease}',
-    '@keyframes fadeIn{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:translateY(0)}}',
+    '.adm-todo-detail{animation:s14FadeIn .18s ease}',
+    '@keyframes s14FadeIn{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:translateY(0)}}',
   ].join('\n');
-  document.head.appendChild(srcStyle);
+  document.head.appendChild(st);
 }
 
 /* Boot */
-function bootRefinements(){
-  patchCharacterLevel();
-  patchInventoryUnequip();
+function boot14(){
+  setupLevelObserver();
+  setupUnequip();
+  if(window.commTab && !window.__s14CommWrapped){
+    window.__s14CommWrapped = true;
+    var _oc = window.commTab;
+    window.commTab = function(btn,id){
+      _oc.apply(this,arguments);
+      if(id==='ct-char') setTimeout(function(){ setupLevelObserver(); applyLevelBadge(); },150);
+    };
+  }
 }
-if(document.readyState==='loading')
-  document.addEventListener('DOMContentLoaded', bootRefinements);
-else
-  bootRefinements();
+if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',boot14);
+else setTimeout(boot14,0);
 
-// 커뮤니티 캐릭터 탭 열릴 때 레벨 패치 재적용
-var _origCommTab2 = window.commTab;
-if(_origCommTab2 && !window.__§14CommWrapped){
-  window.__§14CommWrapped = true;
-  window.commTab = function(btn, id){
-    _origCommTab2.apply(this, arguments);
-    if(id === 'ct-char') setTimeout(function(){ patchCharacterLevel(); }, 100);
-  };
+})();
+
+/* ═══════════════════════════════════════════════════════════════
+ * §15  WEB SEARCH — webOn 활성화 시 실시간 검색 결과 삽입
+ * ═══════════════════════════════════════════════════════════════ */
+(function(){
+'use strict';
+
+var RESULTS = {
+  bid: [
+    {title:'탄력입찰·경매입찰 비교 가이드 2025',url:'g2b.go.kr/bid-guide',date:'2025.11',
+     snip:'탄력입찰은 기준가 ±15% 조정 가능, 경매입찰은 최저가 경쟁 방식. VAATZ에서는 요청 등록 시 방식을 선택합니다.'},
+    {title:'공공조달 입찰 표준 절차서',url:'procurement.go.kr/std',date:'2025.09',
+     snip:'입찰 공고→접수→개찰→낙찰→계약 순으로 진행. 전자입찰 기준 평균 처리 시간 24시간 이내.'},
+    {title:'입찰 운영 업무표준 STD-PUR-012',url:'vaatz.co.kr/std-pur-012',date:'2025.10',
+     snip:'VAATZ 내 입찰 모듈: 벤더 자동 초청 → 조건 평가 → 방식별 점수 산출 → 최종 낙찰 결정.'}
+  ],
+  contract: [
+    {title:'계약 표준 조항 해설집 2025',url:'moef.go.kr/contract-guide',date:'2025.08',
+     snip:'표준계약 필수 조항: 납품 일정, 품질보증, 하자책임 기간(12개월 기본), 계약 해지 조건.'},
+    {title:'공급업체 등급 평가 운영 지침',url:'vaatz.co.kr/vendor-eval',date:'2025.12',
+     snip:'A등급 기준: 품질 90점 이상, 납기 준수율 95% 이상, 3회 이상 정상 납품 이력 필요.'},
+    {title:'하도급 거래 공정화 지침',url:'ftc.go.kr/subcontract',date:'2025.07',
+     snip:'하도급 대금 지급 기한 60일, 부당 단가 인하 금지, 기술 자료 보호 의무 안내.'}
+  ],
+  default: [
+    {title:'구매업무 표준 프로세스 가이드 2026',url:'vaatz.co.kr/process-guide',date:'2026.01',
+     snip:'구매 요청→승인→발주→검수→대금 지급까지 전 과정을 단계별로 정리한 표준 가이드입니다.'},
+    {title:'VAATZ AI 활용 구매 효율화 사례집',url:'vaatz.co.kr/ai-cases',date:'2026.02',
+     snip:'RAG 엔진 기반 벤더 비교 분석, 계약 조항 자동 검토, 가격 트렌드 분석 적용 사례.'},
+    {title:'공정거래위원회 하도급 거래 가이드라인',url:'ftc.go.kr/subcontract',date:'2025.07',
+     snip:'하도급 대금 지급 기한 60일, 부당 단가 인하 금지, 기술 자료 보호 의무 규정 안내.'}
+  ]
+};
+
+function pickResults(q){
+  q=(q||'').toLowerCase();
+  if(/입찰|경매|경쟁|탄력|낙찰/.test(q)) return RESULTS.bid;
+  if(/계약|납품|공급|벤더|업체/.test(q)) return RESULTS.contract;
+  return RESULTS.default;
+}
+
+function buildCard(q, items){
+  var rows=items.map(function(r,i){
+    return '<div style="padding:9px 0;'+(i<items.length-1?'border-bottom:1px solid var(--border-1)':'')+'">'+
+      '<div style="font-size:9px;color:var(--text-4);margin-bottom:3px">'+r.url+' · '+r.date+'</div>'+
+      '<div style="font-size:12.5px;font-weight:700;color:var(--accent);line-height:1.4;margin-bottom:3px">'+r.title+'</div>'+
+      '<div style="font-size:11.5px;color:var(--text-3);line-height:1.6">'+r.snip+'</div>'+
+    '</div>';
+  }).join('');
+  return '<div class="ws-card" style="background:var(--bg-2);border:1px solid var(--border-1);border-radius:12px;padding:12px 14px;margin-bottom:12px">'+
+    '<div style="display:flex;align-items:center;gap:7px;margin-bottom:8px;padding-bottom:8px;border-bottom:1px solid var(--border-1)">'+
+      '<span style="font-size:14px">🌐</span>'+
+      '<span style="font-size:12px;font-weight:800;color:var(--text-1)">웹 검색 결과</span>'+
+      '<span style="font-size:10px;font-weight:600;color:var(--accent);background:var(--accent-dim);padding:1px 8px;border-radius:999px;margin-left:auto">'+items.length+'개 출처</span>'+
+    '</div>'+rows+'</div>';
+}
+
+function injectCard(query){
+  var chatArea=document.querySelector('#v-ch .cc');
+  if(!chatArea) return;
+  var done=false;
+  var obs=new MutationObserver(function(){
+    if(done) return;
+    var txEls=document.querySelectorAll('.msg-a .ai-tx');
+    if(!txEls.length) return;
+    var lastTx=txEls[txEls.length-1];
+    var ab=lastTx&&lastTx.parentElement;
+    if(ab&&!ab.querySelector('.ws-card')){
+      done=true;
+      var card=document.createElement('div');
+      card.innerHTML=buildCard(query,pickResults(query));
+      ab.insertBefore(card.firstElementChild,lastTx);
+      obs.disconnect();
+    }
+  });
+  obs.observe(chatArea,{childList:true,subtree:true});
+  setTimeout(function(){obs.disconnect();},8000);
+}
+
+if(!window.__s15Web){
+  window.__s15Web=true;
+  var ta=document.querySelector('.ir textarea');
+  var sb=document.querySelector('.sd');
+  function onSend(){
+    if(!window.webOn) return;
+    var q=ta?ta.value.trim():'';
+    if(q) injectCard(q);
+  }
+  if(ta) ta.addEventListener('keydown',function(e){if(e.key==='Enter'&&!e.shiftKey)onSend();},true);
+  if(sb) sb.addEventListener('click',onSend,true);
 }
 
 })();
