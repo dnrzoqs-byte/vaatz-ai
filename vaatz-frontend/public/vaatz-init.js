@@ -61,8 +61,18 @@ function sv(v){
   document.querySelector('.sb-nav .sb-i').classList.add('on');
 }
 
-function oa(){document.getElementById('ao').classList.add('sh');document.body.style.overflow='hidden'}
-function ca(){document.getElementById('ao').classList.remove('sh');document.body.style.overflow=''}
+function oa(){
+  /* Phase 3 bridge: React adminOpen 상태 동기 */
+  if(typeof window.__reactOpenAdmin==='function') window.__reactOpenAdmin();
+  document.getElementById('ao').classList.add('sh');
+  document.body.style.overflow='hidden';
+}
+function ca(){
+  /* Phase 3 bridge: React adminOpen 상태 동기 */
+  if(typeof window.__reactCloseAdmin==='function') window.__reactCloseAdmin();
+  document.getElementById('ao').classList.remove('sh');
+  document.body.style.overflow='';
+}
 // ─────────────────────────────────────────────────────
 // §03  Admin 탭 전환
 // ─────────────────────────────────────────────────────

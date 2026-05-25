@@ -1,7 +1,7 @@
 // ─── App ─────────────────────────────────────────────────────────────────────
-// Phase 2 React Migration:
-//   - CommunityModal → React Context 기반 open/close
-//   - 나머지 모달(마이페이지·Admin·DB뷰어)은 여전히 VanillaModals
+// Phase 3 React Migration:
+//   - CommunityModal (Phase 2) + AdminPanel (Phase 3) → React Context 기반
+//   - 나머지 모달(마이페이지·DB뷰어·Q&A작성)은 여전히 VanillaModals
 //
 // 컴포넌트 트리:
 //   AppProvider
@@ -14,7 +14,8 @@
 //           ChatArea   (웰컴뷰 + 채팅뷰 + 입력창)
 //           RightPanel (내 파일 / 답변 근거 패널)
 //     CommunityModal   (Phase 2: Context 기반 열림/닫힘)
-//     VanillaModals    (마이페이지·Admin·DB뷰어 — vaatz-init.js 관리)
+//     AdminPanel       (Phase 3: Context 기반 열림/닫힘)
+//     VanillaModals    (마이페이지·DB뷰어·Q&A작성 — vaatz-init.js 관리)
 // ─────────────────────────────────────────────────────────────────────────────
 import { useEffect, useRef } from 'react'
 import { AppProvider }      from './context/AppContext'
@@ -23,6 +24,7 @@ import TopBar               from './components/layout/TopBar'
 import ChatArea             from './components/chat/ChatArea'
 import RightPanel           from './components/layout/RightPanel'
 import CommunityModal       from './components/modals/CommunityModal'
+import AdminPanel           from './components/modals/AdminPanel'
 import VanillaModals        from './components/modals/VanillaModals'
 import Toast                from './components/shared/Toast'
 
@@ -67,6 +69,9 @@ function AppShell() {
 
       {/* Phase 2: 커뮤니티 모달 — React Context 기반 */}
       <CommunityModal />
+
+      {/* Phase 3: Admin 패널 — React Context 기반 */}
+      <AdminPanel />
 
       {/* 나머지 Vanilla 모달들 (vaatz-init.js 관리) */}
       <VanillaModals />
