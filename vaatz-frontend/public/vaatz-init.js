@@ -3969,14 +3969,19 @@ if (document.readyState === 'loading') {
     if(!fc) return;
     if(rp && rp.classList.contains('sh')){
       var rpW = rp.offsetWidth || 340;
-      fc.style.right = (rpW + 20) + 'px';
+      fc.style.setProperty('right', (rpW + 20) + 'px', 'important');
     } else {
-      fc.style.right = '20px';
+      fc.style.setProperty('right', '20px', 'important');
     }
   }
   var origRpT = window.rpT;
   window.rpT = function(){
     if(origRpT) origRpT.apply(this, arguments);
+    var rp = document.getElementById('rp');
+    if(rp && !rp.classList.contains('sh')){
+      rp.style.width = '';
+      rp.style.minWidth = '';
+    }
     setTimeout(updateFloatCharPos, 200);
   };
   var origRpSwitchTab = window.rpSwitchTab;
