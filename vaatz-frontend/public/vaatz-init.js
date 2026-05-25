@@ -2242,9 +2242,9 @@ function installNotice(){wrapTopbar();const tb=$('.tb');if(!tb||$('#v29Notice'))
 function updateScope(type){$$('.tb-l .sc-btn').forEach(b=>{const isMy=b.textContent.includes('내 파일');b.classList.toggle('on',type==='my'?isMy:!isMy)})}
 window.rpT=function(force,tab){const rp=$('#rp');if(!rp)return;const open=typeof force==='boolean'?force:!rp.classList.contains('sh');rp.classList.toggle('sh',open);if(!open){rp.classList.remove('source-full');updateScope('all');return}if(tab&&window.rpSwitchTab)window.rpSwitchTab(tab);updateScope($('#rpTabMy')?.classList.contains('on')?'my':'all')};
 window.scT=function(btn,type){if(btn){btn.parentElement?.querySelectorAll('.sc-btn').forEach(b=>b.classList.remove('on'));btn.classList.add('on')}const rp=$('#rp');if(type==='my'){const already=rp?.classList.contains('sh')&&$('#rpTabMy')?.classList.contains('on');if(already){rpT(false);return}rpT(true,'my');say('내 파일 패널을 열었습니다. 다시 누르거나 X로 닫을 수 있습니다.','📂',1500)}else{rpT(false);say('검색 범위: 구매지식으로 설정했습니다.','📚',1500)}};
-function installChatTools(){const box=$('.ibx');if(!box||$('#v29ChatTools'))return;$$('.v26-chat-controls').forEach(x=>x.remove());const row=document.createElement('div');row.id='v29ChatTools';row.className='v29-chat-tools';row.innerHTML=`<div class="v29-mode-select"><button class="v29-mode-current" id="v29ModeCurrent" onclick="toggleModeMenuV29(event)"><span class="v29-mode-icon" id="v29ModeIcon">${modeInfo[currentMode][0]}</span><span class="v29-mode-copy"><span class="v29-mode-title" id="v29ModeTitle">${currentMode}</span><span class="v29-mode-desc" id="v29ModeDesc">${modeInfo[currentMode][2]}</span></span><span>⌃</span></button><div class="v29-mode-menu" id="v29ModeMenu">${MODES.map(m=>`<button class="v29-mode-option ${m===currentMode?'on':''}" data-mode="${m}" onclick="setChatModeV29('${m}')"><div class="t">${modeInfo[m][0]} ${m}</div><div class="d">${modeInfo[m][2]}</div></button>`).join('')}</div></div><div class="v29-size-panel"><span class="lb">화면</span>${[['small','작게'],['standard','표준'],['large','크게']].map(x=>`<button class="v29-size-btn ${x[0]===uiSize?'on':''}" data-size="${x[0]}" onclick="setFontSizeV29('${x[0]}')">${x[1]}</button>`).join('')}</div>`;box.insertBefore(row,box.firstChild);applyFontSize()}
+function installChatTools(){const box=$('.ibx');if(!box||$('#v29ChatTools'))return;$$('.v26-chat-controls').forEach(x=>x.remove());const row=document.createElement('div');row.id='v29ChatTools';row.className='v29-chat-tools';row.innerHTML=`<div class="v29-mode-select"><button class="v29-mode-current" id="v29ModeCurrent" data-mode="${currentMode}" onclick="toggleModeMenuV29(event)"><span class="v29-mode-icon" id="v29ModeIcon">${modeInfo[currentMode][0]}</span><span class="v29-mode-copy"><span class="v29-mode-title" id="v29ModeTitle">${currentMode}</span><span class="v29-mode-desc" id="v29ModeDesc">${modeInfo[currentMode][2]}</span></span><span>⌃</span></button><div class="v29-mode-menu" id="v29ModeMenu">${MODES.map(m=>`<button class="v29-mode-option ${m===currentMode?'on':''}" data-mode="${m}" onclick="setChatModeV29('${m}')"><div class="t">${modeInfo[m][0]} ${m}</div><div class="d">${modeInfo[m][2]}</div></button>`).join('')}</div></div><div class="v29-size-panel"><span class="lb">화면</span>${[['small','작게'],['standard','표준'],['large','크게']].map(x=>`<button class="v29-size-btn ${x[0]===uiSize?'on':''}" data-size="${x[0]}" onclick="setFontSizeV29('${x[0]}')">${x[1]}</button>`).join('')}</div>`;box.insertBefore(row,box.firstChild);applyFontSize()}
 window.toggleModeMenuV29=e=>{e&&e.stopPropagation();$('#v29ModeMenu')?.classList.toggle('sh')};
-window.setChatModeV29=mode=>{currentMode=mode;sls('vaatz-current-mode',mode);window.currentAIMode=mode;try{window.setChatModeV26&&window.setChatModeV26(mode)}catch(e){};$('#v29ModeIcon')&&( $('#v29ModeIcon').textContent=modeInfo[mode][0]);$('#v29ModeTitle')&&( $('#v29ModeTitle').textContent=mode);$('#v29ModeDesc')&&( $('#v29ModeDesc').textContent=modeInfo[mode][2]);$$('.v29-mode-option').forEach(b=>b.classList.toggle('on',b.dataset.mode===mode));$('#v29ModeMenu')?.classList.remove('sh');say(`${mode}로 전환했습니다.`,'🧭',1600)};
+window.setChatModeV29=mode=>{currentMode=mode;sls('vaatz-current-mode',mode);window.currentAIMode=mode;try{window.setChatModeV26&&window.setChatModeV26(mode)}catch(e){};$('#v29ModeIcon')&&( $('#v29ModeIcon').textContent=modeInfo[mode][0]);$('#v29ModeTitle')&&( $('#v29ModeTitle').textContent=mode);$('#v29ModeDesc')&&( $('#v29ModeDesc').textContent=modeInfo[mode][2]);$('#v29ModeCurrent')?.setAttribute('data-mode',mode);$$('.v29-mode-option').forEach(b=>b.classList.toggle('on',b.dataset.mode===mode));$('#v29ModeMenu')?.classList.remove('sh');say(`${mode}로 전환했습니다.`,'🧭',1600)};
 function applyFontSize(){document.documentElement.setAttribute('data-font-size',uiSize);$$('.v29-size-btn').forEach(b=>b.classList.toggle('on',b.dataset.size===uiSize))}
 window.setFontSizeV29=size=>{uiSize=size;sls('vaatz-font-size',size);applyFontSize();say(`화면 크기: ${size==='large'?'크게':size==='small'?'작게':'표준'}로 변경했습니다.`,'Aa',1500)};window.setFontSizeV26=window.setFontSizeV29;document.addEventListener('click',e=>{if(!e.target.closest('#v29ChatTools'))$('#v29ModeMenu')?.classList.remove('sh')});
 window.setSourcePageV29=i=>{try{currentSourcePage=i;renderSourcePage()}catch(e){}};
@@ -4191,7 +4191,7 @@ var cats = ['전체','입찰','계약','VAATZ','5스타','원가','일반자재'
 var questions = [
   {id:1, cat:'입찰', title:'탄력적입찰에서 1회차 유찰 시 처리 절차가 궁금합니다',
    body:'구매업무규정 제23조에 따른 재공고 요건과 수의계약 전환 기준이 궁금합니다. VAATZ에서 유찰처리 메뉴는 어디서 찾나요?',
-   tags:['탄력적입찰','유찰','수의계약'], author:'계약초보', time:'3일 전', votes:47, views:312, adopted:true,
+   tags:['탄력적입찰','유찰','수의계약'], author:'계약초보', time:'3일 전', votes:47, views:312, lv:2, adopted:true,
    answers:[
      {id:11, author:'프로큐어마스터', role:'CPO', lv:4, time:'3일 전', votes:42, adopted:true,
       body:'구매업무규정 제23조 4항에 따르면 1회차 유찰 시 참여 업체 확대 또는 수의계약 전환이 가능합니다.\n\n실무적으로는 구매위원회 사전 승인을 받고 진행해야 하며, VAATZ에서는 [입찰관리 → 유찰처리] 메뉴에서 처리합니다. 참여 업체 확대 후 재공고 기간은 최소 5영업일이 필요합니다.'},
@@ -4200,29 +4200,29 @@ var questions = [
    ]},
   {id:2, cat:'원가', title:'원가모드에서 단가 이력과 환율 기준을 같이 볼 수 있나요?',
    body:'원가 관련 질의 시 어떤 DB와 문서를 연결해야 하는지 궁금합니다.',
-   tags:['원가모드','단가','환율'], author:'원가분석러', time:'2시간 전', votes:34, views:178, adopted:false,
+   tags:['원가모드','단가','환율'], author:'원가분석러', time:'2시간 전', votes:34, views:178, lv:2, adopted:false,
    answers:[
      {id:21, author:'VAATZ달인', role:'수석바이어', lv:3, time:'1시간 전', votes:12, adopted:false,
       body:'원가모드는 현재 단가 이력 DB 연동 중입니다. 설정 > AI 모드 > 원가 에서 VAATZ 마스터 데이터 연결을 활성화하면 가능합니다.'},
    ]},
   {id:3, cat:'5스타', title:'5스타 4→5등급 승급 시 IATF 16949가 필수인가요?',
    body:'2026년 기준으로 필수 요건인지, 기존 업체의 유예기간이 있는지 확인하고 싶습니다.',
-   tags:['5스타','IATF16949','협력사'], author:'품질매니저', time:'1일 전', votes:18, views:95, adopted:false,
+   tags:['5스타','IATF16949','협력사'], author:'품질매니저', time:'1일 전', votes:18, views:95, lv:1, adopted:false,
    answers:[]},
   {id:4, cat:'VAATZ', title:'VAATZ 해외 발주 환율은 발주 시점과 결제 시점 중 어느 것이 기준인가요?',
    body:'글로벌 구매 모듈에서 환율 자동 적용 기준과 예외 처리 방법이 궁금합니다.',
-   tags:['VAATZ','환율','해외구매'], author:'해외구매담당', time:'오늘', votes:22, views:143, adopted:true,
+   tags:['VAATZ','환율','해외구매'], author:'해외구매담당', time:'오늘', votes:22, views:143, lv:2, adopted:true,
    answers:[
      {id:41, author:'글로벌구매Pro', role:'책임매니저', lv:3, time:'오늘', votes:19, adopted:true,
       body:'VAATZ 글로벌 구매 모듈에서 환율은 매일 09시 기준으로 자동 갱신됩니다.\n\n발주 시점 기준이며, 결제 시점 환율 차이는 [글로벌구매 → 환율관리 → 차이 정산] 메뉴에서 처리합니다.'},
    ]},
   {id:5, cat:'일반자재', title:'MRO 반복 구매 시 경매입찰 생략 기준이 있나요?',
    body:'반복 구매 품목의 계약 활용 가능 여부와 예외 승인 조건이 궁금합니다.',
-   tags:['MRO','반복구매','경매입찰'], author:'MRO담당', time:'20분 전', votes:9, views:41, adopted:false,
+   tags:['MRO','반복구매','경매입찰'], author:'MRO담당', time:'20분 전', votes:9, views:41, lv:1, adopted:false,
    answers:[]},
   {id:6, cat:'협력사', title:'협력사 평가 결과를 입찰 참여 조건에 자동 반영할 수 있나요?',
    body:'5스타 등급과 납품 품질 이슈를 VAATZ 입찰 초대 조건에 반영하는 방법이 궁금합니다.',
-   tags:['협력사','입찰초대','5스타'], author:'품질지킴이', time:'어제', votes:16, views:88, adopted:false,
+   tags:['협력사','입찰초대','5스타'], author:'품질지킴이', time:'어제', votes:16, views:88, lv:1, adopted:false,
    answers:[]},
 ];
 
@@ -4237,6 +4237,34 @@ function filtered(){
     }
     return true;
   });
+}
+
+function qa36MiniChar(lv){
+  var bodyC=['','#4A8EF0','#26A69A','#FFA726','#AB47BC','#EF5350'][lv]||'#4A8EF0';
+  return '<div class="qa36-char-fig" onclick="event.stopPropagation();openComm(\'char\')" title="캐릭터 꾸미기">' +
+    '<svg viewBox="0 0 80 100" xmlns="http://www.w3.org/2000/svg">' +
+      '<ellipse cx="40" cy="98" rx="14" ry="2.5" fill="rgba(0,0,0,0.10)"/>' +
+      '<rect x="25" y="60" width="30" height="29" rx="9" fill="' + bodyC + '"/>' +
+      '<rect x="11" y="63" width="13" height="7" rx="3.5" fill="' + bodyC + '"/>' +
+      '<rect x="56" y="63" width="13" height="7" rx="3.5" fill="' + bodyC + '"/>' +
+      '<rect x="28" y="88" width="10" height="9" rx="4" fill="#1A48A8"/>' +
+      '<rect x="42" y="88" width="10" height="9" rx="4" fill="#1A48A8"/>' +
+      '<ellipse cx="33" cy="97" rx="6" ry="2.5" fill="#111"/>' +
+      '<ellipse cx="47" cy="97" rx="6" ry="2.5" fill="#111"/>' +
+      '<text x="40" y="77" text-anchor="middle" font-size="5" font-weight="800" fill="rgba(255,255,255,0.88)" font-family="sans-serif">VAATZ</text>' +
+      '<rect x="34" y="53" width="12" height="8" rx="4" fill="#FFCC99"/>' +
+      '<ellipse cx="40" cy="38" rx="20" ry="18" fill="#FFCC99"/>' +
+      '<path d="M20 34 Q20 14 40 13 Q60 14 60 34 Q56 19 40 19 Q24 19 20 34Z" fill="#3A1A05"/>' +
+      '<ellipse cx="30" cy="38" rx="6" ry="6.5" fill="white"/>' +
+      '<ellipse cx="50" cy="38" rx="6" ry="6.5" fill="white"/>' +
+      '<circle cx="31" cy="38" r="3.5" fill="#1A3A80"/>' +
+      '<circle cx="51" cy="38" r="3.5" fill="#1A3A80"/>' +
+      '<circle cx="32" cy="36" r="1" fill="white"/>' +
+      '<circle cx="52" cy="36" r="1" fill="white"/>' +
+      '<path d="M33 49 Q40 54 47 49" stroke="#C07040" stroke-width="1.5" fill="none" stroke-linecap="round"/>' +
+    '</svg>' +
+    '<span class="qa36-char-lv-tag lv-' + lv + '">Lv.' + lv + '</span>' +
+  '</div>';
 }
 
 function renderList(ct){
@@ -4306,17 +4334,22 @@ function renderDetail(ct){
     '<button class="qa36-back" onclick="qa36Back()">← 목록으로</button>' +
 
     '<div class="qa36-q-card">' +
-      '<div class="qa36-q-meta">' +
-        '<span class="qa36-cat-tag">' + (catIcons[q.cat]||'') + ' ' + esc(q.cat) + '</span>' +
-        '<span class="qa36-q-author">👤 ' + esc(q.author) + '</span>' +
-        '<span>' + q.time + '</span>' +
-        q.tags.map(function(t){ return '<span class="qa36-tag">#' + esc(t) + '</span>'; }).join('') +
-      '</div>' +
-      '<div class="qa36-q-title">' + esc(q.title) + '</div>' +
-      '<div class="qa36-q-body">' + esc(q.body) + '</div>' +
-      '<div class="qa36-q-foot">' +
-        '<span class="qa36-view-count">👁 조회 ' + (q.views||0) + '</span>' +
-        '<button class="qa36-vote-btn" onclick="qa36VoteQ(' + q.id + ',this)">👍 추천 ' + q.votes + '</button>' +
+      '<div class="qa36-q-layout">' +
+        '<div class="qa36-q-content">' +
+          '<div class="qa36-q-meta">' +
+            '<span class="qa36-cat-tag">' + (catIcons[q.cat]||'') + ' ' + esc(q.cat) + '</span>' +
+            '<span class="qa36-q-author">👤 ' + esc(q.author) + '</span>' +
+            '<span>' + q.time + '</span>' +
+            q.tags.map(function(t){ return '<span class="qa36-tag">#' + esc(t) + '</span>'; }).join('') +
+          '</div>' +
+          '<div class="qa36-q-title">' + esc(q.title) + '</div>' +
+          '<div class="qa36-q-body">' + esc(q.body) + '</div>' +
+          '<div class="qa36-q-foot">' +
+            '<span class="qa36-view-count">👁 조회 ' + (q.views||0) + '</span>' +
+            '<button class="qa36-vote-btn" onclick="qa36VoteQ(' + q.id + ',this)">👍 추천 ' + q.votes + '</button>' +
+          '</div>' +
+        '</div>' +
+        '<div class="qa36-char-col">' + qa36MiniChar(q.lv||1) + '</div>' +
       '</div>' +
     '</div>' +
 
@@ -4327,17 +4360,22 @@ function renderDetail(ct){
         : sortedAns.map(function(a){
             return '<div class="qa36-ans-card' + (a.adopted?' adopted':'') + '">' +
               (a.adopted ? '<div class="qa36-ans-adopted-badge">✓ 채택 답변</div>' : '') +
-              '<div class="qa36-ans-meta">' +
-                '<div class="qa36-ans-author">' +
-                  '<span class="qa36-ans-lv lv-' + a.lv + '">Lv.' + a.lv + '</span>' +
-                  '<span class="qa36-ans-nm">' + esc(a.author) + '</span>' +
-                  '<span class="qa36-ans-role">' + esc(a.role) + '</span>' +
+              '<div class="qa36-ans-layout">' +
+                '<div class="qa36-ans-content">' +
+                  '<div class="qa36-ans-meta">' +
+                    '<div class="qa36-ans-author">' +
+                      '<span class="qa36-ans-lv lv-' + a.lv + '">Lv.' + a.lv + '</span>' +
+                      '<span class="qa36-ans-nm">' + esc(a.author) + '</span>' +
+                      '<span class="qa36-ans-role">' + esc(a.role) + '</span>' +
+                    '</div>' +
+                    '<span class="qa36-ans-time">' + a.time + '</span>' +
+                  '</div>' +
+                  '<div class="qa36-ans-body">' + esc(a.body) + '</div>' +
+                  '<div class="qa36-ans-foot">' +
+                    '<button class="qa36-vote-btn" onclick="qa36VoteA(' + q.id + ',' + a.id + ',this)">👍 ' + a.votes + '</button>' +
+                  '</div>' +
                 '</div>' +
-                '<span class="qa36-ans-time">' + a.time + '</span>' +
-              '</div>' +
-              '<div class="qa36-ans-body">' + esc(a.body) + '</div>' +
-              '<div class="qa36-ans-foot">' +
-                '<button class="qa36-vote-btn" onclick="qa36VoteA(' + q.id + ',' + a.id + ',this)">👍 ' + a.votes + '</button>' +
+                '<div class="qa36-char-col">' + qa36MiniChar(a.lv) + '</div>' +
               '</div>' +
             '</div>';
           }).join('')
@@ -4406,9 +4444,11 @@ window.qa36OpenAsk = function(){
       '<div class="rq-h" style="display:flex;justify-content:space-between;align-items:center">✏️ 질문 등록<button class="adm-x" onclick="qa36CloseAsk()">✕</button></div>' +
       '<div style="display:flex;flex-direction:column;gap:12px;padding:4px 0">' +
         '<div><label style="font-size:11px;font-weight:600;color:var(--text-3);display:block;margin-bottom:5px">카테고리</label>' +
-          '<select id="qa36AskCat" class="frm-i" style="width:100%">' +
+          '<select id="qa36AskCat" class="frm-i" style="width:100%" onchange="var ci=document.getElementById(\'qa36CatCustom\');if(ci)ci.style.display=this.value===\'__custom__\'?\'block\':\'none\'">' +
             cats.filter(function(c){ return c!=='전체'; }).map(function(c){ return '<option value="'+c+'">'+c+'</option>'; }).join('') +
-          '</select></div>' +
+            '<option value="__custom__">✏️ 직접 입력...</option>' +
+          '</select>' +
+          '<input id="qa36CatCustom" class="frm-i" placeholder="카테고리 직접 입력" style="width:100%;display:none;margin-top:6px"></div>' +
         '<div><label style="font-size:11px;font-weight:600;color:var(--text-3);display:block;margin-bottom:5px">제목</label><input id="qa36AskTitle" class="frm-i" placeholder="질문을 한 줄로 요약해주세요" style="width:100%"></div>' +
         '<div><label style="font-size:11px;font-weight:600;color:var(--text-3);display:block;margin-bottom:5px">상세 내용</label><textarea id="qa36AskBody" class="frm-i" style="width:100%;min-height:100px;resize:vertical" placeholder="상황, 관련 문서, VAATZ 메뉴, 원하는 답변 형태를 적어주세요"></textarea></div>' +
         '<div><label style="font-size:11px;font-weight:600;color:var(--text-3);display:block;margin-bottom:5px">태그 (쉼표 구분)</label><input id="qa36AskTags" class="frm-i" placeholder="탄력적입찰, 수의계약" style="width:100%"></div>' +
@@ -4424,7 +4464,8 @@ window.qa36OpenAsk = function(){
 };
 window.qa36CloseAsk = function(){ document.getElementById('qa36AskModal')?.remove(); };
 window.qa36SubmitAsk = function(){
-  var cat = document.getElementById('qa36AskCat')?.value;
+  var catRaw = document.getElementById('qa36AskCat')?.value;
+  var cat = catRaw === '__custom__' ? (document.getElementById('qa36CatCustom')?.value.trim() || '기타') : catRaw;
   var title = document.getElementById('qa36AskTitle')?.value.trim();
   var body = document.getElementById('qa36AskBody')?.value.trim();
   var tagsRaw = document.getElementById('qa36AskTags')?.value || '';

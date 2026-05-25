@@ -1759,6 +1759,7 @@ textarea:focus { outline: none; }
 .app:has(.rp.sh) .float-char {
   right: 360px !important;
   transition: right 0.25s ease;
+  pointer-events: none !important;
 }
 
 /* ── Admin 업무 파이프라인 ── */
@@ -2012,10 +2013,11 @@ textarea:focus { outline: none; }
   font-size: 11px !important;
 }
 
-/* 우측 패널 열릴 때 float-char 위치 */
+/* 우측 패널 열릴 때 float-char 위치 + 클릭 차단 방지 */
 .app:has(.rp.sh) .float-char {
   right: 360px !important;
   transition: right 0.25s ease;
+  pointer-events: none !important;
 }
 
 /* ════════════════════════════════════════
@@ -2873,6 +2875,122 @@ html[data-theme="light"] .src-doc-meta {
   color: var(--accent);
   font-size: 11px;
 }
+
+/* ═══════════════════════════════════════
+ * V29 AI 모드 선택기 — 배지 + 설명 분리
+ * ═══════════════════════════════════════ */
+.v29-mode-current {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 12px;
+  background: var(--bg-2);
+  border: 1.5px solid var(--border-1);
+  border-radius: 12px;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all .15s;
+  white-space: nowrap;
+}
+.v29-mode-current:hover { border-color: var(--accent-bd); background: var(--bg-3); }
+.v29-mode-icon { font-size: 15px; flex-shrink: 0; line-height: 1; }
+.v29-mode-copy { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; }
+.v29-mode-title {
+  font-size: 11px;
+  font-weight: 800;
+  padding: 2px 8px;
+  border-radius: 20px;
+  background: var(--accent);
+  color: white;
+  white-space: nowrap;
+  letter-spacing: 0.01em;
+  line-height: 1.4;
+}
+.v29-mode-desc {
+  font-size: 10px;
+  color: var(--text-4);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 220px;
+  line-height: 1.3;
+}
+/* 모드별 배지 색상 */
+#v29ModeCurrent[data-mode="통합모드"] .v29-mode-title { background: #4A8EF0; }
+#v29ModeCurrent[data-mode="생산자재 모드"] .v29-mode-title { background: #26A69A; }
+#v29ModeCurrent[data-mode="일반자재 모드"] .v29-mode-title { background: #FFA726; }
+#v29ModeCurrent[data-mode="원가모드"] .v29-mode-title { background: #AB47BC; }
+
+/* ═══════════════════════════════════════
+ * 우측 작업 패널 스크롤 수정
+ * ═══════════════════════════════════════ */
+.rp { height: 100% !important; }
+.rp-tabs { flex: none !important; flex-shrink: 0 !important; }
+#rpPaneSrc { overflow: hidden !important; }
+.v29-source-shell {
+  display: flex !important;
+  flex-direction: column !important;
+  height: 100% !important;
+  min-height: 0 !important;
+}
+.v29-src-body {
+  flex: 1 !important;
+  min-height: 0 !important;
+  overflow: hidden !important;
+  display: flex !important;
+}
+.v29-doc-scroll {
+  flex: 1 !important;
+  overflow-y: auto !important;
+  min-height: 0 !important;
+}
+
+/* ═══════════════════════════════════════
+ * Q&A 답변/질문 카드 캐릭터 레이아웃
+ * ═══════════════════════════════════════ */
+.qa36-ans-layout { display: flex; gap: 16px; align-items: flex-start; }
+.qa36-ans-content { flex: 1; min-width: 0; }
+.qa36-q-layout { display: flex; gap: 16px; align-items: flex-start; }
+.qa36-q-content { flex: 1; min-width: 0; }
+.qa36-char-col {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 56px;
+  padding-top: 4px;
+}
+.qa36-char-fig {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  cursor: pointer;
+  transition: transform .18s cubic-bezier(.34,1.56,.64,1);
+}
+.qa36-char-fig:hover { transform: translateY(-3px) scale(1.06); }
+.qa36-char-fig svg {
+  width: 44px;
+  height: 55px;
+  display: block;
+  filter: drop-shadow(0 3px 8px rgba(30,60,160,0.20));
+}
+[data-theme="light"] .qa36-char-fig svg {
+  filter: brightness(1.05) drop-shadow(0 3px 8px rgba(80,120,200,0.15));
+}
+.qa36-char-lv-tag {
+  font-size: 8px;
+  font-weight: 800;
+  padding: 2px 6px;
+  border-radius: 5px;
+  color: white;
+  white-space: nowrap;
+}
+.qa36-char-lv-tag.lv-1 { background: #4A8EF0; }
+.qa36-char-lv-tag.lv-2 { background: #26A69A; }
+.qa36-char-lv-tag.lv-3 { background: #FFA726; }
+.qa36-char-lv-tag.lv-4 { background: #AB47BC; }
+.qa36-char-lv-tag.lv-5 { background: #EF5350; }
 
 /* Card header with vote badge on right */
 .v26-q-card-head {

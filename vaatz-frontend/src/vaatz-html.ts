@@ -6,9 +6,6 @@
 <div class="brand"><div class="brand-m" onclick="sv('wl')" style="cursor:pointer" title="홈으로"><svg viewBox="0 0 24 24" fill="none"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14.5v-9l7 4.5-7 4.5z" fill="white" opacity=".9"/></svg></div><div><div class="brand-n">VAATZ AI</div><div class="brand-s">Hyundai · Kia Procurement</div></div></div>
 <button class="new-c" onclick="sv('wl')">＋ 새 대화</button>
 </div>
-<div class="sb-nav"><div class="sb-lb">메뉴</div>
-<button class="sb-i on"><span class="sb-ic sb-ic-chat"></span>AI 질의응답</button>
-</div>
 <div class="sb-nav"><div class="sb-lb">구매 DB</div>
 <button class="sb-i" onclick="openDB('term')"><span class="sb-ic sb-ic-book"></span>용어사전</button>
 <button class="sb-i" onclick="openDB('std')"><span class="sb-ic sb-ic-list"></span>업무표준</button>
@@ -39,7 +36,7 @@
 <div class="mn">
 <div class="tb">
 <div class="tb-l">
-    <div class="tb-t">AI 질의응답</div>
+    <div class="tb-t">VAATZ AI</div>
     <div class="sc-sw">
         <button class="sc-btn on" onclick="scT(this,'all')">구매지식</button>
         <button class="sc-btn" onclick="scT(this,'my')">내 파일</button>
@@ -1499,9 +1496,7 @@
 
 <!-- Community Side Buttons -->
 <div class="comm-side">
-<div class="comm-side-btn" onclick="openComm('qa')" title="지식 Q&A"><span>💡</span><span>Q&A</span></div>
-<div class="comm-side-btn" onclick="openComm('hof')" title="명예의 전당"><span>🏆</span><span>랭킹</span></div>
-<div class="comm-side-btn" onclick="openComm('char')" title="내 캐릭터"><span>🧸</span><span>캐릭터</span></div>
+<div class="comm-side-btn" onclick="openComm('qa')" title="구매 커뮤니티 Q&A"><span>💡</span><span>Q&A</span></div>
 </div>
 
 <!-- Floating Character (draggable) -->
