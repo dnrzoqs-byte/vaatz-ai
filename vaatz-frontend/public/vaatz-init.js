@@ -52,13 +52,21 @@ function dismissToast(el){
 let currentView='ch';
 function sv(v){
   currentView=v;
-  document.getElementById('v-wl').style.display=v==='wl'?'block':'none';
-  document.getElementById('v-ch').style.display=v==='ch'?'block':'none';
-  document.querySelectorAll('.pfb').forEach(b=>b.classList.remove('on'));
-  document.querySelectorAll('.pfb')[v==='wl'?0:1].classList.add('on');
-  // Update sidebar
-  document.querySelectorAll('.sb-nav .sb-i').forEach(x=>x.classList.remove('on'));
-  document.querySelector('.sb-nav .sb-i').classList.add('on');
+  const vWl=document.getElementById('v-wl');
+  const vCh=document.getElementById('v-ch');
+  if(vWl) vWl.style.display=v==='wl'?'block':'none';
+  if(vCh) vCh.style.display=v==='ch'?'block':'none';
+  // .pfb buttons (optional — safe guard)
+  const pfbs=document.querySelectorAll('.pfb');
+  pfbs.forEach(b=>b.classList.remove('on'));
+  const pfbTarget=pfbs[v==='wl'?0:1];
+  if(pfbTarget) pfbTarget.classList.add('on');
+  // Sidebar highlight
+  try{
+    document.querySelectorAll('.sb-nav .sb-i').forEach(x=>x.classList.remove('on'));
+    const first=document.querySelector('.sb-nav .sb-i');
+    if(first) first.classList.add('on');
+  }catch(e){}
 }
 
 function oa(){

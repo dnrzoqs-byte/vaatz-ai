@@ -16,6 +16,12 @@ html, body, #root {
   min-width: 1024px;
 }
 
+/* ── 스크롤 컨테이너: flex child에서 overflow-y:auto 정상 동작 ── */
+.cs {
+  min-height: 0;
+  scroll-behavior: smooth;
+}
+
 /* ── 채팅 콘텐츠: 좌우 공백, 꽉 채우기 ── */
 .cc {
   max-width: 100% !important;
@@ -170,35 +176,37 @@ html, body, #root {
 
 /* ── 웰컴 화면 ── */
 .wl {
-  padding: 56px 20px 32px;
-  max-width: 640px;
+  padding: 44px 20px 36px;
+  max-width: 660px;
   margin: 0 auto;
+  width: 100%;
 }
 .wl-m {
-  width: 54px;
-  height: 54px;
-  border-radius: 14px;
-  margin-bottom: 18px;
+  width: 56px;
+  height: 56px;
+  border-radius: 15px;
+  margin-bottom: 20px;
 }
 .wl-ti {
-  font-size: 22px;
+  font-size: 23px;
   font-weight: 800;
-  letter-spacing: -0.7px;
-  margin-bottom: 7px;
+  letter-spacing: -0.8px;
+  margin-bottom: 8px;
 }
 .wl-d {
   font-size: 13.5px;
-  line-height: 1.75;
-  margin-bottom: 26px;
+  line-height: 1.8;
+  margin-bottom: 28px;
   color: var(--text-3);
+  text-align: center;
 }
-.wg { gap: 8px; max-width: 520px; }
-.wc { padding: 16px 14px; border-radius: 10px; }
-.wc-i { font-size: 18px; margin-bottom: 6px; }
+.wg { gap: 10px; max-width: 540px; }
+.wc { padding: 16px 15px; border-radius: 11px; }
+.wc-i { font-size: 20px; margin-bottom: 7px; }
 .wc-t { font-size: 12.5px; font-weight: 600; }
 .wc-d { font-size: 10.5px; line-height: 1.5; }
-.wt { margin-top: 20px; max-width: 520px; }
-.wt-i { font-size: 11px; padding: 5px 12px; }
+.wt { margin-top: 22px; max-width: 540px; }
+.wt-i { font-size: 11px; padding: 6px 14px; border-radius: 18px; }
 
 /* ── 메시지 ── */
 .msg { margin-bottom: 20px; }
@@ -3499,21 +3507,4 @@ html:not([data-theme="light"]) #shopCharPreview {
 }
 .tf-more-row:hover { background: var(--bg-3); }
 
-/* ── 가운데 채팅 창 꽉 채우기 ── */
-.cc {
-  max-width: 100% !important;
-  margin: 0 !important;
-  padding: 28px 36px 16px !important;
-}
-.iw {
-  max-width: 100% !important;
-  padding: 0 36px 18px !important;
-}
-.wl {
-  max-width: 100% !important;
-  margin: 0 !important;
-  padding: 52px 40px 32px !important;
-}
-.wg { max-width: 560px !important; }
-.wt { max-width: 560px !important; }
 
