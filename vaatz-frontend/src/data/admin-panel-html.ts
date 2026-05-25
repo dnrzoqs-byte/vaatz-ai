@@ -267,48 +267,131 @@
 
 <!-- ════ 팀별 목록 ════ -->
 <div class="adm-b" id="p-list" style="display:none">
-<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
-  <div style="font-size:13px;font-weight:600">📋 팀별 문서 목록 <span style="color:var(--text-4);font-size:11px;font-weight:400">— 전체 8팀 · 폴더별 요청/관리</span></div>
-  <div style="display:flex;gap:4px">
-    <button class="tb-b" style="font-size:11px" onclick="document.querySelectorAll('#p-list .ft-ds').forEach(d=>{d.style.maxHeight='2000px';d.classList.remove('cl')})">📂 전체 펼치기</button>
-    <button class="tb-b" style="font-size:11px" onclick="document.querySelectorAll('#p-list .ft-ds').forEach(d=>{d.style.maxHeight='0';d.classList.add('cl')})">📁 전체 접기</button>
+
+<!-- 헤더 + 요약 -->
+<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+  <div>
+    <div style="font-size:13px;font-weight:700">📋 팀별 문서 요청 현황</div>
+    <div style="font-size:10px;color:var(--text-4);margin-top:2px">전체 8팀 · 검토 대기 <b style="color:var(--a)">7건</b> · 완료 <b style="color:var(--g)">7건</b></div>
+  </div>
+  <div style="display:flex;gap:6px">
+    <button class="tb-b" style="font-size:11px" onclick="listFilterAll()">전체</button>
+    <button class="tb-b" style="font-size:11px;background:var(--a-dim);color:var(--a)" onclick="listFilterPending()">대기만</button>
   </div>
 </div>
-<div style="font-size:11px;color:var(--text-3);margin-bottom:12px">팀별 폴더를 클릭하여 문서를 확인하고 승인·보완 요청·이전 단계 반려·삭제를 처리하세요.</div>
 
-<div class="ft-f" style="margin-bottom:4px"><div class="ft-fh" onclick="tf(this)" style="background:var(--bg-2);border:1px solid var(--border-1);border-radius:6px"><span class="ft-ar op">▶</span><span class="ft-ic">📂</span><span class="ft-nm">구매전략팀</span><span style="font-size:9px;color:var(--text-4);margin-left:4px">Admin: 김현대</span><span style="font-size:10px;background:var(--r-dim);color:var(--r);padding:1px 6px;border-radius:4px;font-weight:600;margin-left:auto;margin-right:6px">긴급 2</span></div>
-<div class="ft-ds" style="max-height:400px;padding-left:10px">
-  <div class="req-card"><div class="req-body"><div class="req-title">조달청 물품구매계약 특수조건</div><div class="req-meta">박성민 매니저 · 02.08 · <span class="bd bd-a" style="font-size:8px">대기 3일</span></div></div><div class="req-acts"><button class="abtn ok" onclick="appReq(this)">승인</button><button class="abtn" style="color:var(--a)" onclick="rejReq(this)">보완 요청</button><button class="abtn no" onclick="listDeleteDoc(this)">🗑 삭제</button></div></div>
-  <div class="req-card"><div class="req-body"><div class="req-title">해외법인 구매 승인 프로세스</div><div class="req-meta">이준혁 책임매니저 · 02.07 · <span class="bd bd-a" style="font-size:8px">대기 2일</span></div></div><div class="req-acts"><button class="abtn ok" onclick="appReq(this)">승인</button><button class="abtn" style="color:var(--a)" onclick="rejReq(this)">보완 요청</button><button class="abtn no" onclick="listDeleteDoc(this)">🗑 삭제</button></div></div>
-</div></div>
+<!-- 팀 탭 필터 -->
+<div style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:12px" id="listTeamTabs">
+  <button class="v25-chip on" onclick="listSetTeam(this,'전체')">전체</button>
+  <button class="v25-chip" onclick="listSetTeam(this,'구매전략팀')">구매전략</button>
+  <button class="v25-chip" onclick="listSetTeam(this,'반도체구매팀')">반도체</button>
+  <button class="v25-chip" onclick="listSetTeam(this,'구매품질기획팀')">품질기획</button>
+  <button class="v25-chip" onclick="listSetTeam(this,'PT제어부품구매팀')">PT제어</button>
+  <button class="v25-chip" onclick="listSetTeam(this,'구매디지털추진팀')">디지털</button>
+</div>
 
-<div class="ft-f" style="margin-bottom:4px"><div class="ft-fh" onclick="tf(this)" style="background:var(--bg-2);border:1px solid var(--border-1);border-radius:6px"><span class="ft-ar">▶</span><span class="ft-ic">📂</span><span class="ft-nm">반도체구매팀</span><span style="font-size:9px;color:var(--text-4);margin-left:4px">Admin: 김현대</span><span style="font-size:10px;background:var(--a-dim);color:var(--a);padding:1px 6px;border-radius:4px;font-weight:600;margin-left:auto;margin-right:6px">대기 2</span></div>
-<div class="ft-ds cl" style="max-height:0;padding-left:10px">
-  <div class="req-card"><div class="req-body"><div class="req-title">반도체 수출규제 국가별 현황</div><div class="req-meta">최유진 매니저 · 02.08 · <span class="bd bd-a" style="font-size:8px">대기</span></div></div><div class="req-acts"><button class="abtn ok" onclick="appReq(this)">승인</button><button class="abtn" style="color:var(--a)" onclick="rejReq(this)">보완 요청</button><button class="abtn no" onclick="listDeleteDoc(this)">🗑 삭제</button></div></div>
-  <div class="req-card"><div class="req-body"><div class="req-title">TSMC 납기 관리 가이드</div><div class="req-meta">최유진 매니저 · 02.06 · <span class="bd bd-a" style="font-size:8px">대기</span></div></div><div class="req-acts"><button class="abtn ok" onclick="appReq(this)">승인</button><button class="abtn" style="color:var(--a)" onclick="rejReq(this)">보완 요청</button><button class="abtn no" onclick="listDeleteDoc(this)">🗑 삭제</button></div></div>
-</div></div>
+<!-- 문서 리스트 (flat) -->
+<div id="listDocArea">
 
-<div class="ft-f" style="margin-bottom:4px"><div class="ft-fh" onclick="tf(this)" style="background:var(--bg-2);border:1px solid var(--border-1);border-radius:6px"><span class="ft-ar">▶</span><span class="ft-ic">📂</span><span class="ft-nm">구매품질기획팀</span><span style="font-size:9px;color:var(--text-4);margin-left:4px">Admin: 정현수</span><span style="font-size:10px;background:var(--g-dim);color:var(--g);padding:1px 6px;border-radius:4px;font-weight:600;margin-left:auto;margin-right:6px">완료 1</span></div>
-<div class="ft-ds cl" style="max-height:0;padding-left:10px">
-  <div class="req-card done"><div class="req-body"><div class="req-title">공정거래법 하도급 관련 조항</div><div class="req-meta">정현수 책임매니저 · 02.07</div></div><div class="req-acts"><span class="bd bd-g">승인됨</span><button class="abtn" style="color:var(--a)" onclick="listRevertDoc(this)">↩ 이전 단계</button><button class="abtn no" onclick="listDeleteDoc(this)">🗑 삭제</button></div></div>
-</div></div>
+<!-- 구매전략팀 -->
+<div class="list-team-label" data-team="구매전략팀">
+  <span>구매전략팀</span><span class="bd bd-r" style="font-size:8px;margin-left:6px">긴급 2</span>
+</div>
+<div class="list-doc-row" data-team="구매전략팀">
+  <div class="list-doc-main">
+    <div class="list-doc-title">조달청 물품구매계약 특수조건</div>
+    <div class="list-doc-meta">박성민 매니저 · 02.08 <span class="bd bd-a" style="font-size:8px;margin-left:4px">대기 3일</span></div>
+  </div>
+  <div class="list-doc-acts">
+    <button class="abtn ok" onclick="appReq(this)">승인</button>
+    <button class="abtn" style="color:var(--a)" onclick="rejReq(this)">보완</button>
+    <button class="abtn no" onclick="listDeleteDoc(this)">삭제</button>
+  </div>
+</div>
+<div class="list-doc-row" data-team="구매전략팀">
+  <div class="list-doc-main">
+    <div class="list-doc-title">해외법인 구매 승인 프로세스</div>
+    <div class="list-doc-meta">이준혁 책임매니저 · 02.07 <span class="bd bd-a" style="font-size:8px;margin-left:4px">대기 2일</span></div>
+  </div>
+  <div class="list-doc-acts">
+    <button class="abtn ok" onclick="appReq(this)">승인</button>
+    <button class="abtn" style="color:var(--a)" onclick="rejReq(this)">보완</button>
+    <button class="abtn no" onclick="listDeleteDoc(this)">삭제</button>
+  </div>
+</div>
 
-<div class="ft-f" style="margin-bottom:4px"><div class="ft-fh" onclick="tf(this)" style="background:var(--bg-2);border:1px solid var(--border-1);border-radius:6px"><span class="ft-ar">▶</span><span class="ft-ic">📂</span><span class="ft-nm">PT제어부품구매팀</span><span style="font-size:9px;color:var(--text-4);margin-left:4px">Admin: 김현대</span><span style="font-size:10px;background:var(--a-dim);color:var(--a);padding:1px 6px;border-radius:4px;font-weight:600;margin-left:auto;margin-right:6px">대기 1</span></div>
-<div class="ft-ds cl" style="max-height:0;padding-left:10px">
-  <div class="req-card"><div class="req-body"><div class="req-title">전동화 부품 단가 벤치마크</div><div class="req-meta">한도윤 매니저 · 02.08 · <span class="bd bd-a" style="font-size:8px">대기</span></div></div><div class="req-acts"><button class="abtn ok" onclick="appReq(this)">승인</button><button class="abtn" style="color:var(--a)" onclick="rejReq(this)">보완 요청</button><button class="abtn no" onclick="listDeleteDoc(this)">🗑 삭제</button></div></div>
-</div></div>
+<!-- 반도체구매팀 -->
+<div class="list-team-label" data-team="반도체구매팀">
+  <span>반도체구매팀</span><span class="bd bd-a" style="font-size:8px;margin-left:6px">대기 2</span>
+</div>
+<div class="list-doc-row" data-team="반도체구매팀">
+  <div class="list-doc-main">
+    <div class="list-doc-title">반도체 수출규제 국가별 현황</div>
+    <div class="list-doc-meta">최유진 매니저 · 02.08 <span class="bd bd-a" style="font-size:8px;margin-left:4px">대기</span></div>
+  </div>
+  <div class="list-doc-acts">
+    <button class="abtn ok" onclick="appReq(this)">승인</button>
+    <button class="abtn" style="color:var(--a)" onclick="rejReq(this)">보완</button>
+    <button class="abtn no" onclick="listDeleteDoc(this)">삭제</button>
+  </div>
+</div>
+<div class="list-doc-row" data-team="반도체구매팀">
+  <div class="list-doc-main">
+    <div class="list-doc-title">TSMC 납기 관리 가이드</div>
+    <div class="list-doc-meta">최유진 매니저 · 02.06 <span class="bd bd-a" style="font-size:8px;margin-left:4px">대기</span></div>
+  </div>
+  <div class="list-doc-acts">
+    <button class="abtn ok" onclick="appReq(this)">승인</button>
+    <button class="abtn" style="color:var(--a)" onclick="rejReq(this)">보완</button>
+    <button class="abtn no" onclick="listDeleteDoc(this)">삭제</button>
+  </div>
+</div>
 
-<div class="ft-f" style="margin-bottom:4px;opacity:.75"><div class="ft-fh" onclick="tf(this)" style="background:var(--bg-2);border:1px solid var(--border-1);border-radius:6px"><span class="ft-ar">▶</span><span class="ft-ic">📂</span><span class="ft-nm">구매역량개발팀</span><span style="font-size:9px;color:var(--text-4);margin-left:4px">Admin: 김현대</span><span style="font-size:10px;background:var(--bg-4);color:var(--text-4);padding:1px 6px;border-radius:4px;font-weight:600;margin-left:auto;margin-right:6px">요청 없음</span></div>
-<div class="ft-ds cl" style="max-height:0"><div style="padding:10px;font-size:11px;color:var(--text-4)">현재 요청된 문서가 없습니다.</div></div></div>
+<!-- 구매품질기획팀 -->
+<div class="list-team-label" data-team="구매품질기획팀">
+  <span>구매품질기획팀</span><span class="bd bd-g" style="font-size:8px;margin-left:6px">완료 1</span>
+</div>
+<div class="list-doc-row done" data-team="구매품질기획팀">
+  <div class="list-doc-main">
+    <div class="list-doc-title">공정거래법 하도급 관련 조항</div>
+    <div class="list-doc-meta">정현수 책임매니저 · 02.07</div>
+  </div>
+  <div class="list-doc-acts">
+    <span class="bd bd-g" style="font-size:9px">승인됨</span>
+    <button class="abtn" style="color:var(--a)" onclick="listRevertDoc(this)">↩ 반려</button>
+    <button class="abtn no" onclick="listDeleteDoc(this)">삭제</button>
+  </div>
+</div>
 
-<div class="ft-f" style="margin-bottom:4px;opacity:.75"><div class="ft-fh" onclick="tf(this)" style="background:var(--bg-2);border:1px solid var(--border-1);border-radius:6px"><span class="ft-ar">▶</span><span class="ft-ic">📂</span><span class="ft-nm">샤시부품구매1팀</span><span style="font-size:9px;color:var(--text-4);margin-left:4px">Admin: 이준혁</span><span style="font-size:10px;background:var(--bg-4);color:var(--text-4);padding:1px 6px;border-radius:4px;font-weight:600;margin-left:auto;margin-right:6px">요청 없음</span></div>
-<div class="ft-ds cl" style="max-height:0"><div style="padding:10px;font-size:11px;color:var(--text-4)">현재 요청된 문서가 없습니다.</div></div></div>
+<!-- PT제어부품구매팀 -->
+<div class="list-team-label" data-team="PT제어부품구매팀">
+  <span>PT제어부품구매팀</span><span class="bd bd-a" style="font-size:8px;margin-left:6px">대기 1</span>
+</div>
+<div class="list-doc-row" data-team="PT제어부품구매팀">
+  <div class="list-doc-main">
+    <div class="list-doc-title">전동화 부품 단가 벤치마크</div>
+    <div class="list-doc-meta">한도윤 매니저 · 02.08 <span class="bd bd-a" style="font-size:8px;margin-left:4px">대기</span></div>
+  </div>
+  <div class="list-doc-acts">
+    <button class="abtn ok" onclick="appReq(this)">승인</button>
+    <button class="abtn" style="color:var(--a)" onclick="rejReq(this)">보완</button>
+    <button class="abtn no" onclick="listDeleteDoc(this)">삭제</button>
+  </div>
+</div>
 
-<div class="ft-f" style="margin-bottom:4px;opacity:.75"><div class="ft-fh" onclick="tf(this)" style="background:var(--bg-2);border:1px solid var(--border-1);border-radius:6px"><span class="ft-ar">▶</span><span class="ft-ic">📂</span><span class="ft-nm">의장시스템부품개발팀</span><span style="font-size:9px;color:var(--text-4);margin-left:4px">Admin: 이준혁</span><span style="font-size:10px;background:var(--bg-4);color:var(--text-4);padding:1px 6px;border-radius:4px;font-weight:600;margin-left:auto;margin-right:6px">요청 없음</span></div>
-<div class="ft-ds cl" style="max-height:0"><div style="padding:10px;font-size:11px;color:var(--text-4)">현재 요청된 문서가 없습니다.</div></div></div>
+<!-- 구매디지털추진팀 -->
+<div class="list-team-label" data-team="구매디지털추진팀">
+  <span>구매디지털추진팀</span><span class="bd bd-g" style="font-size:8px;margin-left:6px">완료 6</span>
+</div>
+<div class="list-doc-row" style="opacity:.6;pointer-events:none" data-team="구매디지털추진팀">
+  <div class="list-doc-main">
+    <div class="list-doc-title" style="color:var(--text-3)">처리 완료 문서 6건</div>
+    <div class="list-doc-meta">최종 승인 탭에서 확인 가능합니다</div>
+  </div>
+  <div class="list-doc-acts"><span class="bd bd-g" style="font-size:9px">완료</span></div>
+</div>
 
-<div class="ft-f" style="margin-bottom:4px;opacity:.75"><div class="ft-fh" onclick="tf(this)" style="background:var(--bg-2);border:1px solid var(--border-1);border-radius:6px"><span class="ft-ar">▶</span><span class="ft-ic">📂</span><span class="ft-nm">구매디지털추진팀</span><span style="font-size:9px;color:var(--text-4);margin-left:4px">Admin: 김현대</span><span style="font-size:10px;background:var(--g-dim);color:var(--g);padding:1px 6px;border-radius:4px;font-weight:600;margin-left:auto;margin-right:6px">완료 6</span></div>
-<div class="ft-ds cl" style="max-height:0"><div style="padding:10px;font-size:11px;color:var(--text-4)">이미 처리된 문서 6건 — 최종 승인 탭에서 확인 가능합니다.</div></div></div>
+</div><!-- /listDocArea -->
 </div>
 
 <div class="adm-b" id="p-usr" style="display:none">

@@ -4882,3 +4882,203 @@ if(!window.__s15Web){
 
 })();
 
+/* ─── 팀별 목록 flat-list UI ────────────────────────────────── */
+(function(){
+if(document.getElementById('list-flat-style')) return;
+var s=document.createElement('style'); s.id='list-flat-style';
+s.textContent=[
+  '.list-team-label{display:flex;align-items:center;font-size:11px;font-weight:700;color:var(--text-2);padding:10px 0 5px;border-top:1px solid var(--border-1);margin-top:2px}',
+  '.list-team-label:first-child{border-top:none;margin-top:0;padding-top:0}',
+  '.list-doc-row{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:8px;background:var(--bg-2);border:1px solid var(--border-1);margin-bottom:5px}',
+  '.list-doc-row.done{opacity:.75;background:var(--bg-3)}',
+  '.list-doc-main{flex:1;min-width:0}',
+  '.list-doc-title{font-size:12.5px;font-weight:600;color:var(--text-1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}',
+  '.list-doc-meta{font-size:10px;color:var(--text-4);margin-top:2px}',
+  '.list-doc-acts{display:flex;align-items:center;gap:4px;flex-shrink:0}',
+  '.list-doc-acts .abtn{padding:3px 8px;font-size:10px}',
+].join('\n');
+document.head.appendChild(s);
+
+window.listSetTeam = function(btn, team){
+  document.querySelectorAll('#listTeamTabs .v25-chip').forEach(function(b){ b.classList.remove('on'); });
+  btn.classList.add('on');
+  var labels = document.querySelectorAll('#listDocArea .list-team-label');
+  var rows = document.querySelectorAll('#listDocArea .list-doc-row');
+  labels.forEach(function(el){
+    el.style.display = (team==='전체'||el.dataset.team===team) ? '' : 'none';
+  });
+  rows.forEach(function(el){
+    el.style.display = (team==='전체'||el.dataset.team===team) ? '' : 'none';
+  });
+};
+window.listFilterAll = function(){
+  document.querySelectorAll('#listDocArea .list-doc-row').forEach(function(r){ r.style.display=''; });
+  document.querySelectorAll('#listDocArea .list-team-label').forEach(function(l){ l.style.display=''; });
+};
+window.listFilterPending = function(){
+  document.querySelectorAll('#listDocArea .list-doc-row').forEach(function(r){
+    r.style.display = r.classList.contains('done') ? 'none' : '';
+  });
+  document.querySelectorAll('#listDocArea .list-team-label').forEach(function(l){ l.style.display=''; });
+};
+})();
+
+/* ═══════════════════════════════════════════════════════════════
+ * §16  COMMUNITY ENHANCE + 자동차 레벨 테마
+ *       HOT 실시간랭킹 · 카테고리 심플 · 채택 명예 · Lv.100 자동차
+ * ═══════════════════════════════════════════════════════════════ */
+(function(){
+'use strict';
+
+/* ── 1. 자동차 레벨 타이틀 (Lv.1~100) ───────────────────────── */
+var AUTO_LV = [
+  {min:100,title:'⚡ VAATZ 챔피언',       col:'#E8A000'},
+  {min:95, title:'🏎️ F1 구매 파일럿',     col:'#FF6B35'},
+  {min:90, title:'🚗 원가혁신 아이콘',     col:'#E74C3C'},
+  {min:85, title:'🏭 공급망 아키텍트',     col:'#9B59B6'},
+  {min:80, title:'🌐 글로벌 수석바이어',   col:'#8E44AD'},
+  {min:75, title:'🔧 기술구매 전문가',     col:'#2980B9'},
+  {min:70, title:'🤝 협력사 총지휘관',     col:'#1ABC9C'},
+  {min:65, title:'📊 입찰 전략가',         col:'#27AE60'},
+  {min:60, title:'🚀 구매 에이스',         col:'#2ECC71'},
+  {min:55, title:'⚙️ 선임 바이어',         col:'#3498DB'},
+  {min:50, title:'🔩 공급망 수호자',       col:'#16A085'},
+  {min:45, title:'📦 부품 스페셜리스트',   col:'#138D75'},
+  {min:40, title:'🏷️ 단가 분석가',        col:'#E67E22'},
+  {min:35, title:'🔍 협력사 탐정',         col:'#D35400'},
+  {min:30, title:'📋 계약 매니저',         col:'#7F8C8D'},
+  {min:25, title:'🚙 주임 바이어',         col:'#6C757D'},
+  {min:20, title:'🔑 구매 어시스턴트',     col:'#95A5A6'},
+  {min:15, title:'📝 신입 바이어',         col:'#ABB4BD'},
+  {min:10, title:'🔧 부품 탐험가',         col:'#BDC3C7'},
+  {min:5,  title:'🌱 구매 새싹',           col:'#CED4DA'},
+  {min:1,  title:'🐣 견습 바이어',         col:'#D8DEE4'},
+];
+
+function getAutoLvInfo(xp){
+  var lvl=Math.min(100,Math.floor(Math.sqrt(Math.max(0,xp)/10))+1);
+  var found=AUTO_LV[AUTO_LV.length-1];
+  for(var i=0;i<AUTO_LV.length;i++){ if(lvl>=AUTO_LV[i].min){found=AUTO_LV[i];break;} }
+  var next=Math.pow(lvl,2)*10, prev=Math.pow(Math.max(0,lvl-1),2)*10;
+  var pct=lvl>=100?100:Math.round((xp-prev)/(next-prev)*100);
+  return {lvl:lvl,title:found.title,col:found.col,pct:Math.max(0,Math.min(100,pct)),xp:xp,toNext:lvl<100?next-xp:0};
+}
+
+function applyAutoLvBadge(){
+  var lv=document.querySelector('#charRoom .v33-char-lv');
+  if(!lv) return;
+  var i=getAutoLvInfo(1720);
+  lv.innerHTML=
+    '<div style="display:flex;align-items:center;gap:6px;justify-content:center;margin-top:4px">'+
+      '<span style="background:'+i.col+';color:#fff;font-size:10px;font-weight:900;padding:2px 10px;border-radius:999px;letter-spacing:.3px">Lv.'+i.lvl+'</span>'+
+      '<span style="font-size:11.5px;color:var(--text-1);font-weight:800">'+i.title+'</span>'+
+    '</div>'+
+    '<div style="margin:7px auto 0;width:150px;height:6px;background:var(--bg-4);border-radius:999px;overflow:hidden">'+
+      '<div style="width:'+i.pct+'%;height:100%;background:'+i.col+';border-radius:999px;transition:.6s ease"></div>'+
+    '</div>'+
+    '<div style="font-size:10px;color:var(--text-4);margin-top:4px;text-align:center">'+
+      i.xp+'pt · '+(i.lvl<100?'다음 레벨까지 '+i.toNext+'pt':'🏆 MAX 달성!')+
+    '</div>';
+}
+
+(function watchChar(){
+  var cr=document.getElementById('charRoom');
+  if(!cr){setTimeout(watchChar,500);return;}
+  new MutationObserver(function(){setTimeout(applyAutoLvBadge,8);}).observe(cr,{childList:true});
+  setTimeout(applyAutoLvBadge,120);
+})();
+
+
+/* ── 2. 스타일 ──────────────────────────────────────────────── */
+if(!document.getElementById('s16-style')){
+  var st=document.createElement('style');
+  st.id='s16-style';
+  st.textContent=[
+    '.s16-live{font-size:8px;font-weight:800;color:#fff;background:#E74C3C;padding:2px 7px;border-radius:999px;animation:s16pulse 1.4s infinite}',
+    '@keyframes s16pulse{0%,100%{opacity:1}50%{opacity:.45}}',
+    '.s16-hot-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}',
+    '.s16-hot-title{display:flex;align-items:center;gap:7px;font-size:13px;font-weight:900;color:var(--text-1)}',
+    '.s16-hot-time{font-size:9px;color:var(--text-4)}',
+    '.s16-h1{background:linear-gradient(135deg,#FFFAE6,#FFF8DC)!important;border:2px solid #FFD700!important;border-radius:14px!important;padding:14px!important;transition:transform .15s}',
+    '.s16-h1:hover{transform:translateY(-2px)}',
+    '.s16-h2{background:linear-gradient(135deg,#F8F9FA,#ECECEC)!important;border:2px solid #C0C0C0!important;border-radius:10px!important;padding:10px 12px!important}',
+    '.s16-h3{background:linear-gradient(135deg,#FFF5EC,#FFE4CC)!important;border:2px solid #CD7F32!important;border-radius:10px!important;padding:10px 12px!important}',
+    '.s16-trend{font-size:9px;font-weight:700;padding:2px 7px;border-radius:999px;display:inline-block;margin-right:5px;vertical-align:middle}',
+    '.qa36-cat[data-s16h]{display:none!important}',
+    '.s16-honor-banner{background:linear-gradient(90deg,#FFD700,#FFA500);color:#7A3B00;font-size:11px;font-weight:800;padding:8px 14px;border-radius:10px;margin-bottom:10px;display:flex;align-items:center;gap:7px}',
+    '.s16-honor-badge{font-size:9px;font-weight:700;background:#FFD700;color:#7A3B00;padding:1px 8px;border-radius:999px;margin-left:5px;vertical-align:middle}',
+    '.qa36-ans-card.adopted{border:2px solid #FFD700!important;background:linear-gradient(180deg,#FFFAE6 0%,var(--bg-2) 60%)!important}',
+  ].join('\n');
+  document.head.appendChild(st);
+}
+
+
+/* ── 3. Q&A 커뮤니티 향상 ───────────────────────────────────── */
+var KEEP_CATS=['전체','입찰','계약','VAATZ','협력사'];
+var MEDALS=['🥇','🥈','🥉'];
+var TRENDS=['⚡ 급상승','🔥 HOT','✨ 주목'];
+var TCOL=['#FFD700','#E74C3C','#CD7F32'];
+var TTXT=['#7A3B00','#fff','#fff'];
+
+function enhanceQA(ct){
+  if(!ct) return;
+  simplifyCats(ct);
+  hotRanking(ct);
+  honorAdopted(ct);
+}
+
+function simplifyCats(ct){
+  ct.querySelectorAll('.qa36-cat').forEach(function(btn){
+    var m=(btn.getAttribute('onclick')||'').match(/qa36SetCat\('([^']+)'\)/);
+    var cat=m?m[1]:'';
+    if(!KEEP_CATS.includes(cat)) btn.dataset.s16h='1';
+  });
+}
+
+function hotRanking(ct){
+  var strip=ct.querySelector('.qa36-hot-strip');
+  if(!strip||strip.dataset.s16r) return;
+  strip.dataset.s16r='1';
+  var label=strip.querySelector('.qa36-hot-label');
+  if(label){
+    var now=new Date();
+    label.outerHTML='<div class="s16-hot-hd">'+
+      '<div class="s16-hot-title"><span style="font-size:16px">🔥</span><span>HOT 실시간 순위</span><span class="s16-live">LIVE</span></div>'+
+      '<span class="s16-hot-time">'+now.getHours()+'시 '+now.getMinutes()+'분 기준</span>'+
+    '</div>';
+  }
+  strip.querySelectorAll('.qa36-hot-card').forEach(function(card,i){
+    var cls=['s16-h1','s16-h2','s16-h3'][i]||'s16-h3';
+    card.classList.add(cls);
+    var rank=card.querySelector('.qa36-hot-rank');
+    if(rank){ rank.style.cssText='font-size:'+(i===0?'24px':'18px')+';line-height:1;background:none;border:none;min-width:auto;padding:0;margin-right:10px;flex-shrink:0'; rank.textContent=MEDALS[i]||(i+1); }
+    var meta=card.querySelector('.qa36-hot-meta');
+    if(meta&&!meta.querySelector('.s16-trend')){
+      var sp=document.createElement('span');
+      sp.className='s16-trend'; sp.style.background=TCOL[i]; sp.style.color=TTXT[i]; sp.textContent=TRENDS[i]||'✨ 주목';
+      meta.insertBefore(sp,meta.firstChild);
+    }
+  });
+}
+
+function honorAdopted(ct){
+  ct.querySelectorAll('.qa36-ans-card.adopted').forEach(function(card){
+    if(card.dataset.s16h) return;
+    card.dataset.s16h='1';
+    var badge=card.querySelector('.qa36-ans-adopted-badge');
+    if(badge){ badge.className='s16-honor-banner'; badge.innerHTML='<span style="font-size:16px">🏆</span><span>채택 명예 답변 · 작성자에게 <b>+30pt</b> 지급 완료</span>'; }
+    var nm=card.querySelector('.qa36-ans-nm');
+    if(nm&&!nm.parentElement.querySelector('.s16-honor-badge')){
+      var hb=document.createElement('span'); hb.className='s16-honor-badge'; hb.textContent='🏅 채택 답변자'; nm.after(hb);
+    }
+  });
+}
+
+(function watchQA(){
+  var ct=document.getElementById('ct-qa');
+  if(!ct){setTimeout(watchQA,500);return;}
+  enhanceQA(ct);
+  new MutationObserver(function(){enhanceQA(ct);}).observe(ct,{childList:true});
+})();
+
+})();
