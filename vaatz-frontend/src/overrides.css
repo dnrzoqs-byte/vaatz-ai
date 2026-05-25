@@ -2214,6 +2214,78 @@ textarea:focus { outline: none; }
   line-height: 1.75;
 }
 
+/* 추천 배지 (카드 우측) */
+.qa36-vote-badge {
+  margin-left: auto;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--accent);
+  opacity: 0.8;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* HOT 글 스트립 */
+.qa36-hot-strip {
+  padding: 14px 24px 6px;
+  border-bottom: 1px solid var(--border-1);
+}
+.qa36-hot-label {
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.7px;
+  color: var(--text-4);
+  margin-bottom: 10px;
+}
+.qa36-hot-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 11px;
+  padding: 10px 12px;
+  margin-bottom: 5px;
+  border: 1px solid var(--border-1);
+  border-radius: 10px;
+  background: var(--bg-2);
+  cursor: pointer;
+  transition: border-color .12s, background .12s;
+}
+.qa36-hot-card:hover {
+  border-color: var(--accent-bd);
+  background: var(--accent-dim);
+}
+.qa36-hot-rank {
+  flex-shrink: 0;
+  width: 22px;
+  height: 22px;
+  border-radius: 6px;
+  background: var(--accent);
+  color: white;
+  font-size: 11px;
+  font-weight: 900;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 1px;
+}
+.qa36-hot-card:nth-child(2) .qa36-hot-rank { background: #FF5733; }
+.qa36-hot-card:nth-child(3) .qa36-hot-rank { background: #FF8C42; }
+.qa36-hot-info { flex: 1; min-width: 0; }
+.qa36-hot-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-1);
+  line-height: 1.4;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-bottom: 4px;
+}
+.qa36-hot-meta {
+  font-size: 11px;
+  color: var(--text-4);
+}
+
 /* 질문 상세 */
 .qa36-back {
   display: flex;

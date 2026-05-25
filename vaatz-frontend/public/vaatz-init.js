@@ -1909,7 +1909,7 @@ sendMessage = function(){
  function memoModal(){if($('#v25MemoModal'))return;document.body.insertAdjacentHTML('beforeend',`<div class="v25-memo-modal" id="v25MemoModal" onclick="if(event.target===this)closeMemoModal()"><div class="v25-memo-box"><div class="v25-memo-list"><div class="v25-memo-h"><span>📝 내 메모</span><button class="v25-btn primary" onclick="newMemo()">＋</button></div><div class="v25-memo-items"><div class="v25-memo-item on"><div class="v25-memo-title">탄력적입찰 핵심 정리</div><div class="v25-memo-meta">오늘 · AI 답변 저장</div></div><div class="v25-memo-item"><div class="v25-memo-title">수의계약 체크리스트</div><div class="v25-memo-meta">어제 · 커뮤니티 답변</div></div></div></div><div class="v25-memo-editor"><div class="v25-memo-editor-h"><input id="v25MemoTitle" value="탄력적입찰 핵심 정리"><button class="large-close" onclick="closeMemoModal()">✕</button></div><textarea id="v25MemoBody">• 탄력적입찰: 순위만 공개\n• 경매입찰: 최저가 실시간 공개\n• 5분 전 제출 시 자동 연장\n• 3스타 이상 업체 참여 가능</textarea><div class="v25-memo-foot"><span style="font-size:11px;color:var(--text-4)">AI 답변, 원문 하이라이트, 커뮤니티 답변을 저장할 수 있습니다.</span><button class="v25-btn primary" onclick="saveMemo()">저장</button></div></div></div></div>`)} window.openMemoModal=()=>{memoModal();$('#v25MemoModal').classList.add('sh')};window.closeMemoModal=()=>$('#v25MemoModal')?.classList.remove('sh');window.newMemo=()=>{$('#v25MemoTitle').value='새 메모';$('#v25MemoBody').value=''};window.saveMemo=()=>say('메모가 저장되었습니다.','✅');window.saveAnswerToMemo=btn=>{openMemoModal();$('#v25MemoTitle').value='저장한 커뮤니티 답변';$('#v25MemoBody').value=btn.closest('.v25-answer')?.innerText||'저장한 답변';say('답변을 메모장에 불러왔습니다.','⭐')};
  function improveCompanion(){let p=$('#companionCard .companion-panel'); if(p){p.classList.add('v25-panel');p.innerHTML=`<button class="companion-action" onclick="openMemoModal()">📝 내 메모</button><button class="companion-action" onclick="say('저장한 답변함을 열었습니다.','⭐')">⭐ 저장답변</button><button class="companion-action" onclick="openComm('qa')">💡 커뮤니티</button><button class="companion-action" onclick="openMypage()">👤 마이페이지</button><button class="companion-action" onclick="openComm('char')">🧸 캐릭터</button><button class="companion-action" onclick="openHistory()">📜 기록장</button><div class="companion-admin-divider">Admin 권한 사용자 전용</div><button class="companion-action" onclick="oa();openAdminTab('p-final')">✅ 최종 승인</button><button class="companion-action" onclick="oa();openAdminTab('p-mode')">🧭 모드관리</button>`}let main=$('#companionCard .companion-main'); if(main){main.classList.add('general'); let msg=$('#companionMsg'); if(msg)msg.textContent='메모·커뮤니티·캐릭터를 빠르게 열어보세요.'}}
  const oldOpenComm=window.openComm; window.openComm=function(tab){oldOpenComm&&oldOpenComm(tab); if(tab==='qa'||!tab)renderQna()}; const oldOpenAdminTab=window.openAdminTab; window.openAdminTab=function(id){oldOpenAdminTab&&oldOpenAdminTab(id); setTimeout(()=>{renderAdminV25(); let b=[...$$('.atb')].find(x=>x.getAttribute('onclick')?.includes(id)); window.at&&window.at(b,id)},0)}; const oldSubmitQuestion=window.submitQuestion; window.submitQuestion=function(){let title=$('#qTitleInput')?.value.trim(),body=$('#qBodyInput')?.value.trim(),cat=$('#qCatSel')?.value||'일반'; if(!title||!body){oldSubmitQuestion&&oldSubmitQuestion();return}qa.unshift({id:Date.now(),cat,status:'NEW',votes:0,answers:0,title,body,author:'프로큐어히어로',time:'방금'});$('#qWriteM')?.classList.remove('sh');renderQna();say('질문이 등록되었습니다.','✅')};
- function boot(){let nav=$('.sb-nav'); if(nav&&!$('#v25CommunityEntry'))nav.insertAdjacentHTML('beforeend','<button class="sb-i v25-community-entry" id="v25CommunityEntry" onclick="openComm(\'qa\')"><span class="sb-ic">💡</span>구매본부 지식커뮤니티</button>');let tb=$('.tb-r'); if(tb&&!$('#v25TopCommunityBtn'))tb.insertAdjacentHTML('afterbegin','<button class="tb-b" id="v25TopCommunityBtn" onclick="openComm(\'qa\')">💡 지식커뮤니티</button>');renderQna();renderAdminV25();improveCompanion();memoModal();$$('.ai-ac').forEach(ac=>{if(!ac.querySelector('.saved-answer-btn'))ac.insertAdjacentHTML('beforeend','<button class="ai-a saved-answer-btn" onclick="openMemoModal()">⭐ 메모 저장</button>')})}
+ function boot(){let nav=$('.sb-nav'); if(nav&&!$('#v25CommunityEntry'))nav.insertAdjacentHTML('beforeend','<button class="sb-i v25-community-entry" id="v25CommunityEntry" onclick="openComm(\'qa\')"><span class="sb-ic">💡</span>구매본부 지식커뮤니티</button>');let tb=$('.tb-r'); if(tb&&!$('#v25TopCommunityBtn'))tb.insertAdjacentHTML('afterbegin','<button class="tb-b" id="v25TopCommunityBtn" onclick="openComm(\'qa\')">💡 구매 커뮤니티</button>');renderQna();renderAdminV25();improveCompanion();memoModal();$$('.ai-ac').forEach(ac=>{if(!ac.querySelector('.saved-answer-btn'))ac.insertAdjacentHTML('beforeend','<button class="ai-a saved-answer-btn" onclick="openMemoModal()">⭐ 메모 저장</button>')})}
  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(boot,80));else setTimeout(boot,80);
 })();
 
@@ -4236,22 +4236,37 @@ function filtered(){
 
 function renderList(ct){
   var list = filtered();
+  var hot = questions.slice().sort(function(a,b){ return b.votes-a.votes; }).slice(0,3);
+  var showHot = qaS.cat==='전체' && !qaS.q;
   ct.innerHTML = '<div class="qa36-wrap">' +
     '<div class="qa36-header">' +
-      '<div><div class="qa36-title">구매본부 지식 Q&A</div><div class="qa36-sub">실무 노하우를 함께 나눕니다 · 답변 채택은 Admin이 진행합니다</div></div>' +
+      '<div><div class="qa36-title">💡 구매 커뮤니티 Q&A</div><div class="qa36-sub">실무 노하우를 함께 나눕니다 · 채택 답변은 AI 학습 후보로 자동 추천됩니다</div></div>' +
       '<button class="qa36-ask-btn" onclick="qa36OpenAsk()">✏️ 질문하기</button>' +
     '</div>' +
     '<div class="qa36-toolbar"><div class="qa36-search"><span style="color:var(--text-4);font-size:13px">🔍</span><input placeholder="질문·태그 검색..." value="' + esc(qaS.q) + '" oninput="qa36Search(this.value)"></div></div>' +
     '<div class="qa36-cats">' +
       cats.map(function(c){ return '<button class="qa36-cat' + (qaS.cat===c?' on':'') + '" onclick="qa36SetCat(\'' + c + '\')">' + (catIcons[c]||'') + ' ' + c + '</button>'; }).join('') +
     '</div>' +
+    (showHot ?
+      '<div class="qa36-hot-strip">' +
+        '<div class="qa36-hot-label">🔥 HOT 글</div>' +
+        hot.map(function(q, i){
+          return '<div class="qa36-hot-card" onclick="qa36Select(' + q.id + ')">' +
+            '<span class="qa36-hot-rank">' + (i+1) + '</span>' +
+            '<div class="qa36-hot-info">' +
+              '<div class="qa36-hot-title">' + esc(q.title) + '</div>' +
+              '<div class="qa36-hot-meta">' + (catIcons[q.cat]||'') + ' ' + esc(q.cat) + ' · 답변 ' + q.answers.length + ' · <b>▲ ' + q.votes + '</b></div>' +
+            '</div>' +
+          '</div>';
+        }).join('') +
+      '</div>'
+    : '') +
     '<div class="qa36-list">' +
       (list.length === 0
         ? '<div class="qa36-empty">검색 결과가 없습니다.</div>'
         : list.map(function(q){
             return '<div class="qa36-card' + (q.adopted?' adopted':'') + '" onclick="qa36Select(' + q.id + ')">' +
               '<div class="qa36-card-left">' +
-                '<div class="qa36-votes"><span class="qa36-vote-n">' + q.votes + '</span><span class="qa36-vote-l">추천</span></div>' +
                 '<div class="qa36-ans-cnt' + (q.answers.length>0?' has-ans':'') + '"><span>' + q.answers.length + '</span><span>답변</span></div>' +
               '</div>' +
               '<div class="qa36-card-body">' +
@@ -4266,6 +4281,7 @@ function renderList(ct){
                   '<span>👤 ' + esc(q.author) + '</span>' +
                   '<span>' + q.time + '</span>' +
                   q.tags.map(function(t){ return '<span class="qa36-tag">#' + esc(t) + '</span>'; }).join('') +
+                  '<span class="qa36-vote-badge">▲ ' + q.votes + '</span>' +
                 '</div>' +
               '</div>' +
             '</div>';
