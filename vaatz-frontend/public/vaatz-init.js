@@ -4479,15 +4479,53 @@ window.qa36SubmitAsk = function(){
   say('질문이 등록되었습니다.','✅',1800);
 };
 
-/* ── renderCommunityV29 override + redirect V26/V27 to V36 ── */
+/* ── V36 Community: renderCommunityV* 통합 ── */
 window.renderCommunityV29 = function(){
   var box = document.querySelector('.comm-box');
   if(box){ box.classList.add('v29-wide'); box.classList.remove('v27-wide','v26-wide'); }
   renderQA();
 };
-/* Redirect older renderers so they never overwrite V36 content */
 window.renderCommunityV26 = window.renderCommunityV29;
 window.renderCommunityV27 = window.renderCommunityV29;
+
+/* ── V36 Community: openComm/closeComm/commTab 완전 교체 (이전 9개 레이어 충돌 제거) ── */
+window.openComm = function(tab) {
+  var ov = document.getElementById('commOv');
+  if(!ov) return;
+  ov.classList.add('sh');
+  var tabMap = {qa:'ct-qa', hof:'ct-hof', lv:'ct-lv', char:'ct-char', shop:'ct-shop'};
+  var tabId = tabMap[tab] || 'ct-qa';
+  ['ct-qa','ct-hof','ct-lv','ct-char','ct-shop'].forEach(function(t){
+    var el = document.getElementById(t);
+    if(el) el.style.display = (t === tabId ? 'block' : 'none');
+  });
+  document.querySelectorAll('.comm-tab').forEach(function(b){
+    var oc = b.getAttribute('onclick') || '';
+    b.classList.toggle('on', oc.indexOf(tabId) !== -1);
+  });
+  if(tabId === 'ct-qa') setTimeout(function(){ renderQA(); }, 20);
+  else if(tabId === 'ct-char') { try{ window.setupV33CharacterPicker && window.setupV33CharacterPicker(); }catch(e){} }
+  else if(tabId === 'ct-shop') { try{ window.renderV33ShopItems && window.renderV33ShopItems(); }catch(e){} }
+};
+
+window.closeComm = function() {
+  var ov = document.getElementById('commOv');
+  if(ov) ov.classList.remove('sh');
+};
+
+window.commTab = function(btn, id) {
+  if(btn){
+    document.querySelectorAll('.comm-tab').forEach(function(b){ b.classList.remove('on'); });
+    btn.classList.add('on');
+  }
+  ['ct-qa','ct-hof','ct-lv','ct-char','ct-shop'].forEach(function(t){
+    var el = document.getElementById(t);
+    if(el) el.style.display = (t === id ? 'block' : 'none');
+  });
+  if(id === 'ct-qa') setTimeout(function(){ renderQA(); }, 20);
+  else if(id === 'ct-char') { try{ window.setupV33CharacterPicker && window.setupV33CharacterPicker(); }catch(e){} }
+  else if(id === 'ct-shop') { try{ window.renderV33ShopItems && window.renderV33ShopItems(); }catch(e){} }
+};
 
 /* boot */
 if(document.readyState === 'loading')
