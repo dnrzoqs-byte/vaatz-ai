@@ -320,8 +320,15 @@ document.querySelectorAll('.wt-i').forEach(btn=>{
 });
 
 // ─── Data Upload Request Modal ───
-function reqOpen(){document.getElementById('rqM').classList.add('sh')}
-function reqClose(){document.getElementById('rqM').classList.remove('sh');document.getElementById('reqFileList').innerHTML=''}
+function reqOpen(){
+  if(typeof window.__reactOpenRequest==='function') window.__reactOpenRequest();
+  document.getElementById('rqM').classList.add('sh');
+}
+function reqClose(){
+  if(typeof window.__reactCloseRequest==='function') window.__reactCloseRequest();
+  document.getElementById('rqM').classList.remove('sh');
+  document.getElementById('reqFileList').innerHTML='';
+}
 function simReqUpload(){
   const nms=['구매전략_보고서_2026.pdf','협력사_평가기준_v3.xlsx','수의계약_가이드_최종.docx','품질검수_체크리스트.hwp','입찰운영_개정안.pdf'];
   const n=nms[Math.floor(Math.random()*nms.length)];
@@ -345,12 +352,16 @@ function submitReq(){
 
 // ─── DB Browser ───
 function openDB(tab){
+  if(typeof window.__reactOpenDB==='function') window.__reactOpenDB();
   document.getElementById('dbOv').classList.add('sh');
   switchDBTab(null,tab);
   const si=document.getElementById('dbSearchInput');
   if(si){si.value='';si.focus()}
 }
-function closeDB(){document.getElementById('dbOv').classList.remove('sh')}
+function closeDB(){
+  if(typeof window.__reactCloseDB==='function') window.__reactCloseDB();
+  document.getElementById('dbOv').classList.remove('sh');
+}
 function switchDBTab(btn,tab){
   document.querySelectorAll('.db-tab').forEach(t=>t.classList.remove('on'));
   if(btn)btn.classList.add('on');
@@ -708,8 +719,16 @@ function toggleWeb(){
 }
 
 // ─── v11: Mypage ───
-function openMypage(){document.getElementById('mpOv').classList.add('sh');document.body.style.overflow='hidden'}
-function closeMypage(){document.getElementById('mpOv').classList.remove('sh');document.body.style.overflow=''}
+function openMypage(){
+  if(typeof window.__reactOpenMypage==='function') window.__reactOpenMypage();
+  document.getElementById('mpOv').classList.add('sh');
+  document.body.style.overflow='hidden';
+}
+function closeMypage(){
+  if(typeof window.__reactCloseMypage==='function') window.__reactCloseMypage();
+  document.getElementById('mpOv').classList.remove('sh');
+  document.body.style.overflow='';
+}
 function mpTab(btn,id){
   document.querySelectorAll('.mp-tab').forEach(t=>t.classList.remove('on'));
   btn.classList.add('on');

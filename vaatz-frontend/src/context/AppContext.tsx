@@ -17,6 +17,10 @@ interface AppState {
   adminTab: AdminTab
   // 마이페이지
   mypageOpen: boolean
+  // 데이터 업로드 요청 모달
+  requestOpen: boolean
+  // DB 브라우저 오버레이
+  dbOpen: boolean
   // 우측 패널
   rightPanelOpen: boolean
   rightPanelTab: RightPanelTab
@@ -39,6 +43,10 @@ interface AppActions {
   setAdminTab: (tab: AdminTab) => void
   openMypage: () => void
   closeMypage: () => void
+  openRequest: () => void
+  closeRequest: () => void
+  openDB: () => void
+  closeDB: () => void
   openRightPanel: (tab?: RightPanelTab) => void
   closeRightPanel: () => void
   setRightPanelTab: (tab: RightPanelTab) => void
@@ -59,6 +67,8 @@ const defaultState: AppState = {
   adminOpen: false,
   adminTab: 'p-home',
   mypageOpen: false,
+  requestOpen: false,
+  dbOpen: false,
   rightPanelOpen: false,
   rightPanelTab: 'src',
   toasts: [],
@@ -101,13 +111,19 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     const w = window as any
-    w.__reactOpenComm  = (tab?: CommTab) => setState(s => ({ ...s, communityOpen: true, communityTab: tab || s.communityTab }))
-    w.__reactCloseComm = () => setState(s => ({ ...s, communityOpen: false }))
-    w.__reactOpenAdmin = (tab?: AdminTab) => setState(s => ({ ...s, adminOpen: true, adminTab: tab || 'p-home' }))
-    w.__reactCloseAdmin= () => setState(s => ({ ...s, adminOpen: false }))
-    w.__reactOpenRP    = (tab?: RightPanelTab) => setState(s => ({ ...s, rightPanelOpen: true, rightPanelTab: tab || 'src' }))
-    w.__reactCloseRP   = () => setState(s => ({ ...s, rightPanelOpen: false }))
-    w.__reactSetView   = (view: 'wl'|'ch') => setState(s => ({ ...s, currentView: view }))
+    w.__reactOpenComm     = (tab?: CommTab)    => setState(s => ({ ...s, communityOpen: true,  communityTab: tab || s.communityTab }))
+    w.__reactCloseComm    = ()                 => setState(s => ({ ...s, communityOpen: false }))
+    w.__reactOpenAdmin    = (tab?: AdminTab)   => setState(s => ({ ...s, adminOpen: true, adminTab: tab || 'p-home' }))
+    w.__reactCloseAdmin   = ()                 => setState(s => ({ ...s, adminOpen: false }))
+    w.__reactOpenMypage   = ()                 => setState(s => ({ ...s, mypageOpen: true }))
+    w.__reactCloseMypage  = ()                 => setState(s => ({ ...s, mypageOpen: false }))
+    w.__reactOpenRequest  = ()                 => setState(s => ({ ...s, requestOpen: true }))
+    w.__reactCloseRequest = ()                 => setState(s => ({ ...s, requestOpen: false }))
+    w.__reactOpenDB       = ()                 => setState(s => ({ ...s, dbOpen: true }))
+    w.__reactCloseDB      = ()                 => setState(s => ({ ...s, dbOpen: false }))
+    w.__reactOpenRP       = (tab?: RightPanelTab) => setState(s => ({ ...s, rightPanelOpen: true, rightPanelTab: tab || 'src' }))
+    w.__reactCloseRP      = ()                 => setState(s => ({ ...s, rightPanelOpen: false }))
+    w.__reactSetView      = (view: 'wl'|'ch')  => setState(s => ({ ...s, currentView: view }))
     w.__reactToast     = (msg: string, icon?: string, dur?: number) => {
       const id = Math.random().toString(36).slice(2)
       setState(s => ({ ...s, toasts: [...s.toasts, { id, message: msg, icon: icon || '✅', duration: dur || 3500 }] }))
@@ -160,6 +176,22 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     setState(s => ({ ...s, mypageOpen: false }))
   }, [])
 
+  const openRequest = useCallback(() => {
+    setState(s => ({ ...s, requestOpen: true }))
+  }, [])
+
+  const closeRequest = useCallback(() => {
+    setState(s => ({ ...s, requestOpen: false }))
+  }, [])
+
+  const openDB = useCallback(() => {
+    setState(s => ({ ...s, dbOpen: true }))
+  }, [])
+
+  const closeDB = useCallback(() => {
+    setState(s => ({ ...s, dbOpen: false }))
+  }, [])
+
   const openRightPanel = useCallback((tab?: RightPanelTab) => {
     setState(s => ({ ...s, rightPanelOpen: true, rightPanelTab: tab || 'src' }))
   }, [])
@@ -195,6 +227,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       openComm, closeComm, setCommTab,
       openAdmin, closeAdmin, setAdminTab,
       openMypage, closeMypage,
+      openRequest, closeRequest,
+      openDB, closeDB,
       openRightPanel, closeRightPanel, setRightPanelTab,
       toast, dismissToast, clearNoti,
     }}>
