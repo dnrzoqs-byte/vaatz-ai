@@ -92,92 +92,174 @@
 <!-- My Level -->
 <div id="ct-lv" style="display:none">
 <div style="background:var(--bg-2);border:1px solid var(--border-1);border-radius:8px;padding:14px">
-<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px"><div style="font-size:13px;font-weight:600;display:flex;align-items:center;gap:6px"><span class="lv lv-3">구매Pro</span> 프로큐어히어로</div><span style="font-size:11px;color:var(--text-3)">다음 직급: Lv.4 과장까지 280pt</span></div>
-<div style="height:8px;background:var(--bg-4);border-radius:4px;overflow:hidden"><div style="height:100%;width:72%;border-radius:4px;background:var(--accent-g);transition:width .5s"></div></div>
-<div style="font-size:10px;color:var(--text-4);margin-top:5px">1,720 / 2,000pt</div>
+<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+<div style="font-size:13px;font-weight:600;display:flex;align-items:center;gap:6px">
+<span style="background:#BDC3C7;color:#fff;font-size:10px;font-weight:900;padding:2px 10px;border-radius:999px">Lv.14</span>
+<span style="font-weight:800">🔧 부품 탐험가</span>
+</div>
+<span style="font-size:10px;color:var(--text-3)">Lv.15까지 240pt</span>
+</div>
+<div style="height:8px;background:var(--bg-4);border-radius:4px;overflow:hidden"><div style="height:100%;width:62%;border-radius:4px;background:linear-gradient(90deg,#BDC3C7,#95A5A6);transition:width .5s"></div></div>
+<div style="font-size:10px;color:var(--text-4);margin-top:5px">1,720pt · Lv.100 달성시 ⚡ VAATZ 챔피언</div>
 </div>
 <div class="char-stat-row" style="margin-top:12px">
 <div class="char-stat"><div class="char-stat-v">34</div><div class="char-stat-l">작성 답변</div></div>
 <div class="char-stat"><div class="char-stat-v" style="color:var(--accent)">10</div><div class="char-stat-l">채택</div></div>
 <div class="char-stat"><div class="char-stat-v">127</div><div class="char-stat-l">받은 추천</div></div>
 </div>
-<div style="font-size:11px;font-weight:600;margin:12px 0 8px">레벨 체계</div>
-<div style="display:grid;grid-template-columns:repeat(6,1fr);gap:4px">
-<div style="background:var(--bg-2);border:1px solid var(--border-1);border-radius:6px;padding:8px;text-align:center"><div style="font-size:16px">📋</div><div style="font-size:8px;font-weight:600;margin-top:2px">Lv.1 사원</div><div style="font-size:7px;color:var(--text-4)">0pt</div></div>
-<div style="background:var(--bg-2);border:1px solid var(--border-1);border-radius:6px;padding:8px;text-align:center"><div style="font-size:16px">🔍</div><div style="font-size:8px;font-weight:600;margin-top:2px">Lv.2 주임</div><div style="font-size:7px;color:var(--text-4)">500pt</div></div>
-<div style="background:var(--accent-dim);border:1px solid var(--accent-bd);border-radius:6px;padding:8px;text-align:center"><div style="font-size:16px">📊</div><div style="font-size:8px;font-weight:600;margin-top:2px;color:var(--accent)">Lv.3 대리 ←</div><div style="font-size:7px;color:var(--text-4)">1,000pt</div></div>
-<div style="background:var(--bg-2);border:1px solid var(--border-1);border-radius:6px;padding:8px;text-align:center"><div style="font-size:16px">💼</div><div style="font-size:8px;font-weight:600;margin-top:2px">Lv.4 과장</div><div style="font-size:7px;color:var(--text-4)">2,000pt</div></div>
-<div style="background:var(--bg-2);border:1px solid var(--border-1);border-radius:6px;padding:8px;text-align:center"><div style="font-size:16px">🏢</div><div style="font-size:8px;font-weight:600;margin-top:2px">Lv.5 차장</div><div style="font-size:7px;color:var(--text-4)">3,000pt</div></div>
-<div style="background:var(--bg-2);border:1px solid var(--border-1);border-radius:6px;padding:8px;text-align:center"><div style="font-size:16px">👔</div><div style="font-size:8px;font-weight:600;margin-top:2px">Lv.6 CPO</div><div style="font-size:7px;color:var(--text-4)">5,000pt</div></div>
+<div style="font-size:11px;font-weight:600;margin:12px 0 8px">🚗 자동차 레벨 로드맵 <span style="font-weight:400;font-size:9px;color:var(--text-4)">Lv.1~100</span></div>
+<div style="display:grid;grid-template-columns:repeat(5,1fr);gap:4px;margin-bottom:6px">
+<div style="background:var(--bg-2);border:1px solid var(--border-1);border-radius:6px;padding:7px 4px;text-align:center"><div style="font-size:14px">🐣</div><div style="font-size:7px;font-weight:600;margin-top:2px">Lv.1</div><div style="font-size:6px;color:var(--text-4)">견습 바이어</div></div>
+<div style="background:var(--bg-2);border:1px solid var(--border-1);border-radius:6px;padding:7px 4px;text-align:center"><div style="font-size:14px">🌱</div><div style="font-size:7px;font-weight:600;margin-top:2px">Lv.5</div><div style="font-size:6px;color:var(--text-4)">구매 새싹</div></div>
+<div style="background:var(--accent-dim);border:2px solid var(--accent-bd);border-radius:6px;padding:7px 4px;text-align:center"><div style="font-size:14px">🔧</div><div style="font-size:7px;font-weight:700;margin-top:2px;color:var(--accent)">Lv.14 ←</div><div style="font-size:6px;color:var(--accent)">부품 탐험가</div></div>
+<div style="background:var(--bg-2);border:1px solid var(--border-1);border-radius:6px;padding:7px 4px;text-align:center"><div style="font-size:14px">🚀</div><div style="font-size:7px;font-weight:600;margin-top:2px">Lv.60</div><div style="font-size:6px;color:var(--text-4)">구매 에이스</div></div>
+<div style="background:var(--bg-2);border:1px solid var(--border-1);border-radius:6px;padding:7px 4px;text-align:center"><div style="font-size:14px">⚡</div><div style="font-size:7px;font-weight:600;margin-top:2px">Lv.100</div><div style="font-size:6px;color:#E8A000">VAATZ 챔피언</div></div>
+</div>
+<div style="background:var(--bg-2);border:1px solid var(--border-1);border-radius:6px;padding:8px 12px;font-size:9px;color:var(--text-3);line-height:1.7">
+🏎️ <b>F1 구매 파일럿</b>(Lv.95) · 🚗 <b>원가혁신 아이콘</b>(Lv.90) · 🏭 <b>공급망 아키텍트</b>(Lv.85) · 🌐 <b>글로벌 수석바이어</b>(Lv.80) · 🔧 <b>기술구매 전문가</b>(Lv.75) · 🤝 <b>협력사 총지휘관</b>(Lv.70)
 </div>
 </div>
 
-<!-- Character -->
+<!-- Character — 싸이월드 감성 미니룸 -->
 <div id="ct-char" style="display:none">
-<div class="char-wrap">
-<div class="char-left">
-<div class="char-room" id="charRoom">
-<div id="charBg" style="position:absolute;inset:0;opacity:.10;font-size:80px;display:flex;align-items:center;justify-content:center;pointer-events:none">🌊</div>
-<div class="char-body" id="charBody">
-<svg class="char-main-svg" viewBox="0 0 80 100" xmlns="http://www.w3.org/2000/svg"><defs><radialGradient id="cSkinG" cx="50%" cy="40%" r="55%"><stop offset="0%" stop-color="#FFE8CC"/><stop offset="60%" stop-color="#FFCC99"/><stop offset="100%" stop-color="#F0A870"/></radialGradient><radialGradient id="cHairG" cx="50%" cy="30%" r="60%"><stop offset="0%" stop-color="#5C3D1E"/><stop offset="100%" stop-color="#1A0A00"/></radialGradient><linearGradient id="cBodyG" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#6BB3FF"/><stop offset="50%" stop-color="#4A8EF0"/><stop offset="100%" stop-color="#2060C8"/></linearGradient><radialGradient id="cEyeG" cx="35%" cy="35%" r="50%"><stop offset="0%" stop-color="#4A7FD4"/><stop offset="100%" stop-color="#1A3A80"/></radialGradient></defs><ellipse cx="40" cy="98" rx="18" ry="3" fill="rgba(0,0,0,0.15)"/><rect x="22" y="60" width="36" height="32" rx="10" fill="url(#cBodyG)"/><rect x="22" y="60" width="36" height="8" rx="5" fill="rgba(255,255,255,0.15)"/><rect x="30" y="67" width="20" height="10" rx="3" fill="rgba(255,255,255,0.2)"/><text x="40" y="75.5" text-anchor="middle" font-size="5.5" font-weight="800" fill="white" font-family="sans-serif">VAATZ</text><rect x="10" y="62" width="13" height="8" rx="4" fill="url(#cBodyG)"/><ellipse cx="10" cy="66" rx="5" ry="5.5" fill="url(#cSkinG)"/><rect x="57" y="62" width="13" height="8" rx="4" fill="url(#cBodyG)"/><ellipse cx="70" cy="66" rx="5" ry="5.5" fill="url(#cSkinG)"/><rect x="26" y="89" width="11" height="10" rx="5" fill="#1A48A8"/><rect x="43" y="89" width="11" height="10" rx="5" fill="#1A48A8"/><ellipse cx="31.5" cy="99" rx="7" ry="3.5" fill="#111"/><ellipse cx="48.5" cy="99" rx="7" ry="3.5" fill="#111"/><rect x="34" y="53" width="12" height="9" rx="4" fill="url(#cSkinG)"/><ellipse cx="40" cy="40" rx="22" ry="20" fill="url(#cSkinG)"/><path d="M18 36 Q18 14 40 13 Q62 14 62 36 Q58 20 40 19 Q22 20 18 36Z" fill="url(#cHairG)"/><path d="M18 36 Q16 30 18 24 Q20 18 28 15 L26 22 Q20 26 18 36Z" fill="url(#cHairG)"/><path d="M62 36 Q64 30 62 24 Q60 18 52 15 L54 22 Q60 26 62 36Z" fill="url(#cHairG)"/><ellipse cx="18" cy="40" rx="4" ry="5" fill="url(#cSkinG)"/><ellipse cx="62" cy="40" rx="4" ry="5" fill="url(#cSkinG)"/><ellipse cx="30" cy="40" rx="7" ry="7.5" fill="white"/><ellipse cx="50" cy="40" rx="7" ry="7.5" fill="white"/><ellipse cx="30" cy="41" rx="5" ry="5.5" fill="url(#cEyeG)"/><ellipse cx="50" cy="41" rx="5" ry="5.5" fill="url(#cEyeG)"/><circle cx="31" cy="40" r="2.5" fill="#0A1840"/><circle cx="51" cy="40" r="2.5" fill="#0A1840"/><circle cx="32" cy="38.5" r="1.2" fill="white"/><circle cx="52" cy="38.5" r="1.2" fill="white"/><circle cx="30.5" cy="41" r="0.6" fill="rgba(255,255,255,0.7)"/><circle cx="50.5" cy="41" r="0.6" fill="rgba(255,255,255,0.7)"/><path d="M24 33 Q30 30 36 33" stroke="#3A2010" stroke-width="1.8" fill="none" stroke-linecap="round"/><path d="M44 33 Q50 30 56 33" stroke="#3A2010" stroke-width="1.8" fill="none" stroke-linecap="round"/><ellipse cx="22" cy="47" rx="5.5" ry="3.5" fill="rgba(255,140,120,0.35)"/><ellipse cx="58" cy="47" rx="5.5" ry="3.5" fill="rgba(255,140,120,0.35)"/><path d="M38 46 Q40 48 42 46" stroke="rgba(180,100,70,0.5)" stroke-width="1.2" fill="none" stroke-linecap="round"/><path d="M33 52 Q40 57 47 52" stroke="#C07040" stroke-width="1.8" fill="none" stroke-linecap="round"/></svg>
-<div class="char-acc-top" id="accHat">🎩</div>
-<div class="char-acc-face" id="accFace"></div>
-<div class="char-acc-side" id="accPet"></div>
+
+<!-- ① 미니룸 + 캐릭터 스테이지 -->
+<div id="charRoom" style="position:relative;width:100%;height:220px;border-radius:12px;overflow:hidden;background:linear-gradient(180deg,#1a2744 0%,#243560 50%,#1E3A5F 100%);margin-bottom:10px;cursor:pointer" title="클릭하여 배경 변경">
+  <!-- 배경 데코 레이어 (§17 JS가 덮어씀) -->
+  <div class="v33-char-bg" style="position:absolute;inset:0;background:linear-gradient(180deg,#1a2744,#243560)">
+    <span class="v33-bg-emoji" style="position:absolute;bottom:8px;right:10px;font-size:36px;opacity:.25">🏭</span>
+    <!-- 미니룸 소품 데코 (싸이월드 감성) -->
+    <span style="position:absolute;left:8px;bottom:10px;font-size:22px;opacity:.55">🛋️</span>
+    <span style="position:absolute;left:36px;bottom:8px;font-size:18px;opacity:.45">🌿</span>
+    <span style="position:absolute;right:36px;bottom:8px;font-size:20px;opacity:.50">🖥️</span>
+    <span style="position:absolute;left:12px;top:14px;font-size:16px;opacity:.35">🎵</span>
+    <span style="position:absolute;right:14px;top:12px;font-size:16px;opacity:.35">⭐</span>
+    <!-- 창문 효과 -->
+    <div style="position:absolute;top:10px;left:50%;transform:translateX(-50%);width:60px;height:36px;border:2px solid rgba(255,255,255,.15);border-radius:6px;background:rgba(100,160,255,.08);display:flex;align-items:center;justify-content:center;font-size:18px;opacity:.6">🌙</div>
+  </div>
+  <!-- 캐릭터 fg (§13 renderV33Character 가 채움) -->
+  <div class="v33-char-fg" style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;padding-bottom:14px">
+    <div class="v33-char-figure" style="position:relative;display:inline-flex;align-items:flex-end;justify-content:center">
+      <span class="v33-char-main" style="font-size:56px;line-height:1;animation:charFloat 3s ease-in-out infinite;display:block">🐧</span>
+    </div>
+    <div class="v33-char-nick" id="charNick" style="font-size:12px;font-weight:700;color:#fff;text-shadow:0 1px 6px rgba(0,0,0,.7);margin-top:4px">프로큐어히어로</div>
+    <div class="v33-char-lv" style="font-size:10px;color:rgba(255,255,255,.75);margin-top:2px">Lv.14 · 1,720pt</div>
+  </div>
 </div>
-<div id="charEffect" style="position:absolute;top:20px;left:30px;z-index:1;font-size:14px;animation:effectFloat 3s ease-in-out infinite;pointer-events:none"></div>
-<div class="char-nick" id="charNick" style="position:relative;z-index:2">프로큐어히어로</div>
-<div class="char-lv" style="position:relative;z-index:2">구매Pro · 1,720pt</div>
+
+<!-- ② 캐릭터 선택 + 커스터마이징 행 -->
+<div style="display:flex;gap:8px;margin-bottom:10px">
+  <!-- 캐릭터 픽커 -->
+  <div style="flex:1;background:var(--bg-2);border:1px solid var(--border-1);border-radius:10px;padding:8px">
+    <div style="font-size:9px;font-weight:700;color:var(--text-3);margin-bottom:5px">🎨 캐릭터 선택</div>
+    <div class="v33-char-picker" style="display:flex;flex-wrap:wrap;gap:3px">
+      <button class="char-sel active" onclick="pickChar(this,'🚗')" title="현대 블루카">🚗</button>
+      <button class="char-sel" onclick="pickChar(this,'🏎️')" title="기아 레이서">🏎️</button>
+      <button class="char-sel" onclick="pickChar(this,'👨‍💼')" title="남성 바이어">👨‍💼</button>
+      <button class="char-sel" onclick="pickChar(this,'👩‍💼')" title="여성 바이어">👩‍💼</button>
+      <button class="char-sel" onclick="pickChar(this,'🧑‍🔧')" title="엔지니어">🧑‍🔧</button>
+      <button class="char-sel" onclick="pickChar(this,'👩‍🔬')" title="품질 연구원">👩‍🔬</button>
+      <button class="char-sel" onclick="pickChar(this,'🐻')" title="바츠곰">🐻</button>
+      <button class="char-sel" onclick="pickChar(this,'🦁')" title="협상사자">🦁</button>
+      <button class="char-sel" onclick="pickChar(this,'🦊')" title="계약여우">🦊</button>
+      <button class="char-sel" onclick="pickChar(this,'🐯')" title="품질호랑이">🐯</button>
+      <button class="char-sel" onclick="pickChar(this,'🐧')" title="펭귄 바이어">🐧</button>
+      <button class="char-sel" onclick="pickChar(this,'🦅')" title="독수리 CPO">🦅</button>
+    </div>
+  </div>
+  <!-- 포인트 미니 -->
+  <div style="background:var(--bg-2);border:1px solid var(--border-1);border-radius:10px;padding:8px;min-width:80px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px">
+    <div style="font-family:Outfit;font-size:18px;font-weight:700;color:var(--accent)">520</div>
+    <div style="font-size:8px;color:var(--text-4)">사용 가능 pt</div>
+    <button style="font-size:9px;padding:3px 8px;background:var(--accent);color:#fff;border:none;border-radius:5px;cursor:pointer;font-family:inherit;font-weight:600" onclick="if(window.commTab)commTab(document.querySelectorAll('.comm-tab')[4],'ct-shop')">🛒 상점</button>
+  </div>
 </div>
-<div style="margin-top:8px;font-size:10px;font-weight:600;color:var(--text-3)">캐릭터 선택</div>
-<div style="display:flex;gap:3px;margin-top:4px;flex-wrap:wrap">
-<button class="char-sel active" onclick="pickChar(this,'🚗')" title="현대 블루카">🚗</button>
-<button class="char-sel" onclick="pickChar(this,'🏎️')" title="기아 레이서">🏎️</button>
-<button class="char-sel" onclick="pickChar(this,'👨‍💼')" title="남성 바이어">👨‍💼</button>
-<button class="char-sel" onclick="pickChar(this,'👩‍💼')" title="여성 바이어">👩‍💼</button>
-<button class="char-sel" onclick="pickChar(this,'🧑‍🔧')" title="엔지니어">🧑‍🔧</button>
-<button class="char-sel" onclick="pickChar(this,'👩‍🔬')" title="품질 연구원">👩‍🔬</button>
-<button class="char-sel" onclick="pickChar(this,'🐻')" title="바츠곰">🐻</button>
-<button class="char-sel" onclick="pickChar(this,'🦁')" title="협상사자">🦁</button>
-<button class="char-sel" onclick="pickChar(this,'🦊')" title="계약여우">🦊</button>
-<button class="char-sel" onclick="pickChar(this,'🐯')" title="품질호랑이">🐯</button>
+
+<!-- ③ 인벤토리 (카테고리 탭 포함) -->
+<div style="background:var(--bg-2);border:1px solid var(--border-1);border-radius:10px;padding:8px;margin-bottom:8px">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+    <div style="font-size:10px;font-weight:700;color:var(--text-2)">🎒 내 인벤토리</div>
+    <div id="invCatTabs" style="display:flex;gap:3px">
+      <button class="v17-cat on" onclick="v17Cat(this,'all')" style="font-size:8px;padding:2px 7px;border-radius:999px;border:1px solid var(--accent);background:var(--accent);color:#fff;cursor:pointer;font-family:inherit">전체</button>
+      <button class="v17-cat" onclick="v17Cat(this,'hat')" style="font-size:8px;padding:2px 7px;border-radius:999px;border:1px solid var(--border-2);background:transparent;color:var(--text-3);cursor:pointer;font-family:inherit">🎩 모자</button>
+      <button class="v17-cat" onclick="v17Cat(this,'pet')" style="font-size:8px;padding:2px 7px;border-radius:999px;border:1px solid var(--border-2);background:transparent;color:var(--text-3);cursor:pointer;font-family:inherit">🐾 펫</button>
+      <button class="v17-cat" onclick="v17Cat(this,'fx')" style="font-size:8px;padding:2px 7px;border-radius:999px;border:1px solid var(--border-2);background:transparent;color:var(--text-3);cursor:pointer;font-family:inherit">✨ 이펙트</button>
+      <button class="v17-cat" onclick="v17Cat(this,'bg')" style="font-size:8px;padding:2px 7px;border-radius:999px;border:1px solid var(--border-2);background:transparent;color:var(--text-3);cursor:pointer;font-family:inherit">🖼️ 배경</button>
+    </div>
+  </div>
+  <div class="inv-grid" id="invGrid" style="display:grid;grid-template-columns:repeat(8,1fr);gap:4px">
+    <div class="inv-slot" data-cat="hat" title="신사 모자" onclick="v33EquipItem(this,'🎩')">🎩</div>
+    <div class="inv-slot" data-cat="hat" title="왕관" onclick="v33EquipItem(this,'👑')">👑</div>
+    <div class="inv-slot" data-cat="hat" title="학사모" onclick="v33EquipItem(this,'🎓')">🎓</div>
+    <div class="inv-slot" data-cat="hat" title="안전모" onclick="v33EquipItem(this,'⛑️')">⛑️</div>
+    <div class="inv-slot" data-cat="pet" title="고양이 친구" onclick="v33EquipItem(this,'🐱')">🐱</div>
+    <div class="inv-slot" data-cat="pet" title="드래곤" onclick="v33EquipItem(this,'🐉')">🐉</div>
+    <div class="inv-slot" data-cat="pet" title="강아지" onclick="v33EquipItem(this,'🐶')">🐶</div>
+    <div class="inv-slot" data-cat="pet" title="로봇" onclick="v33EquipItem(this,'🤖')">🤖</div>
+    <div class="inv-slot" data-cat="fx" title="별빛 이펙트" onclick="v33EquipItem(this,'⭐')">⭐</div>
+    <div class="inv-slot" data-cat="fx" title="불꽃 오라" onclick="v33EquipItem(this,'🔥')">🔥</div>
+    <div class="inv-slot" data-cat="fx" title="다이아 이펙트" onclick="v33EquipItem(this,'💎')">💎</div>
+    <div class="inv-slot" data-cat="fx" title="번개 이펙트" onclick="v33EquipItem(this,'⚡')">⚡</div>
+    <div class="inv-slot" data-cat="fx" title="무지개" onclick="v33EquipItem(this,'🌈')">🌈</div>
+    <div class="inv-slot" data-cat="bg" title="파도 배경" onclick="v33EquipItem(this,'bg-ocean')">🌊</div>
+    <div class="inv-slot" data-cat="bg" title="벚꽃 배경" onclick="v33EquipItem(this,'bg-cherry')">🌸</div>
+    <div class="inv-slot" data-cat="bg" title="야간 도시" onclick="v33EquipItem(this,'bg-city')">🌃</div>
+    <div class="inv-slot" data-cat="bg" title="오피스 배경" onclick="v33EquipItem(this,'bg-office')">🏢</div>
+    <div class="inv-slot" data-cat="bg" title="공장 배경" onclick="v33EquipItem(this,'bg-factory')">🏭</div>
+    <div class="inv-slot empty"></div>
+    <div class="inv-slot empty"></div>
+  </div>
+  <div style="font-size:9px;color:var(--text-4);margin-top:5px">💡 클릭하면 즉시 장착 · 상점에서 더 많은 아이템 구매 가능</div>
 </div>
+
+<!-- ④ 미니룸 소품 꾸미기 (싸이월드 핵심!) -->
+<div style="background:var(--bg-2);border:1px solid var(--border-1);border-radius:10px;padding:8px;margin-bottom:8px">
+  <div style="font-size:10px;font-weight:700;color:var(--text-2);margin-bottom:6px">🛋️ 미니룸 소품 <span style="font-size:8px;font-weight:400;color:var(--text-4)">방에 배치되는 인테리어 아이템</span></div>
+  <div style="display:grid;grid-template-columns:repeat(10,1fr);gap:3px" id="roomDecoGrid">
+    <button class="room-deco-btn" onclick="v17PlaceDeco(this,'🛋️')" title="소파" style="font-size:18px;background:var(--bg-3);border:1px solid var(--border-1);border-radius:6px;padding:4px;cursor:pointer;transition:.1s">🛋️</button>
+    <button class="room-deco-btn" onclick="v17PlaceDeco(this,'🖥️')" title="컴퓨터" style="font-size:18px;background:var(--bg-3);border:1px solid var(--border-1);border-radius:6px;padding:4px;cursor:pointer;transition:.1s">🖥️</button>
+    <button class="room-deco-btn" onclick="v17PlaceDeco(this,'🌿')" title="화분" style="font-size:18px;background:var(--bg-3);border:1px solid var(--border-1);border-radius:6px;padding:4px;cursor:pointer;transition:.1s">🌿</button>
+    <button class="room-deco-btn" onclick="v17PlaceDeco(this,'🪴')" title="관엽식물" style="font-size:18px;background:var(--bg-3);border:1px solid var(--border-1);border-radius:6px;padding:4px;cursor:pointer;transition:.1s">🪴</button>
+    <button class="room-deco-btn" onclick="v17PlaceDeco(this,'🎵')" title="음악노트" style="font-size:18px;background:var(--bg-3);border:1px solid var(--border-1);border-radius:6px;padding:4px;cursor:pointer;transition:.1s">🎵</button>
+    <button class="room-deco-btn" onclick="v17PlaceDeco(this,'🏆')" title="트로피" style="font-size:18px;background:var(--bg-3);border:1px solid var(--border-1);border-radius:6px;padding:4px;cursor:pointer;transition:.1s">🏆</button>
+    <button class="room-deco-btn" onclick="v17PlaceDeco(this,'📚')" title="책장" style="font-size:18px;background:var(--bg-3);border:1px solid var(--border-1);border-radius:6px;padding:4px;cursor:pointer;transition:.1s">📚</button>
+    <button class="room-deco-btn" onclick="v17PlaceDeco(this,'☕')" title="커피" style="font-size:18px;background:var(--bg-3);border:1px solid var(--border-1);border-radius:6px;padding:4px;cursor:pointer;transition:.1s">☕</button>
+    <button class="room-deco-btn" onclick="v17PlaceDeco(this,'🎮')" title="게임기" style="font-size:18px;background:var(--bg-3);border:1px solid var(--border-1);border-radius:6px;padding:4px;cursor:pointer;transition:.1s">🎮</button>
+    <button class="room-deco-btn" onclick="v17PlaceDeco(this,'🚗')" title="미니카" style="font-size:18px;background:var(--bg-3);border:1px solid var(--border-1);border-radius:6px;padding:4px;cursor:pointer;transition:.1s">🚗</button>
+    <button class="room-deco-btn" onclick="v17PlaceDeco(this,'🏎️')" title="레이싱카" style="font-size:18px;background:var(--bg-3);border:1px solid var(--border-1);border-radius:6px;padding:4px;cursor:pointer;transition:.1s">🏎️</button>
+    <button class="room-deco-btn" onclick="v17PlaceDeco(this,'🪑')" title="의자" style="font-size:18px;background:var(--bg-3);border:1px solid var(--border-1);border-radius:6px;padding:4px;cursor:pointer;transition:.1s">🪑</button>
+    <button class="room-deco-btn" onclick="v17PlaceDeco(this,'🖼️')" title="그림" style="font-size:18px;background:var(--bg-3);border:1px solid var(--border-1);border-radius:6px;padding:4px;cursor:pointer;transition:.1s">🖼️</button>
+    <button class="room-deco-btn" onclick="v17PlaceDeco(this,'🎸')" title="기타" style="font-size:18px;background:var(--bg-3);border:1px solid var(--border-1);border-radius:6px;padding:4px;cursor:pointer;transition:.1s">🎸</button>
+    <button class="room-deco-btn" onclick="v17PlaceDeco(this,'🌙')" title="달" style="font-size:18px;background:var(--bg-3);border:1px solid var(--border-1);border-radius:6px;padding:4px;cursor:pointer;transition:.1s">🌙</button>
+    <button class="room-deco-btn" onclick="v17PlaceDeco(this,'❄️')" title="눈꽃" style="font-size:18px;background:var(--bg-3);border:1px solid var(--border-1);border-radius:6px;padding:4px;cursor:pointer;transition:.1s">❄️</button>
+    <button class="room-deco-btn" onclick="v17PlaceDeco(this,'🌊')" title="파도" style="font-size:18px;background:var(--bg-3);border:1px solid var(--border-1);border-radius:6px;padding:4px;cursor:pointer;transition:.1s">🌊</button>
+    <button class="room-deco-btn" onclick="v17PlaceDeco(this,'🎪')" title="서커스" style="font-size:18px;background:var(--bg-3);border:1px solid var(--border-1);border-radius:6px;padding:4px;cursor:pointer;transition:.1s">🎪</button>
+    <button class="room-deco-btn" onclick="v17PlaceDeco(this,'🦋')" title="나비" style="font-size:18px;background:var(--bg-3);border:1px solid var(--border-1);border-radius:6px;padding:4px;cursor:pointer;transition:.1s">🦋</button>
+    <button class="room-deco-btn v17-clear-btn" onclick="v17ClearDeco()" title="소품 초기화" style="font-size:14px;background:var(--bg-3);border:1px solid var(--border-1);border-radius:6px;padding:4px;cursor:pointer;color:var(--text-4)">✕</button>
+  </div>
 </div>
-<div class="char-right">
-<div class="char-sec">
-<div class="char-sec-t">🎒 내 인벤토리</div>
-<div class="inv-grid">
-<div class="inv-slot equipped" title="기본 정장" onclick="equipItem(this,'💼')">💼</div>
-<div class="inv-slot" title="신사 모자" onclick="equipItem(this,'🎩')">🎩</div>
-<div class="inv-slot" title="파도 배경" onclick="equipItem(this,'🌊')">🌊</div>
-<div class="inv-slot empty"></div>
-<div class="inv-slot empty"></div>
-<div class="inv-slot empty"></div>
-<div class="inv-slot empty"></div>
-<div class="inv-slot empty"></div>
+
+<!-- ⑤ 포인트 현황 (컴팩트) -->
+<div style="display:flex;gap:6px;margin-bottom:8px">
+  <div style="flex:1;background:var(--bg-2);border:1px solid var(--border-1);border-radius:8px;padding:8px;text-align:center"><div style="font-family:Outfit;font-size:17px;font-weight:700;color:var(--accent)">1,720</div><div style="font-size:8px;color:var(--text-4)">총 적립</div></div>
+  <div style="flex:1;background:var(--bg-2);border:1px solid var(--border-1);border-radius:8px;padding:8px;text-align:center"><div style="font-family:Outfit;font-size:17px;font-weight:700;color:var(--g)">520</div><div style="font-size:8px;color:var(--text-4)">사용 가능</div></div>
+  <div style="flex:1;background:var(--bg-2);border:1px solid var(--border-1);border-radius:8px;padding:8px;text-align:center"><div style="font-family:Outfit;font-size:17px;font-weight:700;color:var(--a)">1,200</div><div style="font-size:8px;color:var(--text-4)">사용함</div></div>
 </div>
+
+<!-- ⑥ 포인트 획득 방법 (컴팩트) -->
+<div style="background:var(--bg-2);border:1px solid var(--border-1);border-radius:10px;padding:8px">
+  <div style="font-size:10px;font-weight:700;color:var(--text-2);margin-bottom:6px">💰 포인트 획득 방법</div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;font-size:10px">
+    <div style="display:flex;justify-content:space-between;padding:4px 8px;background:var(--bg-3);border-radius:5px"><span style="color:var(--text-2)">질문 작성</span><span style="font-weight:700;color:var(--accent)">+3pt</span></div>
+    <div style="display:flex;justify-content:space-between;padding:4px 8px;background:var(--bg-3);border-radius:5px"><span style="color:var(--text-2)">답변 작성</span><span style="font-weight:700;color:var(--accent)">+5pt</span></div>
+    <div style="display:flex;justify-content:space-between;padding:4px 8px;background:var(--bg-3);border-radius:5px"><span style="color:var(--text-2)">추천 받기</span><span style="font-weight:700;color:var(--accent)">+3pt</span></div>
+    <div style="display:flex;justify-content:space-between;padding:4px 8px;background:var(--bg-3);border-radius:5px"><span style="color:var(--text-2)">답변 채택</span><span style="font-weight:700;color:var(--g)">+30pt</span></div>
+    <div style="display:flex;justify-content:space-between;padding:4px 8px;background:var(--bg-3);border-radius:5px"><span style="color:var(--text-2)">AI 학습 반영</span><span style="font-weight:700;color:var(--a)">+100pt</span></div>
+    <div style="display:flex;justify-content:space-between;padding:4px 8px;background:var(--bg-3);border-radius:5px"><span style="color:var(--text-2)">업로드 승인</span><span style="font-weight:700;color:var(--accent)">+20pt</span></div>
+  </div>
+  <div style="margin-top:6px;font-size:8px;color:var(--text-4)">⚠️ 일일 획득 상한 80pt · 어뷰징 시 미지급</div>
 </div>
-<div class="char-sec">
-<div class="char-sec-t">📊 포인트 현황</div>
-<div style="display:flex;gap:8px;margin-bottom:12px">
-<div style="flex:1;background:var(--bg-2);border:1px solid var(--border-1);border-radius:6px;padding:10px;text-align:center"><div style="font-family:Outfit;font-size:20px;font-weight:700;color:var(--accent)">1,720</div><div style="font-size:9px;color:var(--text-4)">총 적립</div></div>
-<div style="flex:1;background:var(--bg-2);border:1px solid var(--border-1);border-radius:6px;padding:10px;text-align:center"><div style="font-family:Outfit;font-size:20px;font-weight:700;color:var(--g)">520</div><div style="font-size:9px;color:var(--text-4)">사용 가능</div></div>
-<div style="flex:1;background:var(--bg-2);border:1px solid var(--border-1);border-radius:6px;padding:10px;text-align:center"><div style="font-family:Outfit;font-size:20px;font-weight:700;color:var(--a)">1,200</div><div style="font-size:9px;color:var(--text-4)">사용함</div></div>
-</div>
-</div>
-<div class="char-sec">
-<div class="char-sec-t">💰 포인트 획득 방법</div>
-<table style="width:100%;border-collapse:collapse;font-size:11px">
-<tr style="border-bottom:1px solid var(--border-1)"><td style="padding:5px 8px;color:var(--text-2)">질문 작성</td><td style="padding:5px 8px;font-weight:600;color:var(--accent);font-family:'JetBrains Mono',monospace;text-align:right">+3pt</td><td style="padding:5px 8px;font-size:9px;color:var(--text-4)">1일 5회</td></tr>
-<tr style="border-bottom:1px solid var(--border-1)"><td style="padding:5px 8px;color:var(--text-2)">답변 작성</td><td style="padding:5px 8px;font-weight:600;color:var(--accent);font-family:'JetBrains Mono',monospace;text-align:right">+5pt</td><td style="padding:5px 8px;font-size:9px;color:var(--text-4)">1일 10회</td></tr>
-<tr style="border-bottom:1px solid var(--border-1)"><td style="padding:5px 8px;color:var(--text-2)">추천 받기</td><td style="padding:5px 8px;font-weight:600;color:var(--accent);font-family:'JetBrains Mono',monospace;text-align:right">+3pt</td><td style="padding:5px 8px;font-size:9px;color:var(--text-4)">무제한</td></tr>
-<tr style="border-bottom:1px solid var(--border-1)"><td style="padding:5px 8px;color:var(--text-2)"><b>답변 채택</b></td><td style="padding:5px 8px;font-weight:600;color:var(--g);font-family:'JetBrains Mono',monospace;text-align:right">+30pt</td><td style="padding:5px 8px;font-size:9px;color:var(--text-4)">무제한</td></tr>
-<tr style="border-bottom:1px solid var(--border-1)"><td style="padding:5px 8px;color:var(--text-2)"><b>AI 학습 반영</b></td><td style="padding:5px 8px;font-weight:600;color:var(--a);font-family:'JetBrains Mono',monospace;text-align:right">+100pt</td><td style="padding:5px 8px;font-size:9px;color:var(--text-4)">관리자 승인</td></tr>
-<tr><td style="padding:5px 8px;color:var(--text-2)">데이터 업로드 승인</td><td style="padding:5px 8px;font-weight:600;color:var(--accent);font-family:'JetBrains Mono',monospace;text-align:right">+20pt</td><td style="padding:5px 8px;font-size:9px;color:var(--text-4)">무제한</td></tr>
-</table>
-<div style="margin-top:8px;font-size:9px;color:var(--text-4);line-height:1.5;padding:6px 8px;background:var(--bg-2);border-radius:4px">⚠️ 일일 획득 상한: 최대 80pt/일 (AI 학습 반영 보너스 제외). 어뷰징 방지를 위해 동일 질문 반복 시 포인트가 지급되지 않습니다.</div>
-</div>
-</div>
-</div>
+
 </div>
 
 <!-- Shop — Expanded v2 with full accessories + backgrounds -->

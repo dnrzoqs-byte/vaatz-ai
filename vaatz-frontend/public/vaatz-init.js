@@ -5082,3 +5082,137 @@ function honorAdopted(ct){
 })();
 
 })();
+
+/* ═══════════════════════════════════════════════════════════════
+ * §17  싸이월드 감성 미니룸 — 인벤토리 카테고리 탭 + 소품 배치
+ * ═══════════════════════════════════════════════════════════════ */
+(function(){
+'use strict';
+
+/* ── 스타일 ─────────────────────────────────────────────────── */
+if(!document.getElementById('s17-style')){
+  var st=document.createElement('style');
+  st.id='s17-style';
+  st.textContent=[
+    /* 인벤토리 슬롯 크기 */
+    '#ct-char .inv-slot{width:100%;aspect-ratio:1;display:flex;align-items:center;justify-content:center;font-size:20px;background:var(--bg-3);border:1px solid var(--border-1);border-radius:7px;cursor:pointer;transition:.12s;user-select:none}',
+    '#ct-char .inv-slot:hover{border-color:var(--accent);background:var(--accent-dim);transform:scale(1.08)}',
+    '#ct-char .inv-slot.equipped{border-color:var(--accent)!important;background:var(--accent-dim)!important;box-shadow:0 0 0 2px var(--accent-bd)}',
+    '#ct-char .inv-slot.empty{background:var(--bg-4)!important;border-style:dashed!important;cursor:default;pointer-events:none}',
+    '#ct-char .inv-slot[data-hidden]{display:none!important}',
+    /* 카테고리 탭 활성 스타일 (JS 토글용) */
+    '#ct-char .v17-cat.on{background:var(--accent)!important;color:#fff!important;border-color:var(--accent)!important}',
+    /* 미니룸 소품 버튼 활성 */
+    '.room-deco-btn.on{border-color:var(--accent)!important;background:var(--accent-dim)!important}',
+    '.room-deco-btn:hover{border-color:var(--accent);transform:scale(1.1)}',
+    /* v33 char stage 보정 */
+    '#charRoom.v33-char-stage .v33-char-bg{position:absolute;inset:0}',
+    '#charRoom.v33-char-stage .v33-char-fg{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;padding-bottom:14px}',
+    '#charRoom.v33-char-stage .v33-char-figure{position:relative;display:inline-flex;align-items:flex-end;justify-content:center}',
+    '#charRoom.v33-char-stage .v33-char-main{font-size:56px;line-height:1;animation:charFloat 3s ease-in-out infinite;display:block}',
+    '#charRoom.v33-char-stage .v33-char-hat{position:absolute;top:-22px;left:50%;transform:translateX(-50%);font-size:26px;line-height:1;z-index:2}',
+    '#charRoom.v33-char-stage .v33-char-side{position:absolute;bottom:4px;right:-28px;font-size:22px;animation:charFloat 2.8s ease-in-out infinite .4s}',
+    '#charRoom.v33-char-stage .v33-char-effect{position:absolute;top:-10px;left:-14px;font-size:16px;animation:effectFloat 3s ease-in-out infinite;z-index:3}',
+    '#charRoom.v33-char-stage .v33-char-nick{font-size:12px;font-weight:700;color:#fff;text-shadow:0 1px 6px rgba(0,0,0,.7);margin-top:6px;position:relative;z-index:2}',
+    '#charRoom.v33-char-stage .v33-char-lv{font-size:9px;color:rgba(255,255,255,.75);margin-top:2px;position:relative;z-index:2}',
+    /* bg emoji 위치 */
+    '#charRoom.v33-char-stage .v33-bg-emoji{position:absolute;bottom:8px;right:10px;font-size:36px;opacity:.25;z-index:0}',
+    /* 미니룸 데코 오버레이 */
+    '#s17-deco-layer{position:absolute;inset:0;pointer-events:none;z-index:1}',
+    '.s17-deco-item{position:absolute;font-size:22px;opacity:.65;pointer-events:none;animation:effectFloat 4s ease-in-out infinite}',
+  ].join('\n');
+  document.head.appendChild(st);
+}
+
+/* ── 인벤토리 카테고리 필터 ─────────────────────────────────── */
+window.v17Cat=function(btn, cat){
+  document.querySelectorAll('#invCatTabs .v17-cat').forEach(function(b){
+    b.classList.remove('on');
+    b.style.background='transparent'; b.style.color='var(--text-3)'; b.style.borderColor='var(--border-2)';
+  });
+  btn.classList.add('on');
+  btn.style.background='var(--accent)'; btn.style.color='#fff'; btn.style.borderColor='var(--accent)';
+  document.querySelectorAll('#invGrid .inv-slot').forEach(function(slot){
+    if(slot.classList.contains('empty')){ slot.removeAttribute('data-hidden'); return; }
+    if(cat==='all') slot.removeAttribute('data-hidden');
+    else if(slot.dataset.cat===cat) slot.removeAttribute('data-hidden');
+    else slot.dataset.hidden='1';
+  });
+};
+
+/* ── 미니룸 소품 배치 ───────────────────────────────────────── */
+var DECO_POSITIONS=[
+  {left:'6px',bottom:'8px'},{left:'30px',bottom:'6px'},{right:'30px',bottom:'8px'},
+  {right:'6px',bottom:'6px'},{left:'14px',top:'12px'},{right:'14px',top:'12px'},
+  {left:'50%',bottom:'4px',transform:'translateX(-50%)'},{left:'20px',top:'30px'},
+  {right:'20px',top:'30px'},{left:'44px',bottom:'10px'}
+];
+var v17DecoState=[];
+
+window.v17PlaceDeco=function(btn, emoji){
+  var cr=document.getElementById('charRoom');
+  if(!cr) return;
+  var layer=cr.querySelector('#s17-deco-layer');
+  if(!layer){ layer=document.createElement('div'); layer.id='s17-deco-layer'; cr.appendChild(layer); }
+
+  // toggle: already placed → remove
+  var existing=Array.from(layer.children).find(function(el){ return el.dataset.emoji===emoji; });
+  if(existing){ existing.remove(); btn.classList.remove('on'); v17DecoState=v17DecoState.filter(function(e){ return e!==emoji; }); return; }
+
+  var idx=v17DecoState.length % DECO_POSITIONS.length;
+  var pos=DECO_POSITIONS[idx];
+  var el=document.createElement('span');
+  el.className='s17-deco-item'; el.dataset.emoji=emoji; el.textContent=emoji;
+  Object.keys(pos).forEach(function(k){ el.style[k]=pos[k]; });
+  el.style.animationDelay=(idx*0.3)+'s';
+  layer.appendChild(el);
+  btn.classList.add('on');
+  v17DecoState.push(emoji);
+};
+
+window.v17ClearDeco=function(){
+  var cr=document.getElementById('charRoom');
+  if(!cr) return;
+  var layer=cr.querySelector('#s17-deco-layer');
+  if(layer) layer.innerHTML='';
+  document.querySelectorAll('.room-deco-btn').forEach(function(b){ b.classList.remove('on'); });
+  v17DecoState=[];
+};
+
+/* ── patchInventory 업그레이드: §13의 덮어쓰기를 막기 위해 ───── */
+// §13 patchInventory()가 먼저 실행되므로 우리는 MutationObserver로 ct-char 열릴 때 재구성
+(function watchCharTab(){
+  var ctChar=document.getElementById('ct-char');
+  if(!ctChar){ setTimeout(watchCharTab, 400); return; }
+  var prevDisplay='none';
+  new MutationObserver(function(){
+    var cur=ctChar.style.display||'';
+    if(cur!=='none' && prevDisplay==='none'){
+      // 탭이 열렸다 → inv-slot에 data-cat 보존 확인
+      ensureInvCats();
+    }
+    prevDisplay=cur;
+  }).observe(ctChar, {attributes:true, attributeFilter:['style']});
+})();
+
+function ensureInvCats(){
+  // §13 patchInventory가 data-cat 없이 슬롯을 재생성했을 수 있음
+  var grid=document.getElementById('invGrid');
+  if(!grid) return;
+  var CAT_MAP={
+    '🎩':'hat','👑':'hat','🎓':'hat','⛑️':'hat','🪖':'hat','👒':'hat','🎀':'hat','🎅':'hat','✨':'hat',
+    '🐱':'pet','🐉':'pet','🐶':'pet','🤖':'pet','🦄':'pet','🐦':'pet','🐢':'pet','👾':'pet','🦋':'pet',
+    '⭐':'fx','🔥':'fx','💎':'fx','⚡':'fx','🌈':'fx','💫':'fx','🌟':'fx','🎇':'fx','☄️':'fx','🌠':'fx',
+    'bg-ocean':'bg','bg-cherry':'bg','bg-city':'bg','bg-office':'bg','bg-factory':'bg',
+    'bg-beach':'bg','bg-night':'bg','bg-mountain':'bg','bg-galaxy':'bg',
+    '🌊':'bg','🌸':'bg','🏢':'bg','🏭':'bg','🌃':'bg','🏔️':'bg','🏖️':'bg','🌌':'bg',
+  };
+  grid.querySelectorAll('.inv-slot:not(.empty)').forEach(function(slot){
+    if(!slot.dataset.cat){
+      var key=(slot.dataset.itemKey||slot.textContent.trim());
+      slot.dataset.cat=CAT_MAP[key]||'other';
+    }
+  });
+}
+
+})();
