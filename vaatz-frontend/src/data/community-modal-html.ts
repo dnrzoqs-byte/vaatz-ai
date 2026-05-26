@@ -7,6 +7,7 @@
 <button class="comm-tab" onclick="commTab(this,'ct-lv')">📊 내 레벨</button>
 <button class="comm-tab" onclick="commTab(this,'ct-char')">👤 내 캐릭터</button>
 <button class="comm-tab" onclick="commTab(this,'ct-shop')">🛒 상점</button>
+<button class="comm-tab" onclick="commTab(this,'ct-quest')">🎖 칭호·퀘스트</button>
 </div>
 <div class="comm-body">
 
@@ -558,6 +559,11 @@
 <div class="shop-item" onclick="buyItem(this,'🏁','G80',2000)"><div class="shop-ic">🏁</div><div class="shop-nm">제네시스 G80</div><div class="shop-pr">2,000pt</div><div class="shop-lv-req">Lv.5+</div></div>
 <div class="shop-item" onclick="buyItem(this,'🥇','GV90',3500)"><div class="shop-ic">🥇</div><div class="shop-nm">GV90</div><div class="shop-pr">3,500pt</div><div class="shop-lv-req">CPO</div></div>
 </div>
+</div>
+
+<!-- 칭호·퀘스트 -->
+<div id="ct-quest" style="display:none"></div>
+
 </div>
 </div>
 </div></div>`

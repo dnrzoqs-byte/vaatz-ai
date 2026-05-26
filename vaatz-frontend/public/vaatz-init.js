@@ -5001,17 +5001,26 @@ var questions = [
    answers:[]},
 ];
 
-var qaS = { cat:'전체', view:'list', selId:null, q:'' };
+var qaS = { cat:'전체', view:'list', selId:null, q:'', status:'all', sort:'latest', page:1 };
+var QA_PAGE_SIZE = 4;
 
 function filtered(){
-  return questions.filter(function(q){
+  var list = questions.filter(function(q){
     if(qaS.cat !== '전체' && q.cat !== qaS.cat) return false;
+    if(qaS.status === 'adopted' && !q.adopted) return false;
+    if(qaS.status === 'waiting' && (q.answers.length > 0 || q.adopted)) return false;
+    if(qaS.status === 'answered' && (q.answers.length === 0 || q.adopted)) return false;
     if(qaS.q){
       var kw = qaS.q.toLowerCase();
       if(!(q.title + ' ' + q.body + ' ' + q.tags.join(' ')).toLowerCase().includes(kw)) return false;
     }
     return true;
   });
+  if(qaS.sort === 'votes') list = list.slice().sort(function(a,b){ return b.votes - a.votes; });
+  else if(qaS.sort === 'answers') list = list.slice().sort(function(a,b){ return b.answers.length - a.answers.length; });
+  else if(qaS.sort === 'views') list = list.slice().sort(function(a,b){ return (b.views||0) - (a.views||0); });
+  // default: latest (original order)
+  return list;
 }
 
 function qa36MiniChar(lv){
@@ -5043,9 +5052,62 @@ function qa36MiniChar(lv){
 }
 
 function renderList(ct){
-  var list = filtered();
+  var allFiltered = filtered();
+  var totalPages = Math.max(1, Math.ceil(allFiltered.length / QA_PAGE_SIZE));
+  if(qaS.page > totalPages) qaS.page = totalPages;
+  var pageStart = (qaS.page - 1) * QA_PAGE_SIZE;
+  var list = allFiltered.slice(pageStart, pageStart + QA_PAGE_SIZE);
+
   var hot = questions.slice().sort(function(a,b){ return b.votes-a.votes; }).slice(0,3);
-  var showHot = qaS.cat==='전체' && !qaS.q;
+  var showHot = qaS.cat==='전체' && !qaS.q && qaS.status==='all' && qaS.page===1;
+
+  /* Status filter chips */
+  var statusChips = [
+    {id:'all', label:'전체', color:'var(--accent)'},
+    {id:'adopted', label:'✓ 채택됨', color:'#26A69A'},
+    {id:'answered', label:'💬 답변있음', color:'#5C6BC0'},
+    {id:'waiting', label:'⏳ 답변대기', color:'#FFA726'},
+  ];
+  var statusBar = '<div class="qa36-status-bar">' +
+    statusChips.map(function(s){
+      var on = (qaS.status === s.id);
+      return '<button class="qa36-status-chip' + (on?' on':'') + '" style="' + (on?'background:'+s.color+';color:#fff;border-color:'+s.color:'') + '" onclick="qa36SetStatus(\'' + s.id + '\')">' + s.label + '</button>';
+    }).join('') +
+    '<div class="qa36-sort-wrap">' +
+      '<select class="qa36-sort-sel" onchange="qa36SetSort(this.value)">' +
+        '<option value="latest"' + (qaS.sort==='latest'?' selected':'') + '>최신순</option>' +
+        '<option value="votes"' + (qaS.sort==='votes'?' selected':'') + '>추천순</option>' +
+        '<option value="answers"' + (qaS.sort==='answers'?' selected':'') + '>답변순</option>' +
+        '<option value="views"' + (qaS.sort==='views'?' selected':'') + '>조회순</option>' +
+      '</select>' +
+    '</div>' +
+  '</div>';
+
+  /* Filter summary */
+  var activeFilters = [];
+  if(qaS.cat !== '전체') activeFilters.push((catIcons[qaS.cat]||'') + ' ' + qaS.cat);
+  if(qaS.status !== 'all') activeFilters.push(statusChips.find(function(s){return s.id===qaS.status;})?.label || '');
+  if(qaS.q) activeFilters.push('🔍 "' + qaS.q + '"');
+  var filterSummary = activeFilters.length > 0
+    ? '<div class="qa36-filter-summary">필터: ' + activeFilters.map(function(f){ return '<span class="qa36-filter-tag">' + f + '</span>'; }).join('') + '<span class="qa36-filter-count">' + allFiltered.length + '건</span></div>'
+    : '';
+
+  /* Pagination */
+  function pagBtn(p, label, disabled, active){
+    return '<button class="qa36-page-btn' + (active?' on':'') + (disabled?' disabled':'') + '" ' + (disabled?'disabled':'onclick="qa36SetPage('+p+')"') + '>' + (label||p) + '</button>';
+  }
+  var paginationHtml = '';
+  if(totalPages > 1){
+    var pages = [];
+    pages.push(pagBtn(1, '«', qaS.page===1));
+    pages.push(pagBtn(qaS.page-1, '‹', qaS.page===1));
+    var start = Math.max(1, qaS.page-2), end = Math.min(totalPages, qaS.page+2);
+    for(var p=start; p<=end; p++) pages.push(pagBtn(p, p, false, p===qaS.page));
+    pages.push(pagBtn(qaS.page+1, '›', qaS.page===totalPages));
+    pages.push(pagBtn(totalPages, '»', qaS.page===totalPages));
+    paginationHtml = '<div class="qa36-pagination">' + pages.join('') + '<span class="qa36-page-info">' + qaS.page + ' / ' + totalPages + '</span></div>';
+  }
+
   ct.innerHTML = '<div class="qa36-wrap">' +
     '<div class="qa36-header">' +
       '<div><div class="qa36-title">💡 구매 커뮤니티 Q&A</div><div class="qa36-sub">실무 노하우를 함께 나눕니다 · 채택 답변은 AI 학습 후보로 자동 추천됩니다</div></div>' +
@@ -5055,6 +5117,8 @@ function renderList(ct){
     '<div class="qa36-cats">' +
       cats.map(function(c){ return '<button class="qa36-cat' + (qaS.cat===c?' on':'') + '" onclick="qa36SetCat(\'' + c + '\')">' + (catIcons[c]||'') + ' ' + c + '</button>'; }).join('') +
     '</div>' +
+    statusBar +
+    filterSummary +
     (showHot ?
       '<div class="qa36-hot-strip">' +
         '<div class="qa36-hot-label">🔥 HOT 글</div>' +
@@ -5073,6 +5137,7 @@ function renderList(ct){
       (list.length === 0
         ? '<div class="qa36-empty">검색 결과가 없습니다.</div>'
         : list.map(function(q){
+            var honorific = window.VAATZ_GAME && window.VAATZ_GAME.getUserHonorific ? window.VAATZ_GAME.getUserHonorific(q.author) : '';
             return '<div class="qa36-card' + (q.adopted?' adopted':'') + '" onclick="qa36Select(' + q.id + ')">' +
               '<div class="qa36-card-left">' +
                 '<div class="qa36-ans-cnt' + (q.answers.length>0?' has-ans':'') + '"><span>' + q.answers.length + '</span><span>답변</span></div>' +
@@ -5086,7 +5151,7 @@ function renderList(ct){
                 '<div class="qa36-card-preview">' + esc(q.body.substring(0,90)) + (q.body.length>90?'...':'') + '</div>' +
                 '<div class="qa36-card-meta">' +
                   '<span class="qa36-cat-tag">' + (catIcons[q.cat]||'') + ' ' + esc(q.cat) + '</span>' +
-                  '<span>👤 ' + esc(q.author) + '</span>' +
+                  '<span>👤 ' + esc(q.author) + (honorific ? ' <span class="qa36-honorific">'+honorific+'</span>' : '') + '</span>' +
                   '<span>' + q.time + '</span>' +
                   q.tags.map(function(t){ return '<span class="qa36-tag">#' + esc(t) + '</span>'; }).join('') +
                   '<span class="qa36-view-badge">👁 ' + (q.views||0) + '</span>' +
@@ -5096,7 +5161,9 @@ function renderList(ct){
             '</div>';
           }).join('')
       ) +
-    '</div></div>';
+    '</div>' +
+    paginationHtml +
+  '</div>';
 }
 
 function renderDetail(ct){
@@ -5179,7 +5246,10 @@ window.qa36Select = function(id){
   qaS.view='detail'; qaS.selId=id; renderQA();
 };
 window.qa36Back   = function(){ qaS.view='list'; qaS.selId=null; renderQA(); };
-window.qa36SetCat = function(c){ qaS.cat=c; qaS.view='list'; qaS.selId=null; renderQA(); };
+window.qa36SetCat = function(c){ qaS.cat=c; qaS.view='list'; qaS.selId=null; qaS.page=1; renderQA(); };
+window.qa36SetStatus = function(s){ qaS.status=s; qaS.page=1; renderQA(); };
+window.qa36SetSort   = function(s){ qaS.sort=s; qaS.page=1; renderQA(); };
+window.qa36SetPage   = function(p){ qaS.page=p; renderQA(); };
 window.qa36Search = function(v){
   qaS.q = v;
   clearTimeout(window.__qa36s);
@@ -5271,9 +5341,9 @@ window.openComm = function(tab) {
   var ov = document.getElementById('commOv');
   if(!ov) return;
   ov.classList.add('sh');
-  var tabMap = {qa:'ct-qa', hof:'ct-hof', lv:'ct-lv', char:'ct-char', shop:'ct-shop'};
+  var tabMap = {qa:'ct-qa', hof:'ct-hof', lv:'ct-lv', char:'ct-char', shop:'ct-shop', quest:'ct-quest'};
   var tabId = tabMap[tab] || 'ct-qa';
-  ['ct-qa','ct-hof','ct-lv','ct-char','ct-shop'].forEach(function(t){
+  ['ct-qa','ct-hof','ct-lv','ct-char','ct-shop','ct-quest'].forEach(function(t){
     var el = document.getElementById(t);
     if(el) el.style.display = (t === tabId ? 'block' : 'none');
   });
@@ -5284,6 +5354,7 @@ window.openComm = function(tab) {
   if(tabId === 'ct-qa') setTimeout(function(){ renderQA(); }, 20);
   else if(tabId === 'ct-char') { try{ window.setupV33CharacterPicker && window.setupV33CharacterPicker(); }catch(e){} }
   else if(tabId === 'ct-shop') { try{ window.renderV33ShopItems && window.renderV33ShopItems(); }catch(e){} }
+  else if(tabId === 'ct-quest') { setTimeout(function(){ if(window.renderQuestTab) window.renderQuestTab(); }, 20); }
 };
 
 window.closeComm = function() {
@@ -5298,13 +5369,14 @@ window.commTab = function(btn, id) {
     document.querySelectorAll('.comm-tab').forEach(function(b){ b.classList.remove('on'); });
     btn.classList.add('on');
   }
-  ['ct-qa','ct-hof','ct-lv','ct-char','ct-shop'].forEach(function(t){
+  ['ct-qa','ct-hof','ct-lv','ct-char','ct-shop','ct-quest'].forEach(function(t){
     var el = document.getElementById(t);
     if(el) el.style.display = (t === id ? 'block' : 'none');
   });
   if(id === 'ct-qa') setTimeout(function(){ renderQA(); }, 20);
   else if(id === 'ct-char') { try{ window.setupV33CharacterPicker && window.setupV33CharacterPicker(); }catch(e){} }
   else if(id === 'ct-shop') { try{ window.renderV33ShopItems && window.renderV33ShopItems(); }catch(e){} }
+  else if(id === 'ct-quest') { setTimeout(function(){ if(window.renderQuestTab) window.renderQuestTab(); }, 20); }
 };
 
 /* ─── hofTab: 명예의 전당 기간 탭 전환 ─── */
@@ -5946,5 +6018,317 @@ function ensureInvCats(){
     }
   });
 }
+
+})();
+
+/* ═══════════════════════════════════════════════════════════════
+ * §16  VAATZ 호칭·칭호·퀘스트 Gamification System
+ *       - 호칭 (Title)   : 레벨 기반 직함
+ *       - 칭호 (Badge)   : 퀘스트 달성 배지
+ *       - 퀘스트 (Quest) : 일간·주간·업적·시즌
+ * ═══════════════════════════════════════════════════════════════ */
+(function(){
+'use strict';
+
+function esc(s){ return String(s||'').replace(/[&<>"']/g,function(m){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m];}); }
+function say(m,i,d){ try{(window.toast||window.safeToast||console.log)(m,i||'✅',d||1800);}catch(e){console.log(m);} }
+
+/* ─── 1. VAATZ_GAME 데이터 정의 ─────────────────────────────── */
+var GAME = {
+  /* 레벨별 호칭 (Lv.1~10+) */
+  TITLES: [
+    {lv:1,  title:'신입 구매인',   color:'#78909C', bg:'#ECEFF1'},
+    {lv:2,  title:'주니어 바이어', color:'#5C6BC0', bg:'#E8EAF6'},
+    {lv:3,  title:'구매 Pro',      color:'#26A69A', bg:'#E0F2F1'},
+    {lv:4,  title:'시니어 바이어', color:'#FFA726', bg:'#FFF3E0'},
+    {lv:5,  title:'구매 리더',     color:'#EC407A', bg:'#FCE4EC'},
+    {lv:6,  title:'마스터 바이어', color:'#7E57C2', bg:'#EDE7F6'},
+    {lv:7,  title:'구매 전략가',   color:'#26C6DA', bg:'#E0F7FA'},
+    {lv:8,  title:'최고 구매인',   color:'#EF5350', bg:'#FFEBEE'},
+    {lv:9,  title:'구매 챔피언',   color:'#FF7043', bg:'#FBE9E7'},
+    {lv:10, title:'레전드 바이어', color:'#FFD700', bg:'#FFFDE7'},
+  ],
+
+  /* 칭호 (Quest 달성 배지) */
+  HONORIFICS: [
+    {id:'first_q',   emoji:'🌱', name:'첫 질문자',     desc:'첫 번째 질문 등록',       cat:'입문', earned:true},
+    {id:'first_a',   emoji:'💬', name:'첫 답변자',     desc:'첫 번째 답변 작성',       cat:'입문', earned:true},
+    {id:'adopted',   emoji:'✅', name:'채택 달성',     desc:'답변이 채택됨',           cat:'답변', earned:true},
+    {id:'adopted5',  emoji:'🏅', name:'채택 5회',      desc:'답변 5회 채택',           cat:'답변', earned:false},
+    {id:'vote10',    emoji:'👍', name:'추천왕',        desc:'누적 추천 10회 이상',      cat:'활동', earned:false},
+    {id:'ai_learn',  emoji:'🧠', name:'AI 학습 기여',  desc:'답변이 AI DB 등재',       cat:'기여', earned:false},
+    {id:'doc_up',    emoji:'📄', name:'자료 공유자',   desc:'문서 1건 이상 업로드',     cat:'기여', earned:true},
+    {id:'doc_up5',   emoji:'📚', name:'지식 창고지기', desc:'문서 5건 이상 업로드',    cat:'기여', earned:false},
+    {id:'lv5',       emoji:'⭐', name:'레벨 5 달성',   desc:'Lv.5 이상 달성',          cat:'성장', earned:false},
+    {id:'lv10',      emoji:'👑', name:'레전드',        desc:'Lv.10 달성',              cat:'성장', earned:false},
+    {id:'streak7',   emoji:'🔥', name:'7일 연속 접속', desc:'7일 연속 로그인',          cat:'활동', earned:false},
+    {id:'night_owl', emoji:'🦉', name:'야행성 구매인', desc:'밤 10시 이후 활동 5회',    cat:'재미', earned:false},
+    {id:'early',     emoji:'🌅', name:'얼리버드',      desc:'오전 7시 이전 활동 5회',   cat:'재미', earned:false},
+    {id:'helper10',  emoji:'🤝', name:'답변 매니저',   desc:'답변 누적 10개 이상',      cat:'답변', earned:false},
+    {id:'cpo',       emoji:'🎖️', name:'CPO 인증',     desc:'CPO 역할 달성',           cat:'특별', earned:false},
+  ],
+
+  /* 퀘스트 (일간·주간·업적·시즌) */
+  QUESTS: [
+    /* 일간 */
+    {id:'dq1', type:'일간', icon:'☀️', name:'오늘의 질문 탐험',  desc:'Q&A 게시글 3개 읽기', reward:'+10pt', max:3, cur:2, done:false},
+    {id:'dq2', type:'일간', icon:'✍️', name:'오늘의 답변 공유',  desc:'답변 1개 등록하기',   reward:'+20pt', max:1, cur:0, done:false},
+    {id:'dq3', type:'일간', icon:'👍', name:'오늘의 추천 활동',  desc:'답변 추천 2회',       reward:'+5pt',  max:2, cur:2, done:true},
+    /* 주간 */
+    {id:'wq1', type:'주간', icon:'📅', name:'이번 주의 지식인',  desc:'7일 연속 접속',        reward:'+50pt', max:7, cur:5, done:false},
+    {id:'wq2', type:'주간', icon:'📋', name:'이번 주의 문서왕',  desc:'문서 2건 업로드',      reward:'+80pt', max:2, cur:1, done:false},
+    {id:'wq3', type:'주간', icon:'🏆', name:'이번 주의 채택왕',  desc:'답변 채택 1회',        reward:'+100pt',max:1, cur:1, done:true},
+    /* 업적 */
+    {id:'aq1', type:'업적', icon:'🌱', name:'첫 걸음',           desc:'첫 번째 질문 등록',    reward:'칭호: 첫 질문자', max:1, cur:1, done:true},
+    {id:'aq2', type:'업적', icon:'📚', name:'지식 기여자',       desc:'문서 누적 5건 업로드', reward:'칭호: 지식 창고지기', max:5, cur:2, done:false},
+    {id:'aq3', type:'업적', icon:'🧠', name:'AI 학습 공헌자',    desc:'AI DB 등재 1회',       reward:'칭호: AI 학습 기여', max:1, cur:0, done:false},
+    /* 시즌 */
+    {id:'sq1', type:'시즌', icon:'🌸', name:'[5월 시즌] 구매 탐험대', desc:'5월 한 달간 Q&A 참여 10회', reward:'+300pt + 특별 칭호', max:10, cur:6, done:false},
+    {id:'sq2', type:'시즌', icon:'🎯', name:'[5월 시즌] 전문가 인증', desc:'5월 답변 채택 3회',          reward:'+500pt',             max:3, cur:1, done:false},
+  ],
+
+  /* 현재 유저 상태 (샘플) */
+  ME: {
+    lv: 3,
+    pts: 1720,
+    activeTitle: 'Lv.3 구매 Pro',
+    activeBadgeId: 'adopted',
+  },
+
+  /* 작성자별 배지 매핑 (커뮤니티 표시용) */
+  AUTHOR_BADGES: {
+    '프로큐어마스터': {emoji:'🏆', name:'채택왕'},
+    '입찰달인':       {emoji:'🏷️', name:'입찰 전문가'},
+    'VAATZ달인':      {emoji:'💻', name:'VAATZ 달인'},
+    '글로벌구매Pro':  {emoji:'🌐', name:'글로벌 바이어'},
+    '품질매니저':     {emoji:'🔍', name:'품질 지킴이'},
+  },
+
+  getUserHonorific: function(author){
+    var b = GAME.AUTHOR_BADGES[author];
+    return b ? (b.emoji + ' ' + b.name) : '';
+  },
+};
+
+window.VAATZ_GAME = GAME;
+
+/* ─── 2. 내 호칭 타이틀 가져오기 ────────────────────────────── */
+function getMyTitle(){
+  var lv = GAME.ME.lv;
+  var found = GAME.TITLES.slice().reverse().find(function(t){ return t.lv <= lv; });
+  return found || GAME.TITLES[0];
+}
+
+/* ─── 3. 퀘스트 타입별 그룹화 ───────────────────────────────── */
+function groupQuests(){
+  var groups = {};
+  GAME.QUESTS.forEach(function(q){
+    if(!groups[q.type]) groups[q.type] = [];
+    groups[q.type].push(q);
+  });
+  return groups;
+}
+
+/* ─── 4. 진행률 바 HTML ──────────────────────────────────────── */
+function progressBar(cur, max, color){
+  var pct = Math.min(100, Math.round((cur/max)*100));
+  return '<div class="qst-prog-wrap"><div class="qst-prog-bar" style="width:' + pct + '%;background:' + (color||'var(--accent)') + '"></div></div><span class="qst-prog-txt">' + cur + '/' + max + '</span>';
+}
+
+/* ─── 5. 메인 렌더 ───────────────────────────────────────────── */
+window.renderQuestTab = function(){
+  var ct = document.getElementById('ct-quest');
+  if(!ct) return;
+
+  var myTitle = getMyTitle();
+  var earnedBadges = GAME.HONORIFICS.filter(function(h){ return h.earned; });
+  var lockedBadges = GAME.HONORIFICS.filter(function(h){ return !h.earned; });
+  var groups = groupQuests();
+  var typeColors = {'일간':'#4A8EF0','주간':'#26A69A','업적':'#FFA726','시즌':'#EC407A'};
+
+  ct.innerHTML = '<div class="qst-wrap">' +
+
+    /* ── 내 호칭 카드 ── */
+    '<div class="qst-my-card">' +
+      '<div class="qst-my-left">' +
+        '<div class="qst-my-lv" style="color:' + myTitle.color + ';background:' + myTitle.bg + '">Lv.' + GAME.ME.lv + '</div>' +
+        '<div>' +
+          '<div class="qst-my-title" style="color:' + myTitle.color + '">' + esc(myTitle.title) + '</div>' +
+          '<div class="qst-my-pts">🏅 ' + GAME.ME.pts.toLocaleString() + 'pt 보유</div>' +
+        '</div>' +
+      '</div>' +
+      '<div class="qst-my-right">' +
+        '<div class="qst-my-badge-label">현재 활성 칭호</div>' +
+        (function(){
+          var ab = GAME.HONORIFICS.find(function(h){ return h.id===GAME.ME.activeBadgeId; });
+          return ab ? '<div class="qst-active-badge"><span class="qst-badge-emoji">' + ab.emoji + '</span><span>' + esc(ab.name) + '</span></div>' : '<div class="qst-no-badge">칭호 없음</div>';
+        })() +
+        '<div class="qst-my-badge-label" style="margin-top:8px">호칭 선택</div>' +
+        '<select class="qst-title-sel" onchange="vaatzSelectTitle(this.value)">' +
+          GAME.TITLES.filter(function(t){ return t.lv <= GAME.ME.lv; }).map(function(t){
+            return '<option value="' + t.lv + '"' + (t.lv===myTitle.lv?' selected':'') + '>' + esc('Lv.' + t.lv + ' ' + t.title) + '</option>';
+          }).join('') +
+        '</select>' +
+      '</div>' +
+    '</div>' +
+
+    /* ── 획득 칭호 뱃지 월 ── */
+    '<div class="qst-section">' +
+      '<div class="qst-section-hd">🎖 획득한 칭호 <span class="qst-count">' + earnedBadges.length + '/' + GAME.HONORIFICS.length + '</span></div>' +
+      '<div class="qst-badge-wall">' +
+        earnedBadges.map(function(h){
+          var isActive = (h.id === GAME.ME.activeBadgeId);
+          return '<div class="qst-badge-slot earned' + (isActive?' active':'') + '" onclick="vaatzActivateBadge(\'' + h.id + '\')" title="' + esc(h.desc) + '">' +
+            '<span class="qst-badge-emoji">' + h.emoji + '</span>' +
+            '<span class="qst-badge-nm">' + esc(h.name) + '</span>' +
+            (isActive ? '<span class="qst-badge-active-mark">ON</span>' : '') +
+          '</div>';
+        }).join('') +
+        lockedBadges.map(function(h){
+          return '<div class="qst-badge-slot locked" title="' + esc(h.desc) + '">' +
+            '<span class="qst-badge-emoji" style="filter:grayscale(1);opacity:.35">' + h.emoji + '</span>' +
+            '<span class="qst-badge-nm" style="color:var(--text-4)">' + esc(h.name) + '</span>' +
+          '</div>';
+        }).join('') +
+      '</div>' +
+    '</div>' +
+
+    /* ── 퀘스트 목록 ── */
+    '<div class="qst-section">' +
+      '<div class="qst-section-hd">⚡ 진행 중인 퀘스트</div>' +
+      Object.keys(groups).map(function(type){
+        var color = typeColors[type] || 'var(--accent)';
+        return '<div class="qst-group">' +
+          '<div class="qst-group-hd" style="color:' + color + ';border-left:3px solid ' + color + '">' + esc(type) + ' 퀘스트</div>' +
+          groups[type].map(function(q){
+            return '<div class="qst-quest-row' + (q.done?' done':'') + '">' +
+              '<span class="qst-quest-ic">' + q.icon + '</span>' +
+              '<div class="qst-quest-info">' +
+                '<div class="qst-quest-nm">' + esc(q.name) + (q.done?' <span class="qst-done-mark">완료!</span>':'') + '</div>' +
+                '<div class="qst-quest-desc">' + esc(q.desc) + '</div>' +
+                (!q.done ? progressBar(q.cur, q.max, color) : '') +
+              '</div>' +
+              '<div class="qst-quest-reward">' + esc(q.reward) + '</div>' +
+              (q.done && q.cur <= q.max ?
+                '<button class="qst-claim-btn" style="background:' + color + '" onclick="vaatzClaimQuest(\'' + q.id + '\')">수령</button>'
+              : q.done && q.cur > q.max ?
+                '<span class="qst-claimed">✓ 수령완료</span>'
+              : '') +
+            '</div>';
+          }).join('') +
+        '</div>';
+      }).join('') +
+    '</div>' +
+
+  '</div>';
+};
+
+/* ─── 6. 인터랙션 핸들러 ─────────────────────────────────────── */
+window.vaatzSelectTitle = function(lv){
+  var t = GAME.TITLES.find(function(t){ return String(t.lv) === String(lv); });
+  if(!t) return;
+  GAME.ME.activeTitle = 'Lv.' + t.lv + ' ' + t.title;
+  GAME.ME.lv = t.lv;
+  say('호칭을 "' + t.title + '"으로 변경했습니다.', '🏷️', 2000);
+  window.renderQuestTab();
+};
+
+window.vaatzActivateBadge = function(id){
+  var h = GAME.HONORIFICS.find(function(x){ return x.id===id && x.earned; });
+  if(!h) return;
+  GAME.ME.activeBadgeId = id;
+  say('"' + h.name + '" 칭호를 활성화했습니다! ' + h.emoji, '🎖', 2200);
+  window.renderQuestTab();
+};
+
+window.vaatzClaimQuest = function(id){
+  var q = GAME.QUESTS.find(function(x){ return x.id===id && x.done; });
+  if(!q) return;
+  // mark as claimed (cur > max signals claimed state)
+  q.cur = q.max + 1;
+  var pts = parseInt(((q.reward.match(/\+(\d+)pt/)||[])[1])||'0');
+  if(pts){ GAME.ME.pts += pts; say('퀘스트 보상 수령! ' + q.reward + ' 🎉', '🏅', 2500); }
+  else { say('퀘스트 완료! 보상: ' + q.reward, '🏅', 2500); }
+  window.renderQuestTab();
+};
+
+/* ─── 7. 인라인 CSS 주입 ─────────────────────────────────────── */
+(function injectQuestCSS(){
+  if(document.getElementById('qst-css')) return;
+  var style = document.createElement('style');
+  style.id = 'qst-css';
+  style.textContent = [
+    '.qst-wrap{padding:16px;max-width:680px;margin:0 auto;display:flex;flex-direction:column;gap:16px}',
+    '.qst-my-card{background:var(--bg-2);border:1px solid var(--border-1);border-radius:14px;padding:16px 20px;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}',
+    '.qst-my-left{display:flex;align-items:center;gap:14px}',
+    '.qst-my-lv{font-size:13px;font-weight:800;padding:6px 12px;border-radius:8px;letter-spacing:.5px}',
+    '.qst-my-title{font-size:18px;font-weight:800;letter-spacing:-.3px}',
+    '.qst-my-pts{font-size:12px;color:var(--text-3);margin-top:3px}',
+    '.qst-my-right{display:flex;flex-direction:column;align-items:flex-end;gap:4px}',
+    '.qst-my-badge-label{font-size:10px;color:var(--text-4);font-weight:600;letter-spacing:.3px;text-transform:uppercase}',
+    '.qst-active-badge{display:flex;align-items:center;gap:6px;background:var(--bg-3);border:1px solid var(--accent-bd);border-radius:8px;padding:5px 10px;font-size:13px;font-weight:700;color:var(--accent)}',
+    '.qst-badge-emoji{font-size:16px}',
+    '.qst-no-badge{font-size:12px;color:var(--text-4);font-style:italic}',
+    '.qst-title-sel{font-size:11px;padding:4px 8px;border:1px solid var(--border-2);border-radius:7px;background:var(--bg-3);color:var(--text-1);cursor:pointer;font-family:inherit}',
+    '.qst-section{background:var(--bg-1);border:1px solid var(--border-1);border-radius:12px;padding:14px 16px}',
+    '.qst-section-hd{font-size:13px;font-weight:700;color:var(--text-1);margin-bottom:12px;display:flex;align-items:center;gap:6px}',
+    '.qst-count{font-size:11px;font-weight:600;color:var(--text-3);margin-left:4px}',
+    '.qst-badge-wall{display:grid;grid-template-columns:repeat(auto-fill,minmax(80px,1fr));gap:8px}',
+    '.qst-badge-slot{display:flex;flex-direction:column;align-items:center;gap:4px;padding:10px 6px;border-radius:10px;border:1.5px solid var(--border-1);cursor:pointer;transition:.15s;position:relative;text-align:center}',
+    '.qst-badge-slot.earned{background:var(--bg-2);border-color:var(--border-2)}',
+    '.qst-badge-slot.earned:hover{border-color:var(--accent);transform:translateY(-2px);box-shadow:0 4px 12px rgba(75,142,240,.2)}',
+    '.qst-badge-slot.active{border-color:var(--accent)!important;background:var(--accent-dim)!important;box-shadow:0 0 0 2px var(--accent-bd)}',
+    '.qst-badge-slot.locked{background:var(--bg-3);cursor:default}',
+    '.qst-badge-nm{font-size:9.5px;font-weight:600;color:var(--text-2);line-height:1.2;word-break:keep-all;text-align:center}',
+    '.qst-badge-active-mark{position:absolute;top:4px;right:4px;font-size:8px;font-weight:700;color:var(--accent);background:var(--accent-dim);border-radius:4px;padding:1px 4px}',
+    '.qst-group{margin-bottom:14px}',
+    '.qst-group:last-child{margin-bottom:0}',
+    '.qst-group-hd{font-size:11px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;padding:4px 8px;margin-bottom:8px;border-radius:0 4px 4px 0}',
+    '.qst-quest-row{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:9px;border:1px solid var(--border-1);margin-bottom:6px;background:var(--bg-2);transition:.12s}',
+    '.qst-quest-row.done{opacity:.7;background:var(--bg-3)}',
+    '.qst-quest-row:hover:not(.done){border-color:var(--border-2);transform:translateX(2px)}',
+    '.qst-quest-ic{font-size:20px;flex-shrink:0}',
+    '.qst-quest-info{flex:1;min-width:0}',
+    '.qst-quest-nm{font-size:12px;font-weight:700;color:var(--text-1)}',
+    '.qst-quest-desc{font-size:10.5px;color:var(--text-3);margin:2px 0 4px}',
+    '.qst-done-mark{font-size:10px;font-weight:700;color:#26A69A;background:#E0F2F1;border-radius:4px;padding:1px 5px;margin-left:4px}',
+    '.qst-prog-wrap{height:5px;background:var(--bg-4);border-radius:3px;overflow:hidden;width:80px;display:inline-block;vertical-align:middle;margin-right:4px}',
+    '.qst-prog-bar{height:100%;border-radius:3px;transition:width .3s}',
+    '.qst-prog-txt{font-size:10px;color:var(--text-4);vertical-align:middle}',
+    '.qst-quest-reward{font-size:10px;font-weight:700;color:var(--accent);flex-shrink:0;white-space:nowrap;max-width:110px;text-align:right}',
+    '.qst-claim-btn{font-size:10px;font-weight:700;color:#fff;border:none;border-radius:6px;padding:4px 10px;cursor:pointer;flex-shrink:0;font-family:inherit;white-space:nowrap}',
+    '.qst-claimed{font-size:10px;color:var(--text-4);flex-shrink:0}',
+    /* Q&A 개선 스타일 */
+    '.qa36-status-bar{display:flex;flex-wrap:wrap;gap:6px;padding:10px 0;align-items:center}',
+    '.qa36-status-chip{font-size:11px;font-weight:600;padding:5px 12px;border-radius:20px;border:1.5px solid var(--border-2);background:var(--bg-2);color:var(--text-2);cursor:pointer;transition:.12s;font-family:inherit}',
+    '.qa36-status-chip:hover{border-color:var(--accent);color:var(--accent)}',
+    '.qa36-status-chip.on{font-weight:700}',
+    '.qa36-sort-wrap{margin-left:auto}',
+    '.qa36-sort-sel{font-size:11px;padding:5px 8px;border:1.5px solid var(--border-2);border-radius:8px;background:var(--bg-2);color:var(--text-2);cursor:pointer;font-family:inherit}',
+    '.qa36-filter-summary{display:flex;align-items:center;gap:6px;flex-wrap:wrap;padding:4px 0 8px;font-size:11px;color:var(--text-3)}',
+    '.qa36-filter-tag{background:var(--accent-dim);color:var(--accent);border-radius:6px;padding:2px 8px;font-weight:600}',
+    '.qa36-filter-count{color:var(--text-4);margin-left:2px}',
+    '.qa36-pagination{display:flex;justify-content:center;align-items:center;gap:4px;padding:14px 0 4px;flex-wrap:wrap}',
+    '.qa36-page-btn{font-size:12px;font-weight:600;padding:5px 10px;border:1.5px solid var(--border-2);border-radius:7px;background:var(--bg-2);color:var(--text-2);cursor:pointer;transition:.12s;font-family:inherit;min-width:32px}',
+    '.qa36-page-btn:hover:not(.disabled){border-color:var(--accent);color:var(--accent)}',
+    '.qa36-page-btn.on{background:var(--accent);color:#fff;border-color:var(--accent)}',
+    '.qa36-page-btn.disabled{opacity:.4;cursor:default}',
+    '.qa36-page-info{font-size:11px;color:var(--text-4);margin-left:6px}',
+    '.qa36-honorific{font-size:9.5px;font-weight:700;background:var(--accent-dim);color:var(--accent);border-radius:4px;padding:1px 5px;margin-left:3px;vertical-align:middle}',
+  ].join('');
+  document.head.appendChild(style);
+})();
+
+/* ─── 8. Boot ────────────────────────────────────────────────── */
+(function boot(){
+  var origCommTab = window.commTab;
+  if(origCommTab && !window.__qstCommWrapped){
+    window.__qstCommWrapped = true;
+    window.commTab = function(btn, id){
+      if(origCommTab) origCommTab.apply(this, arguments);
+      if(id === 'ct-quest') setTimeout(function(){ window.renderQuestTab && window.renderQuestTab(); }, 20);
+    };
+  }
+})();
 
 })();
