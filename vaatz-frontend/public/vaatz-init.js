@@ -1868,20 +1868,54 @@ sendMessage = function(){
 
   function renderAdmin(){
     const totalDocs=teams.reduce((a,t)=>a+t.docs,0), totalFinal=teams.reduce((a,t)=>a+t.finalReq,0), published=teams.reduce((a,t)=>a+t.published,0);
+    /* 단계별 문서 수 */
+    const cntUpload=teamDocs.filter(d=>d.status==='작성·보완중').length;
+    const cntRevise=teamDocs.filter(d=>d.status==='보완 요청').length;
+    const cntApprove=teamDocs.filter(d=>d.status==='등록 요청됨').length;
+    const cntDone=teamDocs.filter(d=>d.status==='AI 검색 반영완료').length;
     addAdmSection('p-req', `
-      <div class="v23-admin-title"><div><div class="v23-title-main">VAATZ AI 지식 운영 홈</div><div class="v23-title-sub">복잡한 트리 대신 3단계 운영 흐름으로 관리합니다. 팀별 폴더에서 관리하고, 등록 요청됨 후 System Admin이 승인하면 최종 리스트와 AI 모드에 반영됩니다.</div></div><div class="v23-actions"><button class="v23-btn" onclick="openAdminTab('p-team')">📁 팀 폴더 보기</button><button class="v23-btn primary" onclick="openAdminTab('p-final')">✅ 최종 승인 처리</button></div></div>
+      <div class="v23-admin-title"><div><div class="v23-title-main">VAATZ AI 지식 운영 홈</div><div class="v23-title-sub">4단계 파이프라인으로 문서를 관리합니다. 각 단계 카드를 클릭하면 해당 단계의 문서만 인라인 필터링됩니다.</div></div><div class="v23-actions"><button class="v23-btn" onclick="openAdminTab('p-team')">📁 팀 폴더 보기</button><button class="v23-btn primary" onclick="openAdminTab('p-final')">✅ 최종 승인 처리</button></div></div>
       <div class="v23-hero-grid">
         <div class="v23-kpi"><div class="v23-kpi-label">비정형 문서 총량</div><div class="v23-kpi-value">${totalDocs}<span>건</span></div><div class="v23-kpi-desc">팀별 PDF/PPT/DOCX/XLSX 문서함 전체</div><div class="spark"><i style="height:35%"></i><i style="height:45%"></i><i style="height:62%"></i><i style="height:51%"></i><i style="height:72%"></i><i style="height:85%"></i></div></div>
-        <div class="v23-kpi amber"><div class="v23-kpi-label">최종 승인 대기</div><div class="v23-kpi-value">${totalFinal}<span>건</span></div><div class="v23-kpi-desc">팀 Admin이 등록 요청됨한 문서</div><div class="spark"><i style="height:55%"></i><i style="height:72%"></i><i style="height:48%"></i><i style="height:62%"></i><i style="height:81%"></i></div></div>
-        <div class="v23-kpi green"><div class="v23-kpi-label">AI AI 검색 반영완료</div><div class="v23-kpi-value">${published}<span>건</span></div><div class="v23-kpi-desc">임베딩 완료 및 검색 활성화</div><div class="spark"><i style="height:42%"></i><i style="height:54%"></i><i style="height:68%"></i><i style="height:79%"></i><i style="height:88%"></i></div></div>
+        <div class="v23-kpi amber"><div class="v23-kpi-label">시스템 승인 대기</div><div class="v23-kpi-value">${cntApprove}<span>건</span></div><div class="v23-kpi-desc">팀 Admin이 등록 요청한 문서</div><div class="spark"><i style="height:55%"></i><i style="height:72%"></i><i style="height:48%"></i><i style="height:62%"></i><i style="height:81%"></i></div></div>
+        <div class="v23-kpi green"><div class="v23-kpi-label">AI DB 반영완료</div><div class="v23-kpi-value">${cntDone}<span>건</span></div><div class="v23-kpi-desc">임베딩 완료 및 검색 활성화</div><div class="spark"><i style="height:42%"></i><i style="height:54%"></i><i style="height:68%"></i><i style="height:79%"></i><i style="height:88%"></i></div></div>
         <div class="v23-kpi violet"><div class="v23-kpi-label">정형 I/F</div><div class="v23-kpi-value">7<span>개</span></div><div class="v23-kpi-desc">VAATZ DB, Autopedia, 타 부문 배치</div><div class="spark"><i style="height:60%"></i><i style="height:60%"></i><i style="height:60%"></i><i style="height:40%"></i><i style="height:80%"></i></div></div>
       </div>
-      <div class="v23-process" id="v23HomeProcess">
-        <div class="v23-step" id="v23Step1" onclick="filterAdminHomeStep(1)"><div class="v23-step-num">1</div><div class="v23-step-title">팀별 폴더 관리</div><div class="v23-step-desc">각 팀 Admin이 문서를 업로드·수정·버전관리합니다. 클릭하면 이 단계 문서를 바로 필터링합니다.</div><div class="v23-step-foot"><span class="v23-pill amber">${teams.length}개 팀</span><span class="v23-step-hint">클릭해서 필터링</span></div></div>
-        <div class="v23-arrow">→</div>
-        <div class="v23-step" id="v23Step2" onclick="filterAdminHomeStep(2)"><div class="v23-step-num">2</div><div class="v23-step-title">System Admin 최종 승인</div><div class="v23-step-desc">구매디지털추진팀 Admin이 보안등급, AI 모드, 통합 폴더를 지정하고 최종 승인합니다.</div><div class="v23-step-foot"><span class="v23-pill blue">${totalFinal}건 대기</span><span class="v23-step-hint">클릭해서 필터링</span></div></div>
-        <div class="v23-arrow">→</div>
-        <div class="v23-step" id="v23Step3" onclick="filterAdminHomeStep(3)"><div class="v23-step-num">3</div><div class="v23-step-title">최종 리스트 관리</div><div class="v23-step-desc">승인된 문서는 최종 지식 리스트에서 버전, 모드, 보안, 임베딩 상태를 운영합니다.</div><div class="v23-step-foot"><span class="v23-pill green">${published}건 활성</span><span class="v23-step-hint">클릭해서 필터링</span></div></div>
+      <div class="v23-pipe-bar">
+        <button class="v23-pipe-all" id="v23StepAll" onclick="filterAdminHomeStep('all')">🗂 전체 보기 (${totalDocs})</button>
+        <div class="v23-process" id="v23HomeProcess">
+          <div class="v23-step" id="v23Step1" onclick="filterAdminHomeStep(1)">
+            <div class="v23-step-ic">📤</div>
+            <div class="v23-step-num">1</div>
+            <div class="v23-step-title">파일 업로드</div>
+            <div class="v23-step-desc">팀원이 문서를 업로드·작성 중인 단계</div>
+            <div class="v23-step-foot"><span class="v23-pill amber">${cntUpload}건</span><span class="v23-step-hint">클릭해서 필터링</span></div>
+          </div>
+          <div class="v23-arrow">→</div>
+          <div class="v23-step" id="v23Step2" onclick="filterAdminHomeStep(2)">
+            <div class="v23-step-ic">🔍</div>
+            <div class="v23-step-num">2</div>
+            <div class="v23-step-title">팀 검토·보완</div>
+            <div class="v23-step-desc">팀 Admin이 보완 요청한 문서 수정 중</div>
+            <div class="v23-step-foot"><span class="v23-pill red">${cntRevise}건</span><span class="v23-step-hint">클릭해서 필터링</span></div>
+          </div>
+          <div class="v23-arrow">→</div>
+          <div class="v23-step" id="v23Step3" onclick="filterAdminHomeStep(3)">
+            <div class="v23-step-ic">⏳</div>
+            <div class="v23-step-num">3</div>
+            <div class="v23-step-title">시스템 승인</div>
+            <div class="v23-step-desc">System Admin이 최종 검토·보안등급 지정</div>
+            <div class="v23-step-foot"><span class="v23-pill blue">${cntApprove}건</span><span class="v23-step-hint">클릭해서 필터링</span></div>
+          </div>
+          <div class="v23-arrow">→</div>
+          <div class="v23-step" id="v23Step4" onclick="filterAdminHomeStep(4)">
+            <div class="v23-step-ic">🧠</div>
+            <div class="v23-step-num">4</div>
+            <div class="v23-step-title">AI DB 반영</div>
+            <div class="v23-step-desc">임베딩 완료 후 AI 검색에 실시간 반영</div>
+            <div class="v23-step-foot"><span class="v23-pill green">${cntDone}건</span><span class="v23-step-hint">클릭해서 필터링</span></div>
+          </div>
+        </div>
       </div>
       <div id="v23HomeFilterPanel" style="display:none"></div>
       <div class="v23-workgrid"><div class="v23-panel"><div class="v23-panel-h"><div class="v23-panel-title">🚨 오늘 처리할 일</div><button class="v23-btn" onclick="openAdminTab('p-final')">전체 보기</button></div><div class="v23-panel-body"><div class="v23-mini-list">${teamDocs.filter(d=>d.status==='등록 요청됨').slice(0,5).map(d=>`<div class="v23-mini-row"><div class="v23-mini-icon">${d.type==='PPT'?'📊':d.type==='XLSX'?'📈':'📄'}</div><div class="v23-mini-main"><div class="v23-mini-title">${esc(d.name)}</div><div class="v23-mini-meta"><span>${esc(d.team)}</span><span>${esc(d.mode)}</span><span>${esc(d.sec)}</span></div></div><button class="v23-btn primary" onclick="openAdminTab('p-final')">검토</button></div>`).join('')}</div></div></div><div class="v23-panel"><div class="v23-panel-h"><div class="v23-panel-title">🔗 정형 데이터 배치 상태</div><button class="v23-btn" onclick="openAdminTab('p-datamart')">모니터링</button></div><div class="v23-panel-body"><div class="v23-mini-list"><div class="v23-mini-row"><div class="v23-mini-icon">🖥️</div><div class="v23-mini-main"><div class="v23-mini-title">VAATZ 업체·품목 마스터</div><div class="v23-mini-meta"><span>05:10 성공</span><span>+14,230 rows</span></div></div><span class="v23-pill green">정상</span></div><div class="v23-mini-row"><div class="v23-mini-icon">📖</div><div class="v23-mini-main"><div class="v23-mini-title">Autopedia 용어 DB</div><div class="v23-mini-meta"><span>06:00 성공</span><span>4,832 terms</span></div></div><span class="v23-pill green">정상</span></div><div class="v23-mini-row"><div class="v23-mini-icon">💰</div><div class="v23-mini-main"><div class="v23-mini-title">원가 DB 일 배치</div><div class="v23-mini-meta"><span>07:30 일부 실패</span><span>12 rows error</span></div></div><span class="v23-pill amber">확인</span></div></div></div></div></div>
@@ -2286,53 +2320,76 @@ sendMessage = function(){
   var _homeActiveStep=0;
   window.filterAdminHomeStep=function(step){
     var statusMap={
-      1:['작성·보완중','보완 요청'],
-      2:['등록 요청됨'],
-      3:['AI 검색 반영완료']
+      1:['작성·보완중'],
+      2:['보완 요청'],
+      3:['등록 요청됨'],
+      4:['AI 검색 반영완료'],
+      all:['작성·보완중','보완 요청','등록 요청됨','AI 검색 반영완료']
     };
-    var stepTitles={1:'팀별 폴더 관리 (작성·보완 단계)',2:'System Admin 최종 승인 대기',3:'AI 반영 완료 문서'};
+    var stepLabels={
+      1:{title:'📤 파일 업로드 단계', pill:'amber', action:function(d){return '<button class="v23-btn primary" style="padding:3px 9px;font-size:10px" onclick="requestAIDoc(\''+d.id+'\',this)">✈ 등록요청</button>';}},
+      2:{title:'🔍 팀 검토·보완 단계', pill:'red',   action:function(d){return '<button class="v23-btn" style="padding:3px 9px;font-size:10px" onclick="openAdminTab(\'p-team\')">팀 폴더 →</button>';}},
+      3:{title:'⏳ 시스템 승인 대기',  pill:'blue',  action:function(d){return '<button class="v23-btn primary" style="padding:3px 9px;font-size:10px" onclick="openAdminTab(\'p-final\')">검토 →</button>';}},
+      4:{title:'🧠 AI DB 반영 완료',   pill:'green', action:function(d){return '<button class="v23-btn good" style="padding:3px 9px;font-size:10px" onclick="openAdminTab(\'p-list\')">리스트 확인 →</button>';}},
+      all:{title:'🗂 전체 문서 목록',  pill:'',      action:function(d){
+        var sCls=d.status==='AI 검색 반영완료'?'green':d.status==='등록 요청됨'?'blue':d.status==='보완 요청'?'red':'amber';
+        return '<span class="v23-pill '+sCls+'" style="font-size:9px">'+d.status+'</span>';
+      }}
+    };
     var panel=document.getElementById('v23HomeFilterPanel');
     if(!panel) return;
-    // toggle off if clicking same step
+    // 같은 단계 다시 클릭 → 토글 오프
     if(_homeActiveStep===step){
       _homeActiveStep=0;
       panel.style.display='none'; panel.innerHTML='';
-      [1,2,3].forEach(function(n){var el=document.getElementById('v23Step'+n);if(el)el.classList.remove('v23-step-active');});
+      [1,2,3,4,'all'].forEach(function(n){
+        var el=document.getElementById('v23Step'+(n==='all'?'All':n));
+        if(el)el.classList.remove('v23-step-active');
+      });
       return;
     }
     _homeActiveStep=step;
-    [1,2,3].forEach(function(n){
+    // 카드 active 상태 갱신
+    [1,2,3,4].forEach(function(n){
       var el=document.getElementById('v23Step'+n);
-      if(el) el.classList.toggle('v23-step-active',n===step);
+      if(el) el.classList.toggle('v23-step-active', n===step);
     });
+    var allBtn=document.getElementById('v23StepAll');
+    if(allBtn) allBtn.classList.toggle('v23-step-active', step==='all');
+
     var statuses=statusMap[step]||[];
     var docs=teamDocs.filter(function(d){return statuses.includes(d.status);});
-    var pillCls=step===1?'amber':step===2?'blue':'green';
-    var rows=docs.slice(0,50).map(function(d){
+    var info=stepLabels[step]||stepLabels[1];
+    var sCls=function(d){return d.status==='AI 검색 반영완료'?'green':d.status==='등록 요청됨'?'blue':d.status==='보완 요청'?'red':'amber';};
+    var rows=docs.slice(0,80).map(function(d){
       var ic=d.type==='PDF'?'📄':d.type==='PPT'?'📊':d.type==='XLSX'?'📈':d.type==='DOCX'?'📝':'📋';
-      var sCls=d.status==='AI 검색 반영완료'?'green':d.status==='등록 요청됨'?'blue':d.status==='보완 요청'?'red':'amber';
-      var action='';
-      if(step===1) action='<button class="v23-btn primary" style="padding:3px 9px;font-size:10px" onclick="requestAIDoc(\''+d.id+'\',this)">✈ 등록요청</button>';
-      else if(step===2) action='<button class="v23-btn" style="padding:3px 9px;font-size:10px" onclick="openAdminTab(\'p-final\')">검토 →</button>';
-      else action='<button class="v23-btn good" style="padding:3px 9px;font-size:10px" onclick="openAdminTab(\'p-list\')">리스트 확인 →</button>';
       return '<div class="v23hf-row">'+
         '<span class="v23hf-ic">'+ic+'</span>'+
         '<div class="v23hf-info">'+
           '<div class="v23hf-name">'+esc(d.name)+'</div>'+
           '<div class="v23hf-meta">'+esc(d.team)+' · '+esc(d.owner)+' · '+d.date+'</div>'+
         '</div>'+
-        '<span class="v23-pill '+sCls+'" style="flex-shrink:0;font-size:9px">'+d.status+'</span>'+
-        action+
+        (step==='all'?'<span class="v23-pill '+sCls(d)+'" style="flex-shrink:0;font-size:9px">'+d.status+'</span>':'')+
+        info.action(d)+
       '</div>';
     }).join('');
     panel.innerHTML=
       '<div class="v23hf-header">'+
-        '<span class="v23hf-title">🔎 '+stepTitles[step]+'</span>'+
-        '<span class="v23-pill '+pillCls+'" style="font-size:10px">'+docs.length+'건</span>'+
-        '<button class="v23-btn" style="margin-left:auto;padding:3px 10px;font-size:10px" onclick="filterAdminHomeStep('+step+')">✕ 닫기</button>'+
+        '<span class="v23hf-title">'+info.title+'</span>'+
+        (info.pill?'<span class="v23-pill '+info.pill+'" style="font-size:10px">'+docs.length+'건</span>':'<span style="font-size:11px;color:var(--text-3)">'+docs.length+'건</span>')+
+        '<div style="display:flex;gap:6px;margin-left:auto">'+
+          [1,2,3,4].map(function(n){
+            var labels=['업로드','팀검토','시스승인','AI반영'];
+            return '<button class="v23-btn'+(step===n?' primary':'')+'" style="padding:3px 9px;font-size:10px" onclick="filterAdminHomeStep('+n+')">'+labels[n-1]+'</button>';
+          }).join('')+
+          '<button class="v23-btn'+(step==='all'?' primary':'')+'" style="padding:3px 9px;font-size:10px" onclick="filterAdminHomeStep(\'all\')">전체</button>'+
+          '<button class="v23-btn" style="padding:3px 9px;font-size:10px;margin-left:4px" onclick="filterAdminHomeStep(\''+step+'\')">✕</button>'+
+        '</div>'+
       '</div>'+
-      (rows||'<div style="padding:20px;color:var(--text-4);text-align:center">해당 단계에 문서가 없습니다.</div>')+
-      (docs.length>50?'<div style="padding:10px;text-align:center;font-size:11px;color:var(--text-3)">+ '+(docs.length-50)+'건 더 있음</div>':'');
+      '<div class="v23hf-list">'+
+        (rows||'<div style="padding:20px;color:var(--text-4);text-align:center">해당 단계에 문서가 없습니다.</div>')+
+        (docs.length>80?'<div style="padding:10px;text-align:center;font-size:11px;color:var(--text-3)">+ '+(docs.length-80)+'건 더 있음 — 팀 폴더 탭에서 전체 확인 가능</div>':'')+
+      '</div>';
     panel.style.display='block';
   };
 
@@ -6254,67 +6311,74 @@ window.vaatzClaimQuest = function(id){
 
 /* ─── 7. 인라인 CSS 주입 ─────────────────────────────────────── */
 (function injectQuestCSS(){
-  if(document.getElementById('qst-css')) return;
+  var OLD = document.getElementById('qst-css');
+  if(OLD) OLD.remove(); // 구 버전 제거 후 재주입
   var style = document.createElement('style');
   style.id = 'qst-css';
   style.textContent = [
-    '.qst-wrap{padding:16px;max-width:680px;margin:0 auto;display:flex;flex-direction:column;gap:16px}',
-    '.qst-my-card{background:var(--bg-2);border:1px solid var(--border-1);border-radius:14px;padding:16px 20px;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}',
-    '.qst-my-left{display:flex;align-items:center;gap:14px}',
-    '.qst-my-lv{font-size:13px;font-weight:800;padding:6px 12px;border-radius:8px;letter-spacing:.5px}',
-    '.qst-my-title{font-size:18px;font-weight:800;letter-spacing:-.3px}',
-    '.qst-my-pts{font-size:12px;color:var(--text-3);margin-top:3px}',
-    '.qst-my-right{display:flex;flex-direction:column;align-items:flex-end;gap:4px}',
-    '.qst-my-badge-label{font-size:10px;color:var(--text-4);font-weight:600;letter-spacing:.3px;text-transform:uppercase}',
-    '.qst-active-badge{display:flex;align-items:center;gap:6px;background:var(--bg-3);border:1px solid var(--accent-bd);border-radius:8px;padding:5px 10px;font-size:13px;font-weight:700;color:var(--accent)}',
-    '.qst-badge-emoji{font-size:16px}',
-    '.qst-no-badge{font-size:12px;color:var(--text-4);font-style:italic}',
-    '.qst-title-sel{font-size:11px;padding:4px 8px;border:1px solid var(--border-2);border-radius:7px;background:var(--bg-3);color:var(--text-1);cursor:pointer;font-family:inherit}',
-    '.qst-section{background:var(--bg-1);border:1px solid var(--border-1);border-radius:12px;padding:14px 16px}',
-    '.qst-section-hd{font-size:13px;font-weight:700;color:var(--text-1);margin-bottom:12px;display:flex;align-items:center;gap:6px}',
-    '.qst-count{font-size:11px;font-weight:600;color:var(--text-3);margin-left:4px}',
-    '.qst-badge-wall{display:grid;grid-template-columns:repeat(auto-fill,minmax(80px,1fr));gap:8px}',
-    '.qst-badge-slot{display:flex;flex-direction:column;align-items:center;gap:4px;padding:10px 6px;border-radius:10px;border:1.5px solid var(--border-1);cursor:pointer;transition:.15s;position:relative;text-align:center}',
+    /* ── 칭호·퀘스트 탭 전체 래퍼 ── */
+    '#ct-quest{overflow-y:auto}',
+    '.qst-wrap{padding:20px 18px;margin:0 auto;display:flex;flex-direction:column;gap:18px}',
+    /* ── 내 호칭 카드 ── */
+    '.qst-my-card{background:var(--bg-2);border:1px solid var(--border-1);border-radius:16px;padding:20px 24px;display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap}',
+    '.qst-my-left{display:flex;align-items:center;gap:16px}',
+    '.qst-my-lv{font-size:16px;font-weight:900;padding:8px 16px;border-radius:10px;letter-spacing:.5px}',
+    '.qst-my-title{font-size:22px;font-weight:900;letter-spacing:-.5px}',
+    '.qst-my-pts{font-size:14px;color:var(--text-3);margin-top:4px}',
+    '.qst-my-right{display:flex;flex-direction:column;align-items:flex-end;gap:6px}',
+    '.qst-my-badge-label{font-size:11px;color:var(--text-4);font-weight:700;letter-spacing:.3px;text-transform:uppercase}',
+    '.qst-active-badge{display:flex;align-items:center;gap:8px;background:var(--bg-3);border:1.5px solid var(--accent-bd);border-radius:10px;padding:7px 14px;font-size:15px;font-weight:700;color:var(--accent)}',
+    '.qst-badge-emoji{font-size:22px;line-height:1}',
+    '.qst-no-badge{font-size:13px;color:var(--text-4);font-style:italic}',
+    '.qst-title-sel{font-size:13px;padding:6px 10px;border:1.5px solid var(--border-2);border-radius:8px;background:var(--bg-3);color:var(--text-1);cursor:pointer;font-family:inherit}',
+    /* ── 섹션 공통 ── */
+    '.qst-section{background:var(--bg-1);border:1px solid var(--border-1);border-radius:14px;padding:18px 20px}',
+    '.qst-section-hd{font-size:15px;font-weight:800;color:var(--text-1);margin-bottom:14px;display:flex;align-items:center;gap:8px}',
+    '.qst-count{font-size:13px;font-weight:600;color:var(--text-3);margin-left:4px}',
+    /* ── 배지 월 ── */
+    '.qst-badge-wall{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:10px}',
+    '.qst-badge-slot{display:flex;flex-direction:column;align-items:center;gap:6px;padding:14px 8px;border-radius:12px;border:1.5px solid var(--border-1);cursor:pointer;transition:.15s;position:relative;text-align:center}',
     '.qst-badge-slot.earned{background:var(--bg-2);border-color:var(--border-2)}',
-    '.qst-badge-slot.earned:hover{border-color:var(--accent);transform:translateY(-2px);box-shadow:0 4px 12px rgba(75,142,240,.2)}',
-    '.qst-badge-slot.active{border-color:var(--accent)!important;background:var(--accent-dim)!important;box-shadow:0 0 0 2px var(--accent-bd)}',
+    '.qst-badge-slot.earned:hover{border-color:var(--accent);transform:translateY(-3px);box-shadow:0 6px 16px rgba(75,142,240,.2)}',
+    '.qst-badge-slot.active{border-color:var(--accent)!important;background:var(--accent-dim)!important;box-shadow:0 0 0 3px var(--accent-bd)}',
     '.qst-badge-slot.locked{background:var(--bg-3);cursor:default}',
-    '.qst-badge-nm{font-size:9.5px;font-weight:600;color:var(--text-2);line-height:1.2;word-break:keep-all;text-align:center}',
-    '.qst-badge-active-mark{position:absolute;top:4px;right:4px;font-size:8px;font-weight:700;color:var(--accent);background:var(--accent-dim);border-radius:4px;padding:1px 4px}',
-    '.qst-group{margin-bottom:14px}',
+    '.qst-badge-nm{font-size:11.5px;font-weight:600;color:var(--text-2);line-height:1.3;word-break:keep-all;text-align:center}',
+    '.qst-badge-active-mark{position:absolute;top:5px;right:5px;font-size:9px;font-weight:800;color:var(--accent);background:var(--accent-dim);border-radius:5px;padding:2px 5px}',
+    /* ── 퀘스트 목록 ── */
+    '.qst-group{margin-bottom:16px}',
     '.qst-group:last-child{margin-bottom:0}',
-    '.qst-group-hd{font-size:11px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;padding:4px 8px;margin-bottom:8px;border-radius:0 4px 4px 0}',
-    '.qst-quest-row{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:9px;border:1px solid var(--border-1);margin-bottom:6px;background:var(--bg-2);transition:.12s}',
+    '.qst-group-hd{font-size:12px;font-weight:800;letter-spacing:.6px;text-transform:uppercase;padding:5px 10px;margin-bottom:10px;border-radius:0 5px 5px 0}',
+    '.qst-quest-row{display:flex;align-items:center;gap:12px;padding:14px 16px;border-radius:11px;border:1px solid var(--border-1);margin-bottom:8px;background:var(--bg-2);transition:.12s}',
     '.qst-quest-row.done{opacity:.7;background:var(--bg-3)}',
     '.qst-quest-row:hover:not(.done){border-color:var(--border-2);transform:translateX(2px)}',
-    '.qst-quest-ic{font-size:20px;flex-shrink:0}',
+    '.qst-quest-ic{font-size:26px;flex-shrink:0}',
     '.qst-quest-info{flex:1;min-width:0}',
-    '.qst-quest-nm{font-size:12px;font-weight:700;color:var(--text-1)}',
-    '.qst-quest-desc{font-size:10.5px;color:var(--text-3);margin:2px 0 4px}',
-    '.qst-done-mark{font-size:10px;font-weight:700;color:#26A69A;background:#E0F2F1;border-radius:4px;padding:1px 5px;margin-left:4px}',
-    '.qst-prog-wrap{height:5px;background:var(--bg-4);border-radius:3px;overflow:hidden;width:80px;display:inline-block;vertical-align:middle;margin-right:4px}',
-    '.qst-prog-bar{height:100%;border-radius:3px;transition:width .3s}',
-    '.qst-prog-txt{font-size:10px;color:var(--text-4);vertical-align:middle}',
-    '.qst-quest-reward{font-size:10px;font-weight:700;color:var(--accent);flex-shrink:0;white-space:nowrap;max-width:110px;text-align:right}',
-    '.qst-claim-btn{font-size:10px;font-weight:700;color:#fff;border:none;border-radius:6px;padding:4px 10px;cursor:pointer;flex-shrink:0;font-family:inherit;white-space:nowrap}',
-    '.qst-claimed{font-size:10px;color:var(--text-4);flex-shrink:0}',
-    /* Q&A 개선 스타일 */
+    '.qst-quest-nm{font-size:14px;font-weight:700;color:var(--text-1)}',
+    '.qst-quest-desc{font-size:12px;color:var(--text-3);margin:3px 0 6px}',
+    '.qst-done-mark{font-size:11px;font-weight:700;color:#26A69A;background:#E0F2F1;border-radius:5px;padding:2px 6px;margin-left:5px}',
+    '.qst-prog-wrap{height:7px;background:var(--bg-4);border-radius:4px;overflow:hidden;width:100px;display:inline-block;vertical-align:middle;margin-right:6px}',
+    '.qst-prog-bar{height:100%;border-radius:4px;transition:width .35s}',
+    '.qst-prog-txt{font-size:12px;color:var(--text-4);vertical-align:middle}',
+    '.qst-quest-reward{font-size:12px;font-weight:700;color:var(--accent);flex-shrink:0;white-space:nowrap;max-width:120px;text-align:right}',
+    '.qst-claim-btn{font-size:12px;font-weight:700;color:#fff;border:none;border-radius:8px;padding:6px 14px;cursor:pointer;flex-shrink:0;font-family:inherit;white-space:nowrap}',
+    '.qst-claimed{font-size:12px;color:var(--text-4);flex-shrink:0}',
+    /* ── Q&A 필터·페이징 스타일 ── */
     '.qa36-status-bar{display:flex;flex-wrap:wrap;gap:6px;padding:10px 0;align-items:center}',
-    '.qa36-status-chip{font-size:11px;font-weight:600;padding:5px 12px;border-radius:20px;border:1.5px solid var(--border-2);background:var(--bg-2);color:var(--text-2);cursor:pointer;transition:.12s;font-family:inherit}',
+    '.qa36-status-chip{font-size:12px;font-weight:600;padding:6px 14px;border-radius:20px;border:1.5px solid var(--border-2);background:var(--bg-2);color:var(--text-2);cursor:pointer;transition:.12s;font-family:inherit}',
     '.qa36-status-chip:hover{border-color:var(--accent);color:var(--accent)}',
     '.qa36-status-chip.on{font-weight:700}',
     '.qa36-sort-wrap{margin-left:auto}',
-    '.qa36-sort-sel{font-size:11px;padding:5px 8px;border:1.5px solid var(--border-2);border-radius:8px;background:var(--bg-2);color:var(--text-2);cursor:pointer;font-family:inherit}',
-    '.qa36-filter-summary{display:flex;align-items:center;gap:6px;flex-wrap:wrap;padding:4px 0 8px;font-size:11px;color:var(--text-3)}',
-    '.qa36-filter-tag{background:var(--accent-dim);color:var(--accent);border-radius:6px;padding:2px 8px;font-weight:600}',
+    '.qa36-sort-sel{font-size:12px;padding:6px 10px;border:1.5px solid var(--border-2);border-radius:8px;background:var(--bg-2);color:var(--text-2);cursor:pointer;font-family:inherit}',
+    '.qa36-filter-summary{display:flex;align-items:center;gap:6px;flex-wrap:wrap;padding:4px 0 8px;font-size:12px;color:var(--text-3)}',
+    '.qa36-filter-tag{background:var(--accent-dim);color:var(--accent);border-radius:6px;padding:2px 9px;font-weight:600}',
     '.qa36-filter-count{color:var(--text-4);margin-left:2px}',
-    '.qa36-pagination{display:flex;justify-content:center;align-items:center;gap:4px;padding:14px 0 4px;flex-wrap:wrap}',
-    '.qa36-page-btn{font-size:12px;font-weight:600;padding:5px 10px;border:1.5px solid var(--border-2);border-radius:7px;background:var(--bg-2);color:var(--text-2);cursor:pointer;transition:.12s;font-family:inherit;min-width:32px}',
+    '.qa36-pagination{display:flex;justify-content:center;align-items:center;gap:5px;padding:14px 0 4px;flex-wrap:wrap}',
+    '.qa36-page-btn{font-size:13px;font-weight:600;padding:6px 12px;border:1.5px solid var(--border-2);border-radius:8px;background:var(--bg-2);color:var(--text-2);cursor:pointer;transition:.12s;font-family:inherit;min-width:36px}',
     '.qa36-page-btn:hover:not(.disabled){border-color:var(--accent);color:var(--accent)}',
     '.qa36-page-btn.on{background:var(--accent);color:#fff;border-color:var(--accent)}',
     '.qa36-page-btn.disabled{opacity:.4;cursor:default}',
-    '.qa36-page-info{font-size:11px;color:var(--text-4);margin-left:6px}',
-    '.qa36-honorific{font-size:9.5px;font-weight:700;background:var(--accent-dim);color:var(--accent);border-radius:4px;padding:1px 5px;margin-left:3px;vertical-align:middle}',
+    '.qa36-page-info{font-size:12px;color:var(--text-4);margin-left:6px}',
+    '.qa36-honorific{font-size:10px;font-weight:700;background:var(--accent-dim);color:var(--accent);border-radius:4px;padding:1px 6px;margin-left:4px;vertical-align:middle}',
   ].join('');
   document.head.appendChild(style);
 })();
