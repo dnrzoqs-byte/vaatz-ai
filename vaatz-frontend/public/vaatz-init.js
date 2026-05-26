@@ -87,7 +87,7 @@ function ca(){
 function at(b,id){
   document.querySelectorAll('.atb').forEach(t=>t.classList.remove('on'));
   b.classList.add('on');
-  ['p-req','p-doc','p-usr','p-adm','p-int','p-mon','p-verify','p-sec'].forEach(t=>{
+  ['p-req','p-doc','p-usr','p-adm','p-int','p-mon','p-verify','p-sec','p-sec-policy'].forEach(t=>{
     const e=document.getElementById(t);
     if(e)e.style.display=t===id?'block':'none';
   });
@@ -1854,6 +1854,7 @@ sendMessage = function(){
       <button class="atb" onclick="at(this,'p-list')">📚 최종 리스트</button>
       <button class="atb" onclick="at(this,'p-datamart')">🔗 데이터마트</button>
       <button class="atb" onclick="at(this,'p-mode')">🧭 AI 모드·DB</button>
+      <button class="atb" onclick="at(this,'p-sec-policy')">🔒 보안등급</button>
       <button class="atb" onclick="at(this,'p-usr')">👥 사용자·권한</button>
     `;
   }
@@ -2076,10 +2077,210 @@ sendMessage = function(){
       <div class="mode-mapping"><div class="source-palette"><h4>연결 가능한 데이터 소스</h4>${['📄 구매업무규정 PDF','📊 VAATZ 입찰모듈 PPT','📈 품질 5스타 XLSX','🖥️ VAATZ 업체·품목 DB','📖 Autopedia 용어 DB','💰 원가 DB','🏭 생산부문 품질 DB','📦 일반자재 MRO DB'].map((s,i)=>`<div class="mode-source" draggable="true" data-source="${s}"><span>${s.split(' ')[0]}</span><span>${s.replace(/^\S+\s/,'')}</span></div>`).join('')}<div class="mode-note">비정형 문서는 System Admin 최종 승인 후 이 팔레트에 나타납니다. 정형 DB는 데이터마트 I/F 성공 후 연결 가능합니다.</div></div><div class="mode-board">${modeList.map((m,i)=>`<div class="mode-col" data-mode="${m}"><div class="mode-col-head"><div class="mode-col-title">${m}</div><span class="v23-pill ${i===0?'blue':i===1?'green':i===2?'violet':'red'}">${i===0?'기본':i===1?'생산':i===2?'일반':'보안'}</span></div><div class="mapped-list">${(i===0?['📄 구매업무규정 PDF','🖥️ VAATZ 업체·품목 DB','📖 Autopedia 용어 DB']:i===1?['🏭 생산부문 품질 DB','📈 품질 5스타 XLSX']:i===2?['📦 일반자재 MRO DB','📊 VAATZ 입찰모듈 PPT']:['💰 원가 DB']).map(x=>`<span class="mapped-chip">${x}<button onclick="this.parentElement.remove()">×</button></span>`).join('')}</div><div class="mode-note">${m} 접근은 사용자/팀 권한과 문서 보안등급을 모두 통과해야 활성화됩니다.</div></div>`).join('')}</div></div>
     `);
 
+    // ── 보안등급 체계 탭 ────────────────────────────────────
+    const secCounts={
+      '일반 공개': teamDocs.filter(d=>d.sec==='일반 공개').length,
+      '리더 전용':  teamDocs.filter(d=>d.sec==='리더 전용').length,
+      '지정 사용자':teamDocs.filter(d=>d.sec==='지정 사용자').length
+    };
+    const secLevels=[
+      {
+        id:'open', label:'일반 공개', icon:'🟢', cls:'green', eng:'OPEN',
+        cnt: secCounts['일반 공개'],
+        who:'VAATZ 계정 보유 전 직원',
+        aiMode:'통합모드·생산자재 모드·일반자재 모드',
+        desc:'구매 업무 공통 지식, 표준 절차서, 입찰 가이드 등 전사 공유가 필요한 문서에 적용합니다.',
+        rules:['VAATZ 로그인 시 자동 접근 허용','AI 검색 결과에 기본 노출','별도 신청·승인 불필요','최종 리스트 등록 즉시 반영'],
+        examples:['구매업무규정 표준 절차서','입찰 가이드라인','VAATZ 사용자 매뉴얼','품질 5스타 평가 기준']
+      },
+      {
+        id:'leader', label:'리더 전용', icon:'🔴', cls:'red', eng:'LEADER',
+        cnt: secCounts['리더 전용'],
+        who:'팀장(리더)급 이상 자동 부여',
+        aiMode:'원가모드 (기본), 통합모드 일부',
+        desc:'단가·원가·벤치마크 등 경영 민감 정보 및 협력사 평가 상세 데이터에 적용합니다.',
+        rules:['팀장 직급 이상 자동 접근','일반 직원 검색 결과 비노출·마스킹','원가모드 기본 보안등급','AI 답변에 [리더 전용] 배지 표시'],
+        examples:['단가 벤치마크 비교표','협력사 원가 분석 리포트','예산 집행 실적 XLSX','임원 보고용 구매 현황']
+      },
+      {
+        id:'designated', label:'지정 사용자', icon:'🟣', cls:'violet', eng:'DESIGNATED',
+        cnt: secCounts['지정 사용자'],
+        who:'System Admin이 개인 지정',
+        aiMode:'원가모드 일부, 별도 전용 모드',
+        desc:'법적 민감 계약서, 특정 프로젝트 NDA 문서, 임원 전용 분석 자료 등 최고 기밀에 적용합니다.',
+        rules:['System Admin이 사용자 ID 직접 지정','지정되지 않은 리더도 접근 불가','VAATZ 권한 신청 → 팀장 1차 승인 → Admin 최종 승인','접근 이력 전체 감사 로그 기록'],
+        examples:['임원급 원가 협상 자료','NDA 체결 공급사 계약서','특수 프로젝트 단가 합의서','보안감사 대상 문서']
+      }
+    ];
+
+    const policyMatrix=[
+      {role:'일반 직원 (사원·책임)',   open:'✅',leader:'❌',designated:'❌'},
+      {role:'팀장급 (리더·수석)',       open:'✅',leader:'✅',designated:'❌'},
+      {role:'지정 사용자 (Admin 지정)', open:'✅',leader:'✅',designated:'✅'},
+      {role:'System Admin',             open:'✅',leader:'✅',designated:'✅'},
+    ];
+
+    const secDocSample=secList.map(sec=>{
+      const docs=teamDocs.filter(d=>d.sec===sec).slice(0,8);
+      const cls=sec==='리더 전용'?'red':sec==='지정 사용자'?'violet':'green';
+      return `<div class="sp-sec-group">
+        <div class="sp-sec-grp-hd">
+          <span class="v23-pill ${cls}">${sec}</span>
+          <span class="sp-sec-grp-cnt">${secCounts[sec]}건</span>
+          <button class="v23-btn" style="padding:3px 9px;font-size:10px;margin-left:auto" onclick="filterSecDocs('${sec}')">전체 보기</button>
+        </div>
+        <div class="sp-doc-rows">
+          ${docs.map(d=>{
+            const ic=d.type==='PDF'?'📄':d.type==='PPT'?'📊':d.type==='XLSX'?'📈':d.type==='DOCX'?'📝':'📋';
+            return `<div class="sp-doc-row">
+              <span class="sp-doc-ic">${ic}</span>
+              <div class="sp-doc-info">
+                <div class="sp-doc-nm">${esc(d.name)}</div>
+                <div class="sp-doc-meta">${esc(d.team)} · ${esc(d.owner)} · ${d.date}</div>
+              </div>
+              <select class="sp-sec-sel" onchange="changeDocSec('${d.id}',this.value,this)">
+                ${secList.map(s=>`<option value="${s}" ${s===d.sec?'selected':''}>${s}</option>`).join('')}
+              </select>
+            </div>`;
+          }).join('')}
+        </div>
+      </div>`;
+    }).join('');
+
+    addAdmSection('p-sec-policy', `
+      <div class="v23-admin-title">
+        <div>
+          <div class="v23-title-main">🔒 문서 보안등급 체계</div>
+          <div class="v23-title-sub">VAATZ AI 문서의 접근 권한을 3단계로 분류하여 관리합니다. 보안등급은 최종 승인 시 지정하며 AI 검색 노출 범위를 직접 제어합니다.</div>
+        </div>
+        <div class="v23-actions">
+          <button class="v23-btn" onclick="safeV23Toast('보안등급 감사 리포트를 생성했습니다.','📋',2800)">📋 감사 리포트</button>
+          <button class="v23-btn primary" onclick="safeV23Toast('보안정책 변경사항을 저장했습니다.','🔒',2200)">정책 저장</button>
+        </div>
+      </div>
+
+      <!-- 3등급 개요 카드 -->
+      <div class="sp-level-grid">
+        ${secLevels.map(lv=>`
+        <div class="sp-level-card sp-lv-${lv.id}">
+          <div class="sp-lv-head">
+            <span class="sp-lv-icon">${lv.icon}</span>
+            <div>
+              <div class="sp-lv-label">${lv.label}</div>
+              <div class="sp-lv-eng">${lv.eng}</div>
+            </div>
+            <span class="v23-pill ${lv.cls} sp-lv-cnt">${lv.cnt}건</span>
+          </div>
+          <div class="sp-lv-desc">${lv.desc}</div>
+          <div class="sp-lv-who"><b>접근 대상:</b> ${lv.who}</div>
+          <div class="sp-lv-mode"><b>AI 모드:</b> ${lv.aiMode}</div>
+          <ul class="sp-lv-rules">${lv.rules.map(r=>`<li>${r}</li>`).join('')}</ul>
+          <div class="sp-lv-examples">
+            <div class="sp-lv-ex-label">적용 예시</div>
+            ${lv.examples.map(e=>`<span class="sp-ex-chip">${e}</span>`).join('')}
+          </div>
+        </div>`).join('')}
+      </div>
+
+      <!-- 역할별 접근 정책 매트릭스 -->
+      <div class="sp-section-title">📊 역할별 접근 정책 매트릭스</div>
+      <div class="sp-matrix-wrap">
+        <table class="sp-matrix">
+          <thead>
+            <tr>
+              <th>역할</th>
+              <th><span class="v23-pill green" style="font-size:10px">일반 공개</span></th>
+              <th><span class="v23-pill red" style="font-size:10px">리더 전용</span></th>
+              <th><span class="v23-pill violet" style="font-size:10px">지정 사용자</span></th>
+            </tr>
+          </thead>
+          <tbody>
+            ${policyMatrix.map(r=>`<tr>
+              <td class="sp-role-cell">${r.role}</td>
+              <td class="sp-mx-cell">${r.open}</td>
+              <td class="sp-mx-cell">${r.leader}</td>
+              <td class="sp-mx-cell">${r.designated}</td>
+            </tr>`).join('')}
+          </tbody>
+        </table>
+        <div class="sp-matrix-note">
+          ✅ 접근 허용 &nbsp; ❌ 접근 불가 &nbsp;·&nbsp; AI 검색 결과: 등급 미달 시 해당 문서 비노출(마스킹)
+        </div>
+      </div>
+
+      <!-- 등급별 문서 현황 -->
+      <div class="sp-section-title">📂 등급별 문서 현황 <span style="font-size:10px;color:var(--text-4);font-weight:400">(보안등급 변경 가능)</span></div>
+      <div id="spDocFilter" style="display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap">
+        <button class="v23-btn sp-filter-btn on" onclick="filterSecDocs('all',this)">전체 (${teamDocs.length})</button>
+        ${secList.map(s=>`<button class="v23-btn sp-filter-btn" onclick="filterSecDocs('${s}',this)">${s} (${secCounts[s]})</button>`).join('')}
+      </div>
+      <div id="spDocList">${secDocSample}</div>
+
+      <!-- 보안 이벤트 감사 로그 -->
+      <div class="sp-section-title">🕵️ 최근 보안 이벤트 로그</div>
+      <div class="sp-audit-table">
+        <div class="sp-audit-hd"><span>일시</span><span>사용자</span><span>문서</span><span>변경 내용</span><span>결과</span></div>
+        ${[
+          ['2026.05.26 09:12','김도윤 책임','원가 벤치마크_022.xlsx','일반 공개 → 리더 전용','✅ 완료'],
+          ['2026.05.25 17:38','System Admin','NDA_계약서_특수조건_001.pdf','리더 전용 → 지정 사용자','✅ 완료'],
+          ['2026.05.25 14:20','박성민 책임','반도체 수출규제 현황_003.xlsx','등록 시 리더 전용 설정','✅ 완료'],
+          ['2026.05.24 11:05','이준혁 책임','해외법인_구매승인프로세스_001.docx','지정 사용자 접근 요청','⏳ 승인대기'],
+          ['2026.05.23 16:30','System Admin','단가_벤치마크_비교_015.pdf','일괄 보안 등급 감사 실행','✅ 완료'],
+        ].map(r=>`<div class="sp-audit-row"><span>${r[0]}</span><span>${r[1]}</span><span class="sp-audit-doc">${r[2]}</span><span>${r[3]}</span><span>${r[4]}</span></div>`).join('')}
+      </div>
+    `);
+
     const pusr=$('#p-usr'); if(pusr){ pusr.style.display='none'; }
     $$('.adm-b').forEach(e=>{ if(!['p-req'].includes(e.id)) e.style.display='none'; });
     $('#p-req').style.display='block';
   }
+
+  // ── 보안등급 문서 필터링 & 등급 변경 ───────────────────────
+  window.filterSecDocs=function(sec,btn){
+    var secList2=['일반 공개','리더 전용','지정 사용자'];
+    var secCounts2={};
+    secList2.forEach(function(s){secCounts2[s]=teamDocs.filter(function(d){return d.sec===s;}).length;});
+    var docs=sec==='all'?teamDocs:teamDocs.filter(function(d){return d.sec===sec;});
+    // highlight filter buttons
+    $$('#spDocFilter .sp-filter-btn').forEach(function(b){b.classList.remove('on');});
+    if(btn) btn.classList.add('on');
+    var listEl=$('#spDocList'); if(!listEl) return;
+    var groups=sec==='all'?secList2:[sec];
+    listEl.innerHTML=groups.map(function(s){
+      var grpDocs=docs.filter(function(d){return d.sec===s;}).slice(0,12);
+      var cls=s==='리더 전용'?'red':s==='지정 사용자'?'violet':'green';
+      if(!grpDocs.length) return '';
+      return '<div class="sp-sec-group">'+
+        '<div class="sp-sec-grp-hd">'+
+          '<span class="v23-pill '+cls+'">'+s+'</span>'+
+          '<span class="sp-sec-grp-cnt">'+secCounts2[s]+'건</span>'+
+        '</div>'+
+        '<div class="sp-doc-rows">'+
+        grpDocs.map(function(d){
+          var ic=d.type==='PDF'?'📄':d.type==='PPT'?'📊':d.type==='XLSX'?'📈':d.type==='DOCX'?'📝':'📋';
+          return '<div class="sp-doc-row">'+
+            '<span class="sp-doc-ic">'+ic+'</span>'+
+            '<div class="sp-doc-info">'+
+              '<div class="sp-doc-nm">'+esc(d.name)+'</div>'+
+              '<div class="sp-doc-meta">'+esc(d.team)+' · '+esc(d.owner)+' · '+d.date+'</div>'+
+            '</div>'+
+            '<select class="sp-sec-sel" onchange="changeDocSec(\''+d.id+'\',this.value,this)">'+
+              secList2.map(function(sv){return '<option value="'+sv+'"'+(sv===d.sec?' selected':'')+'>'+sv+'</option>';}).join('')+
+            '</select>'+
+          '</div>';
+        }).join('')+
+        '</div>'+
+      '</div>';
+    }).join('');
+  };
+  window.changeDocSec=function(id,newSec,sel){
+    var d=teamDocs.find(function(x){return x.id===id;}); if(!d) return;
+    var old=d.sec;
+    d.sec=newSec;
+    safeToast('['+esc(d.name.substring(0,20))+'...] 보안등급 변경: '+old+' → '+newSec,'🔒',3000);
+    // update pill color on the select's row
+    var row=sel&&sel.closest('.sp-doc-row'); if(!row) return;
+  };
 
   // ── 운영 홈 단계별 필터링 ─────────────────────────────────
   var _homeActiveStep=0;
