@@ -2133,8 +2133,8 @@ sendMessage = function(){
       </div>
     `);
 
-    const finalDocs=teamDocs.filter(d=>d.status==='등록 요청됨').slice(0,10);
-    /* 문서 품질 자동 점수 계산 (샘플 로직) */
+    const finalDocs=teamDocs.filter(d=>d.status==='등록 요청됨');
+    /* 문서 품질 자동 점수 계산 */
     function docQualityScore(d){
       var score=60;
       if(d.chunks>300) score+=15; else if(d.chunks>150) score+=8;
@@ -2146,64 +2146,161 @@ sendMessage = function(){
     function qualityBadge(score){
       var cls=score>=85?'green':score>=70?'amber':'red';
       var label=score>=85?'우수':score>=70?'보통':'보완 권장';
-      return `<span class="v23-pill ${cls}" title="AI 학습 적합도">📊 ${score}점 ${label}</span>`;
+      return '<span class="v23-pill '+cls+'" title="AI 학습 적합도">📊 '+score+'점 '+label+'</span>';
     }
+    /* ── 3단계 레인 분류 ── */
+    var _autoFinal=finalDocs.filter(function(d){return docQualityScore(d)>=85;});
+    var _reviewFinal=finalDocs.filter(function(d){var s=docQualityScore(d);return s>=70&&s<85;});
+    var _lowFinal=finalDocs.filter(function(d){return docQualityScore(d)<70;});
+    function _groupByTeam(arr){var g={};arr.forEach(function(d){g[d.team]=(g[d.team]||0)+1;});return g;}
+    var _autoByTeam=_groupByTeam(_autoFinal);
+    var _reviewByTeam=_groupByTeam(_reviewFinal);
+    /* ── 컴팩트 row (즉시 승인 레인) ── */
+    function _finalRow(d){
+      var score=docQualityScore(d);
+      var simIdx=parseInt((d.id||'').split('-')[1]||'0');
+      var hasSim=simIdx%7===3;
+      return '<div class="v23-final-row" data-id="'+d.id+'" data-team="'+esc(d.team)+'" data-score="'+score+'" data-type="'+d.type+'" onclick="showFinalPreview(\''+d.id+'\')">'
+        +'<input type="checkbox" class="final-row-chk" onclick="event.stopPropagation()" data-id="'+d.id+'">'
+        +'<div class="v23-fr-info"><div class="v23-fr-name">'+esc(d.name)+'</div>'
+        +'<div class="v23-fr-meta">'+esc(d.team)+' · '+esc(d.owner)+' · '+d.date+' · '+d.chunks+'ch</div></div>'
+        +'<div class="v23-fr-badges">'+qualityBadge(score)+(hasSim?'<span class="v23-pill amber" style="font-size:9px">⚠️ 유사</span>':'')+'</div>'
+        +'<div class="v23-fr-acts">'
+        +'<button class="v23-btn primary" style="padding:3px 10px;font-size:10px" onclick="event.stopPropagation();approveFinalRow(this)">✅ 승인</button>'
+        +'<button class="v23-btn danger" style="padding:3px 8px;font-size:10px" onclick="event.stopPropagation();rejectFinalRow(this)">↩</button>'
+        +'</div></div>';
+    }
+    /* ── 카드 HTML (검토/보완 레인) ── */
+    function _finalCard(d){
+      var score=docQualityScore(d);
+      var simIdx=parseInt((d.id||'').split('-')[1]||'0');
+      var hasSim=simIdx%7===3;
+      return '<div class="approval-card'+(score<70?' low-quality':'')+'" data-final-id="'+d.id+'" data-id="'+d.id+'" data-team="'+esc(d.team)+'" data-score="'+score+'" data-type="'+d.type+'" style="cursor:pointer" onclick="showFinalPreview(\''+d.id+'\')">'
+        +'<div class="approval-card-top"><div style="flex:1;min-width:0">'
+        +'<div class="approval-doc">'+esc(d.name)+'</div>'
+        +'<div class="approval-meta">'+esc(d.team)+' · '+esc(d.owner)+' · '+d.date+'</div>'
+        +'<div style="display:flex;gap:5px;margin-top:5px;flex-wrap:wrap">'+qualityBadge(score)
+        +(hasSim?'<span class="v23-pill amber" style="font-size:9px">⚠️ 유사 문서</span>':'')
+        +'</div></div></div>'
+        +(hasSim?'<div class="v23-similar-warn">⚠️ 유사 문서: "구매업무규정_v2.3.pdf" (84%) — 검토 권장</div>':'')
+        +'<div style="display:flex;gap:6px;margin-top:8px;justify-content:flex-end">'
+        +'<button class="v23-btn danger" onclick="event.stopPropagation();rejectFinalRow(this)">↩ 보완 요청</button>'
+        +'<button class="v23-btn primary" onclick="event.stopPropagation();approveFinalRow(this)">✅ 승인</button>'
+        +'</div></div>';
+    }
+    /* ── 테이블 row HTML ── */
+    function _finalTblRow(d){
+      var score=docQualityScore(d);
+      return '<tr class="v23-tbl-row" data-id="'+d.id+'" data-team="'+esc(d.team)+'" data-score="'+score+'" data-type="'+d.type+'" onclick="showFinalPreview(\''+d.id+'\')">'
+        +'<td><input type="checkbox" class="final-row-chk" onclick="event.stopPropagation()" data-id="'+d.id+'"></td>'
+        +'<td><div class="doc-name-strong" style="font-size:11px">'+esc(d.name)+'</div></td>'
+        +'<td style="font-size:11px">'+esc(d.team)+'</td>'
+        +'<td style="font-size:11px">'+d.type+'</td>'
+        +'<td>'+qualityBadge(score)+'</td>'
+        +'<td style="font-size:10px;color:var(--text-3)">'+d.date+'</td>'
+        +'<td style="font-size:10px;color:var(--text-3)">'+esc(d.owner)+'</td>'
+        +'<td><div class="row-actions">'
+        +'<button class="v23-btn primary" style="padding:2px 8px;font-size:10px" onclick="event.stopPropagation();approveFinalRow(this)">✅</button>'
+        +'<button class="v23-btn danger" style="padding:2px 6px;font-size:10px" onclick="event.stopPropagation();rejectFinalRow(this)">↩</button>'
+        +'</div></td></tr>';
+    }
+    /* ── Pre-build HTML ── */
+    var _autoRowsHtml=_autoFinal.map(_finalRow).join('')||'<div class="v23-lane-empty">즉시 승인 가능한 문서가 없습니다.</div>';
+    var _reviewCardsHtml=_reviewFinal.map(_finalCard).join('')||'<div class="v23-lane-empty">검토 필요 문서가 없습니다.</div>';
+    var _lowCardsHtml=_lowFinal.map(_finalCard).join('')||'<div class="v23-lane-empty">보완 권장 문서가 없습니다.</div>';
+    var _finalTblHtml=finalDocs.map(_finalTblRow).join('');
+    var _autoTeamOpts=Object.keys(_autoByTeam).map(function(t){return '<option value="'+esc(t)+'">'+esc(t)+' ('+_autoByTeam[t]+'건)</option>';}).join('');
+    var _reviewTeamOpts=Object.keys(_reviewByTeam).map(function(t){return '<option value="'+esc(t)+'">'+esc(t)+' ('+_reviewByTeam[t]+'건)</option>';}).join('');
+    var _teamOptHtml=teams.map(function(t){return '<option value="'+esc(t.name)+'">'+esc(t.name)+'</option>';}).join('');
     addAdmSection('p-final', `
       ${pipelineBanner('final')}
-      <div class="v23-admin-title"><div><div class="v23-title-main">System Admin 최종 승인</div><div class="v23-title-sub">팀 Admin이 올린 등록 요청됨만 모아 검토합니다. 문서별 AI 적합도 점수와 유사 문서 탐지 결과를 확인 후 승인하세요.</div></div><div class="v23-actions"><button class="v23-btn warn" onclick="safeToast('보완 요청 템플릿을 클립보드에 복사했습니다.','📋')">📋 보완 요청 템플릿</button><button class="v23-btn primary" onclick="approveAllVisibleFinals()">✅ 화면 내 일괄 승인</button></div></div>
-      <!-- 승인 대기 요약 바 -->
-      <div class="v23-final-summary-bar">
-        <div class="v23-fsb-item"><span class="v23-fsb-val">${finalDocs.length}</span><span class="v23-fsb-label">승인 대기</span></div>
-        <div class="v23-fsb-sep">|</div>
-        <div class="v23-fsb-item"><span class="v23-fsb-val" style="color:var(--g)">${finalDocs.filter((_,i)=>docQualityScore(finalDocs[i])>=85).length}</span><span class="v23-fsb-label">즉시 승인 가능</span></div>
-        <div class="v23-fsb-sep">|</div>
-        <div class="v23-fsb-item"><span class="v23-fsb-val" style="color:var(--a)">${finalDocs.filter((_,i)=>docQualityScore(finalDocs[i])<70).length}</span><span class="v23-fsb-label">보완 권장</span></div>
-        <div class="v23-fsb-sep">|</div>
-        <div class="v23-fsb-item"><span class="v23-fsb-val" style="color:var(--accent)">2</span><span class="v23-fsb-label">유사 문서 탐지</span></div>
+      <div class="v23-admin-title"><div><div class="v23-title-main">⚡ 스마트 최종 승인 센터</div><div class="v23-title-sub">AI 적합도로 3단계 자동 분류 · 팀 단위 일괄 승인 · 수백~수천 건도 효율적으로 처리</div></div><div class="v23-actions"><button class="v23-btn warn" onclick="safeToast('보완 요청 템플릿 복사됨.','📋')">📋 보완 템플릿</button><button class="v23-btn" onclick="toggleAutoSettings()">⚙️ 자동 승인 규칙</button></div></div>
+      <!-- 트리아지 KPI 타일 -->
+      <div class="v23-triage-bar">
+        <div class="v23-triage-tile t-auto" onclick="setFinalLane('auto')"><div class="v23-triage-ic">🚀</div><div class="v23-triage-val">${_autoFinal.length}</div><div class="v23-triage-label">즉시 승인 가능</div><div class="v23-triage-sub">AI 85점 이상</div></div>
+        <div class="v23-triage-tile t-review" onclick="setFinalLane('review')"><div class="v23-triage-ic">🔍</div><div class="v23-triage-val">${_reviewFinal.length}</div><div class="v23-triage-label">검토 필요</div><div class="v23-triage-sub">70 ~ 84점</div></div>
+        <div class="v23-triage-tile t-warn" onclick="setFinalLane('low')"><div class="v23-triage-ic">⚠️</div><div class="v23-triage-val">${_lowFinal.length}</div><div class="v23-triage-label">보완 권장</div><div class="v23-triage-sub">69점 이하</div></div>
+        <div class="v23-triage-tile t-total" onclick="setFinalLane('all')"><div class="v23-triage-ic">📋</div><div class="v23-triage-val">${finalDocs.length}</div><div class="v23-triage-label">전체 대기</div><div class="v23-triage-sub">모든 등록 요청</div></div>
       </div>
-      <div class="final-layout"><div>${finalDocs.map((d,i)=>{
-        var score=docQualityScore(d);
-        var hasSimilar=(i===1||i===3);
-        return `<div class="approval-card${score<70?' low-quality':''}" data-final-id="${d.id}">
-          <div class="approval-card-top">
-            <div style="flex:1;min-width:0">
-              <div class="approval-doc">${esc(d.name)}</div>
-              <div class="approval-meta">${esc(d.team)} · ${esc(d.owner)} · ${d.date} · ${d.chunks} chunks 예상</div>
-              <div style="display:flex;gap:6px;margin-top:6px;flex-wrap:wrap">
-                ${qualityBadge(score)}
-                ${hasSimilar?'<span class="v23-pill amber" title="유사 문서 발견">⚠️ 유사 문서 있음</span>':'<span class="v23-pill green" style="font-size:9px">✓ 중복 없음</span>'}
+      <!-- 자동 승인 규칙 패널 -->
+      <div class="v23-auto-rules" id="finalAutoRules" style="display:none">
+        <div class="v23-ar-row"><span class="v23-ar-label">🤖 AI 85점+ 즉시 자동 반영</span><button class="v23-toggle on" id="arT85" onclick="toggleRule(this,'ar85')">ON</button><span class="v23-ar-note">즉시 승인 레인을 자동으로 AI DB에 반영</span></div>
+        <div class="v23-ar-row"><span class="v23-ar-label">🔁 중복 문서 자동 차단</span><button class="v23-toggle on" id="arTDup" onclick="toggleRule(this,'arDup')">ON</button><span class="v23-ar-note">유사도 80% 이상은 자동으로 보완 권장 레인으로 이동</span></div>
+        <div class="v23-ar-row"><span class="v23-ar-label">🌙 야간 배치 자동 처리 (23:00)</span><button class="v23-toggle" id="arTBatch" onclick="toggleRule(this,'arBatch')">OFF</button><span class="v23-ar-note">즉시 승인 레인을 매일 23시에 자동 일괄 반영</span></div>
+      </div>
+      <!-- 필터 + 뷰 컨트롤 -->
+      <div class="v23-final-ctrl">
+        <div class="v23-final-filters">
+          <select id="fTeamFilt" class="v23-filter-sel" onchange="applyFinalFilter()"><option value="">전체 팀</option>${_teamOptHtml}</select>
+          <select id="fScoreFilt" class="v23-filter-sel" onchange="applyFinalFilter()"><option value="">전체 점수</option><option value="auto">🚀 85점+ 즉시승인</option><option value="review">🔍 70~84점 검토</option><option value="low">⚠️ 69점 이하 보완</option></select>
+          <select id="fTypeFilt" class="v23-filter-sel" onchange="applyFinalFilter()"><option value="">전체 유형</option><option>PDF</option><option>PPT</option><option>XLSX</option><option>DOCX</option></select>
+          <input id="fSearchFinal" class="v23-search-inp" placeholder="🔍 문서명·팀·담당자..." oninput="applyFinalFilter()" style="min-width:140px">
+          <button class="v23-btn" onclick="clearFinalFilter()" style="flex-shrink:0">초기화</button>
+        </div>
+        <div class="v23-view-toggle">
+          <button class="v23-vtb on" id="finalVCard" onclick="setFinalView('card')">🗂 카드</button>
+          <button class="v23-vtb" id="finalVTable" onclick="setFinalView('table')">📋 목록</button>
+        </div>
+      </div>
+      <!-- 메인: 레인 + 미리보기 -->
+      <div class="v23-final-main">
+        <div class="v23-final-lanes" id="finalLanes">
+          <!-- LANE 1: 즉시 승인 -->
+          <div class="v23-lane" id="laneAuto" data-lane="auto">
+            <div class="v23-lane-hd t-auto">
+              <div>🚀 즉시 승인 가능 <span class="v23-lane-cnt">${_autoFinal.length}건</span><span style="font-size:10px;font-weight:400;opacity:.65;margin-left:6px">AI 85점 이상 · 중복 검증 완료</span></div>
+              <div class="v23-lane-actions">
+                <select id="autoTeamSel" class="v23-mini-sel"><option value="">팀별 일괄...</option>${_autoTeamOpts}</select>
+                <button class="v23-btn" style="font-size:10px;padding:3px 8px" onclick="batchApproveByTeam('auto')">팀 승인</button>
+                <button class="v23-btn primary" style="font-size:10px;padding:3px 10px" onclick="batchApproveAll('auto')">✅ 전체 일괄 (${_autoFinal.length}건)</button>
               </div>
             </div>
-            ${statusPill(d.status)}
+            <div id="autoLaneBody" class="v23-lane-body">${_autoRowsHtml}</div>
           </div>
-          ${hasSimilar?`<div class="v23-similar-warn">⚠️ 유사 문서 탐지: "<b>구매업무규정_v2.3.pdf</b>" (유사도 84%) — 검토 후 대체 또는 버전 관리 권장</div>`:''}
-          <div class="approval-settings">
-            <div class="setting-box"><div class="setting-label">통합 폴더</div><select><option>구매업무규정</option><option>입찰관리</option><option>VAATZ 매뉴얼</option><option>품질 5스타</option><option>원가/단가</option></select></div>
-            <div class="setting-box"><div class="setting-label">보안등급</div><select><option>${d.sec}</option><option>리더 전용</option><option>일반 공개</option><option>지정 사용자</option></select></div>
-            <div class="setting-box"><div class="setting-label">AI 모드</div><select><option>${d.mode}</option>${modeList.map(m=>`<option>${m}</option>`).join('')}</select></div>
-            <div class="setting-box"><div class="setting-label">청크 전략</div><select><option>기본 (512 token)</option><option>세밀 (256 token)</option><option>광역 (1024 token)</option></select></div>
+          <!-- LANE 2: 검토 필요 -->
+          <div class="v23-lane" id="laneReview" data-lane="review">
+            <div class="v23-lane-hd t-review">
+              <div>🔍 검토 필요 <span class="v23-lane-cnt">${_reviewFinal.length}건</span><span style="font-size:10px;font-weight:400;opacity:.65;margin-left:6px">일부 항목 개선 권장</span></div>
+              <div class="v23-lane-actions">
+                <select id="reviewTeamSel" class="v23-mini-sel"><option value="">팀별 선택...</option>${_reviewTeamOpts}</select>
+                <button class="v23-btn" style="font-size:10px;padding:3px 8px" onclick="batchApproveByTeam('review')">팀 일괄 승인</button>
+                <button class="v23-btn danger" style="font-size:10px;padding:3px 8px" onclick="batchRejectByTeam('review')">팀 보완요청</button>
+              </div>
+            </div>
+            <div id="reviewLaneBody" class="v23-lane-body">${_reviewCardsHtml}</div>
           </div>
-          <div style="display:flex;gap:6px;margin-top:10px;justify-content:flex-end">
-            <button class="v23-btn" onclick="previewFinalDoc('${d.id}')">📄 원문 보기</button>
-            <button class="v23-btn danger" onclick="rejectFinalDoc(this)">↩ 보완 요청</button>
-            <button class="v23-btn primary" onclick="approveFinalDoc(this)">✅ 최종 승인 → AI</button>
+          <!-- LANE 3: 보완 권장 -->
+          <div class="v23-lane" id="laneLow" data-lane="low">
+            <div class="v23-lane-hd t-warn">
+              <div>⚠️ 보완 권장 <span class="v23-lane-cnt">${_lowFinal.length}건</span><span style="font-size:10px;font-weight:400;opacity:.65;margin-left:6px">청크 부족 또는 형식 불적합</span></div>
+              <div class="v23-lane-actions">
+                <button class="v23-btn danger" style="font-size:10px;padding:3px 10px" onclick="batchRejectAll()">↩ 전체 보완 요청 (${_lowFinal.length}건)</button>
+              </div>
+            </div>
+            <div id="lowLaneBody" class="v23-lane-body">${_lowCardsHtml}</div>
           </div>
-        </div>`;
-      }).join('')}</div>
-      <div class="final-preview">
-        <div class="v23-panel-title" style="margin-bottom:10px">🔎 검토 미리보기</div>
-        <div class="preview-doc-page" id="finalPreview">
-          <h4>문서 미리보기</h4>
-          <p>왼쪽 문서의 <span class="preview-highlight">원문 보기</span>를 클릭하면 여기에 요약·하이라이트·유사 문서 비교·임베딩 예측이 표시됩니다.</p>
-          <div style="background:var(--bg-3);border-radius:8px;padding:10px;margin-top:10px;font-size:11px;color:var(--text-3);line-height:1.7">
-            <b>AI 적합도 점수 기준</b><br>
-            • 85~100점: 즉시 승인 권장 (청크 충분, 최신 버전, 형식 적합)<br>
-            • 70~84점: 검토 후 승인 (일부 항목 개선 권장)<br>
-            • 70점 미만: 보완 요청 권장 (청크 부족, 형식 불적합 등)
+          <!-- 목록(테이블) 뷰 — 기본 숨김 -->
+          <div id="finalTableView" style="display:none">
+            <div class="v23-lane-hd t-total" style="background:var(--bg-2);border-radius:10px 10px 0 0">
+              <div>📋 전체 목록 <span class="v23-lane-cnt">${finalDocs.length}건</span></div>
+              <div class="v23-lane-actions">
+                <button class="v23-btn primary" style="font-size:10px;padding:3px 10px" onclick="batchApproveSelected()">✅ 선택 승인</button>
+                <button class="v23-btn danger" style="font-size:10px;padding:3px 10px" onclick="batchRejectSelected()">↩ 선택 보완 요청</button>
+              </div>
+            </div>
+            <div class="final-table-wrap"><table class="large-table" id="finalApprovalTable">
+              <thead><tr><th style="width:32px"><input type="checkbox" id="finalSelectAll" onchange="toggleFinalSelectAll(this)"></th><th>문서명</th><th>팀</th><th>유형</th><th>AI 점수</th><th>등록일</th><th>담당</th><th style="text-align:right">작업</th></tr></thead>
+              <tbody>${_finalTblHtml}</tbody>
+            </table></div>
           </div>
         </div>
-        <div class="mode-note">Tip. 최종 승인 시 문서가 최종 리스트로 이동하고, 선택한 AI 모드의 RAG Index에 반영됩니다.</div>
-      </div></div>
+        <!-- 미리보기 패널 (우측 고정) -->
+        <div class="v23-final-preview-sticky" id="finalStickyPreview">
+          <div class="v23-panel-title" style="margin-bottom:10px">🔎 문서 검토 패널</div>
+          <div id="finalStickyContent"><div class="v23-preview-empty"><div style="font-size:28px;margin-bottom:8px">📄</div><div style="font-size:12px;color:var(--text-3);text-align:center;line-height:1.6">문서를 클릭하면<br>검토 정보가 표시됩니다</div></div></div>
+          <div class="mode-note" style="padding:8px 10px;margin:0">💡 즉시 승인 레인 일괄 승인으로 수백 건을 한 번에 처리하세요.</div>
+        </div>
+      </div>
     `);
 
     const publishedDocs=teamDocs.filter(d=>d.status==='AI 검색 반영완료').slice(0,36);
@@ -2863,10 +2960,127 @@ sendMessage = function(){
   window.submitSelectedTeamDocs=function(){ const checked=$$('.team-doc-check:checked'); if(!checked.length){safeToast('등록 요청됨할 문서를 선택해주세요.','⚠️');return} checked.forEach(c=>{const d=teamDocs.find(x=>x.id===c.dataset.id); if(d)d.status='등록 요청됨'}); safeToast(`${checked.length}건을 System Admin 최종 승인 대기열로 보냈습니다.`,'🚀'); renderTeamDocRows(); renderAdmin(); };
   window.requestOneTeamDoc=function(id,btn){ const d=teamDocs.find(x=>x.id===id); if(d){d.status='등록 요청됨'; safeToast(`${d.name} 등록 요청됨 완료`,'🚀'); btn.closest('tr')?.querySelector('td:nth-child(8)') && (btn.closest('tr').querySelector('td:nth-child(8)').innerHTML=statusPill('등록 요청됨')); renderAdmin();} };
   window.previewTeamDoc=function(id){ const d=teamDocs.find(x=>x.id===id); if(!d)return; safeToast(`${d.name} 미리보기: 보안 ${d.sec}, ${d.mode}, ${d.chunks} chunks`,'🔎',3200); };
-  window.previewFinalDoc=function(id){ const d=teamDocs.find(x=>x.id===id); const p=$('#finalPreview'); if(!d||!p)return; p.innerHTML=`<h4>${esc(d.name)}</h4><p><b>요청팀:</b> ${esc(d.team)} · <b>담당:</b> ${esc(d.owner)}</p><p>이 문서는 <span class="preview-highlight">${esc(d.mode)}</span>에 연결될 예정이며, 보안등급은 <span class="preview-highlight">${esc(d.sec)}</span>입니다.</p><p>중복 문서 검사 결과: 유사도 0.42 이하로 신규 반영 가능. 예상 청크 수는 ${d.chunks}개입니다.</p>`; };
-  window.approveFinalDoc=function(btn){ const card=btn.closest('.approval-card'); if(card){card.style.opacity='.38'; card.style.pointerEvents='none'} safeToast('최종 승인 완료: 최종 리스트와 선택 AI 모드 Index에 반영됩니다.','✅'); };
-  window.rejectFinalDoc=function(btn){ const card=btn.closest('.approval-card'); if(card){card.style.opacity='.38'; card.style.pointerEvents='none'} safeToast('보완 요청 처리했습니다. 팀 Admin에게 보완 요청 알림이 전송됩니다.','↩️'); };
-  window.approveAllVisibleFinals=function(){ $$('.approval-card').forEach(c=>{c.style.opacity='.38'; c.style.pointerEvents='none'}); safeToast('화면에 표시된 등록 요청됨을 모두 승인했습니다.','✅'); };
+  /* ─── ⚡ 스마트 최종 승인 함수 (v37) ─── */
+  window.approveFinalRow=function(btn){var el=btn.closest('.approval-card')||btn.closest('.v23-final-row')||btn.closest('tr');if(el){el.style.opacity='.35';el.style.pointerEvents='none';}safeToast('최종 승인 완료: AI DB에 반영됩니다.','✅');};
+  window.rejectFinalRow=function(btn){var el=btn.closest('.approval-card')||btn.closest('.v23-final-row')||btn.closest('tr');if(el){el.style.opacity='.35';el.style.pointerEvents='none';}safeToast('보완 요청 발송: 팀 Admin에게 알림이 전송됩니다.','↩️');};
+  window.approveFinalDoc=window.approveFinalRow;
+  window.rejectFinalDoc=window.rejectFinalRow;
+  window.approveAllVisibleFinals=function(){if(window.batchApproveAll)batchApproveAll('auto');};
+  window.previewFinalDoc=function(id){if(window.showFinalPreview)showFinalPreview(id);};
+  window.batchApproveAll=function(lane){
+    var sel=lane==='auto'?'#autoLaneBody':lane==='review'?'#reviewLaneBody':'#lowLaneBody';
+    var els=$$(sel+' .approval-card, '+sel+' .v23-final-row');
+    els.forEach(function(el){el.style.opacity='.35';el.style.pointerEvents='none';});
+    var cntMap={auto:'#autoLaneCnt',review:'#reviewLaneCnt',low:'#lowLaneCnt'};
+    var cntEl=$(cntMap[lane]); if(cntEl)cntEl.textContent='0건';
+    safeToast((els.length||0)+'건 일괄 승인 완료. AI 임베딩 대기열에 추가됩니다.','✅',3500);
+  };
+  window.batchApproveByTeam=function(lane){
+    var selId=lane==='auto'?'autoTeamSel':'reviewTeamSel';
+    var team=document.getElementById(selId)?.value;
+    if(!team){safeToast('팀을 선택하세요.','⚠️');return;}
+    var bodyId=lane==='auto'?'#autoLaneBody':'#reviewLaneBody';
+    var els=$$(bodyId+' [data-team="'+team+'"]');
+    els.forEach(function(el){el.style.opacity='.35';el.style.pointerEvents='none';});
+    safeToast(team+' '+els.length+'건 일괄 승인 완료.','✅');
+  };
+  window.batchRejectAll=function(){
+    $$('#lowLaneBody .approval-card').forEach(function(el){el.style.opacity='.35';el.style.pointerEvents='none';});
+    safeToast('보완 권장 문서 전체에 보완 요청 발송 완료.','↩️',3000);
+  };
+  window.batchRejectByTeam=function(lane){
+    var selId=lane==='review'?'reviewTeamSel':'autoTeamSel';
+    var team=document.getElementById(selId)?.value;
+    if(!team){safeToast('팀을 선택하세요.','⚠️');return;}
+    var bodyId=lane==='review'?'#reviewLaneBody':'#lowLaneBody';
+    var els=$$(bodyId+' [data-team="'+team+'"]');
+    els.forEach(function(el){el.style.opacity='.35';el.style.pointerEvents='none';});
+    safeToast(team+' '+els.length+'건에 보완 요청 발송.','↩️');
+  };
+  window.showFinalPreview=function(id){
+    var d=teamDocs.find(function(x){return x.id===id;});
+    var p=$('#finalStickyContent'); if(!d)return;
+    $$('.v23-final-row,.approval-card,.v23-tbl-row').forEach(function(el){el.classList.remove('v23-row-selected');});
+    var clicked=$('[data-final-id="'+id+'"]')||$('[data-id="'+id+'"]');
+    if(clicked)clicked.classList.add('v23-row-selected');
+    var score=Math.min(60+(d.chunks>300?15:d.chunks>150?8:0)+(d.type==='PDF'?10:d.type==='DOCX'?7:0)+((d.version.startsWith('v3')||d.version.startsWith('v4'))?10:0)+(d.sec==='일반 공개'?5:0),100);
+    var sColor=score>=85?'#22c55e':score>=70?'#f59e0b':'#ef4444';
+    var scoreLabel=score>=85?'우수 · 즉시 승인 권장':score>=70?'보통 · 검토 후 승인':'보완 권장 · 반려 검토';
+    if(p) p.innerHTML='<div style="padding:10px">'
+      +'<div style="font-weight:700;font-size:13px;margin-bottom:4px">'+esc(d.name)+'</div>'
+      +'<div style="font-size:11px;color:var(--text-3);margin-bottom:10px">'+esc(d.team)+' · '+esc(d.owner)+' · '+d.date+'</div>'
+      +'<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:6px">'
+      +'<span style="background:'+sColor+'22;color:'+sColor+';padding:3px 8px;border-radius:6px;font-size:11px;font-weight:700">📊 '+score+'점</span>'
+      +'<span style="background:var(--bg-3);padding:3px 8px;border-radius:6px;font-size:11px">'+d.type+'</span>'
+      +'<span style="background:var(--bg-3);padding:3px 8px;border-radius:6px;font-size:11px">'+d.chunks+'ch</span>'
+      +'<span style="background:var(--bg-3);padding:3px 8px;border-radius:6px;font-size:11px">'+d.version+'</span></div>'
+      +'<div style="font-size:10px;color:'+sColor+';font-weight:600;margin-bottom:8px">'+scoreLabel+'</div>'
+      +'<div style="background:var(--bg-3);border-radius:8px;padding:9px;font-size:11px;line-height:1.7;margin-bottom:8px">'
+      +'<b>🔒 보안등급:</b> '+esc(d.sec)+'<br><b>🧭 AI 모드:</b> '+esc(d.mode)+'<br>'
+      +'<b>🧩 청크 예상:</b> '+d.chunks+'개<br><b>🔁 중복 검사:</b> 유사도 0.38 이하 (안전)</div>'
+      +'<div style="background:var(--bg-3);border-radius:8px;padding:9px;margin-bottom:10px">'
+      +'<div style="font-size:11px;font-weight:700;margin-bottom:4px">AI 적합도 체크리스트</div>'
+      +'<div style="display:flex;justify-content:space-between;font-size:10px"><span>청크 볼륨</span><span style="color:'+(d.chunks>150?'#22c55e':'#f59e0b')+'">'+(d.chunks>150?'✓ 충분':'△ 보통')+'</span></div>'
+      +'<div style="display:flex;justify-content:space-between;font-size:10px"><span>문서 형식</span><span style="color:'+(d.type==='PDF'?'#22c55e':'#f59e0b')+'">'+(d.type==='PDF'?'✓ PDF 최적':'△ '+d.type)+'</span></div>'
+      +'<div style="display:flex;justify-content:space-between;font-size:10px"><span>버전 상태</span><span style="color:'+((d.version.startsWith('v3')||d.version.startsWith('v4'))?'#22c55e':'#f59e0b')+'">'+(d.version.startsWith('v3')||d.version.startsWith('v4')?'✓ 최신':'△ 구버전')+'</span></div>'
+      +'<div style="display:flex;justify-content:space-between;font-size:10px"><span>보안등급</span><span>'+esc(d.sec)+'</span></div>'
+      +'</div>'
+      +'<div style="display:flex;gap:6px">'
+      +'<button class="v23-btn danger" style="flex:1;font-size:11px" onclick="rejectFinalRow(this)">↩ 보완 요청</button>'
+      +'<button class="v23-btn primary" style="flex:1;font-size:11px" onclick="approveFinalRow(this)">✅ 최종 승인</button>'
+      +'</div></div>';
+  };
+  window.setFinalView=function(mode){
+    var isTable=mode==='table';
+    var la=$('#laneAuto'),lr=$('#laneReview'),ll=$('#laneLow'),tv=$('#finalTableView');
+    if(la)la.style.display=isTable?'none':'';
+    if(lr)lr.style.display=isTable?'none':'';
+    if(ll)ll.style.display=isTable?'none':'';
+    if(tv)tv.style.display=isTable?'':'none';
+    var vc=$('#finalVCard'),vt=$('#finalVTable');
+    if(vc)vc.classList.toggle('on',!isTable);
+    if(vt)vt.classList.toggle('on',isTable);
+  };
+  window.applyFinalFilter=function(){
+    var team=($('#fTeamFilt')?.value||'');
+    var score=$('#fScoreFilt')?.value||'';
+    var type=($('#fTypeFilt')?.value||'').toLowerCase();
+    var q=($('#fSearchFinal')?.value||'').toLowerCase();
+    function rowOk(el){
+      var et=(el.dataset.team||'');
+      var es=parseInt(el.dataset.score||'0');
+      var ety=(el.dataset.type||'').toLowerCase();
+      var etxt=el.textContent.toLowerCase();
+      return (!team||et===team)&&(!score||(score==='auto'&&es>=85)||(score==='review'&&es>=70&&es<85)||(score==='low'&&es<70))&&(!type||ety===type)&&(!q||etxt.includes(q));
+    }
+    $$('.v23-final-row,.approval-card').forEach(function(el){el.style.display=rowOk(el)?'':'none';});
+    $$('#finalApprovalTable tbody tr').forEach(function(tr){tr.style.display=rowOk(tr)?'':'none';});
+  };
+  window.clearFinalFilter=function(){
+    ['fTeamFilt','fScoreFilt','fTypeFilt','fSearchFinal'].forEach(function(id){var el=document.getElementById(id);if(el)el.value='';});
+    applyFinalFilter();
+  };
+  window.setFinalLane=function(lane){
+    if(lane==='all'){$$('#finalLanes>.v23-lane').forEach(function(l){l.style.display='';});return;}
+    var ids={auto:'laneAuto',review:'laneReview',low:'laneLow'};
+    var el=document.getElementById(ids[lane]||'laneAuto');
+    if(el)el.scrollIntoView({behavior:'smooth',block:'start'});
+  };
+  window.toggleAutoSettings=function(){var p=$('#finalAutoRules');if(p)p.style.display=p.style.display==='none'?'':'none';};
+  window.toggleRule=function(btn,rule){var on=btn.classList.contains('on');btn.classList.toggle('on',!on);btn.textContent=on?'OFF':'ON';safeToast((on?rule+' 비활성화됨':rule+' 활성화됨'),'⚙️',1800);};
+  window.toggleFinalSelectAll=function(cb){$$('#finalApprovalTable .final-row-chk').forEach(function(c){c.checked=cb.checked;});};
+  window.batchApproveSelected=function(){
+    var ch=$$('#finalApprovalTable .final-row-chk:checked');
+    if(!ch.length){safeToast('선택된 문서가 없습니다.','⚠️');return;}
+    ch.forEach(function(c){var tr=c.closest('tr');if(tr){tr.style.opacity='.35';tr.style.pointerEvents='none';}});
+    safeToast(ch.length+'건 승인 완료.','✅');
+  };
+  window.batchRejectSelected=function(){
+    var ch=$$('#finalApprovalTable .final-row-chk:checked');
+    if(!ch.length){safeToast('선택된 문서가 없습니다.','⚠️');return;}
+    ch.forEach(function(c){var tr=c.closest('tr');if(tr){tr.style.opacity='.35';tr.style.pointerEvents='none';}});
+    safeToast(ch.length+'건에 보완 요청 발송.','↩️');
+  };
   /* ─── 최종 리스트 필터 (활용도 포함) ─── */
   window.filterFinalList=function(){
     const q=($('#finalListSearch')?.value||'').toLowerCase();
