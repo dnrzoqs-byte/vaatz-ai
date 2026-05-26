@@ -87,7 +87,7 @@ function ca(){
 function at(b,id){
   document.querySelectorAll('.atb').forEach(t=>t.classList.remove('on'));
   b.classList.add('on');
-  ['p-req','p-doc','p-usr','p-adm','p-int','p-mon','p-verify','p-sec','p-sec-policy'].forEach(t=>{
+  ['p-req','p-doc','p-usr','p-adm','p-int','p-mon','p-verify','p-sec','p-sec-policy','p-quality','p-team','p-final','p-list','p-datamart','p-mode'].forEach(t=>{
     const e=document.getElementById(t);
     if(e)e.style.display=t===id?'block':'none';
   });
@@ -1849,6 +1849,7 @@ sendMessage = function(){
     const tab=$('.adm-t'); if(!tab) return;
     tab.innerHTML=`
       <button class="atb on" onclick="at(this,'p-req')">🏠 운영 홈</button>
+      <button class="atb" onclick="at(this,'p-quality')">📊 AI 품질</button>
       <button class="atb" onclick="at(this,'p-team')">📁 팀별 폴더</button>
       <button class="atb" onclick="at(this,'p-final')">✅ 최종 승인</button>
       <button class="atb" onclick="at(this,'p-list')">📚 최종 리스트</button>
@@ -1875,11 +1876,48 @@ sendMessage = function(){
     const cntDone=teamDocs.filter(d=>d.status==='AI 검색 반영완료').length;
     addAdmSection('p-req', `
       <div class="v23-admin-title"><div><div class="v23-title-main">VAATZ AI 지식 운영 홈</div><div class="v23-title-sub">4단계 파이프라인으로 문서를 관리합니다. 각 단계 카드를 클릭하면 해당 단계의 문서만 인라인 필터링됩니다.</div></div><div class="v23-actions"><button class="v23-btn" onclick="openAdminTab('p-team')">📁 팀 폴더 보기</button><button class="v23-btn primary" onclick="openAdminTab('p-final')">✅ 최종 승인 처리</button></div></div>
+      <!-- KPI Row 1: 문서 현황 -->
       <div class="v23-hero-grid">
         <div class="v23-kpi"><div class="v23-kpi-label">비정형 문서 총량</div><div class="v23-kpi-value">${totalDocs}<span>건</span></div><div class="v23-kpi-desc">팀별 PDF/PPT/DOCX/XLSX 문서함 전체</div><div class="spark"><i style="height:35%"></i><i style="height:45%"></i><i style="height:62%"></i><i style="height:51%"></i><i style="height:72%"></i><i style="height:85%"></i></div></div>
         <div class="v23-kpi amber"><div class="v23-kpi-label">시스템 승인 대기</div><div class="v23-kpi-value">${cntApprove}<span>건</span></div><div class="v23-kpi-desc">팀 Admin이 등록 요청한 문서</div><div class="spark"><i style="height:55%"></i><i style="height:72%"></i><i style="height:48%"></i><i style="height:62%"></i><i style="height:81%"></i></div></div>
         <div class="v23-kpi green"><div class="v23-kpi-label">AI DB 반영완료</div><div class="v23-kpi-value">${cntDone}<span>건</span></div><div class="v23-kpi-desc">임베딩 완료 및 검색 활성화</div><div class="spark"><i style="height:42%"></i><i style="height:54%"></i><i style="height:68%"></i><i style="height:79%"></i><i style="height:88%"></i></div></div>
         <div class="v23-kpi violet"><div class="v23-kpi-label">정형 I/F</div><div class="v23-kpi-value">7<span>개</span></div><div class="v23-kpi-desc">VAATZ DB, Autopedia, 타 부문 배치</div><div class="spark"><i style="height:60%"></i><i style="height:60%"></i><i style="height:60%"></i><i style="height:40%"></i><i style="height:80%"></i></div></div>
+      </div>
+      <!-- KPI Row 2: AI 챗봇 품질 지표 -->
+      <div class="v23-quality-bar">
+        <div class="v23-qkpi" onclick="openAdminTab('p-quality')">
+          <div class="v23-qkpi-icon">🎯</div>
+          <div class="v23-qkpi-body">
+            <div class="v23-qkpi-val">78.4<span class="v23-qkpi-unit">%</span></div>
+            <div class="v23-qkpi-label">답변 채택율</div>
+            <div class="v23-qkpi-trend up">▲ 3.2% vs 지난주</div>
+          </div>
+        </div>
+        <div class="v23-qkpi" onclick="openAdminTab('p-quality')">
+          <div class="v23-qkpi-icon">🔍</div>
+          <div class="v23-qkpi-body">
+            <div class="v23-qkpi-val">91.2<span class="v23-qkpi-unit">%</span></div>
+            <div class="v23-qkpi-label">RAG 검색 히트율</div>
+            <div class="v23-qkpi-trend up">▲ 1.8% vs 지난주</div>
+          </div>
+        </div>
+        <div class="v23-qkpi warn" onclick="openAdminTab('p-quality')">
+          <div class="v23-qkpi-icon">⚠️</div>
+          <div class="v23-qkpi-body">
+            <div class="v23-qkpi-val">23<span class="v23-qkpi-unit">건</span></div>
+            <div class="v23-qkpi-label">미응답 쿼리 (7일)</div>
+            <div class="v23-qkpi-trend down">▲ 5건 증가 → 문서 보강 필요</div>
+          </div>
+        </div>
+        <div class="v23-qkpi" onclick="openAdminTab('p-quality')">
+          <div class="v23-qkpi-icon">⭐</div>
+          <div class="v23-qkpi-body">
+            <div class="v23-qkpi-val">4.1<span class="v23-qkpi-unit">/5</span></div>
+            <div class="v23-qkpi-label">평균 응답 신뢰도</div>
+            <div class="v23-qkpi-trend up">▲ 0.3 vs 지난주</div>
+          </div>
+        </div>
+        <div class="v23-qkpi-more" onclick="openAdminTab('p-quality')">📊 AI 품질<br>상세 보기 →</div>
       </div>
       <div class="v23-pipe-bar">
         <button class="v23-pipe-all" id="v23StepAll" onclick="filterAdminHomeStep('all')">🗂 전체 보기 (${totalDocs})</button>
@@ -2071,6 +2109,16 @@ sendMessage = function(){
           <button class="v23-btn">＋ 팀 폴더 추가</button>
         </div>
       </div>
+      <!-- 상태 필터 바 -->
+      <div class="v23-team-filterbar">
+        <span class="v23-tf-label">상태 필터:</span>
+        <button class="v23-tf-chip on" onclick="setTeamStatusFilter('all',this)">전체 (${teamDocs.length})</button>
+        <button class="v23-tf-chip" onclick="setTeamStatusFilter('작성·보완중',this)">📤 업로드 중 (${cntUpload})</button>
+        <button class="v23-tf-chip" onclick="setTeamStatusFilter('보완 요청',this)">🔍 보완 요청 (${cntRevise})</button>
+        <button class="v23-tf-chip" onclick="setTeamStatusFilter('등록 요청됨',this)">⏳ 시스템 승인 대기 (${cntApprove})</button>
+        <button class="v23-tf-chip" onclick="setTeamStatusFilter('AI 검색 반영완료',this)">✅ AI 반영완료 (${cntDone})</button>
+        <input id="teamFolderSearch" class="v23-search-inp" style="margin-left:auto;max-width:200px" placeholder="🔍 문서·팀 검색..." oninput="filterTeamFolder(this.value)">
+      </div>
 
       <!-- 📁 폴더 트리 보기 (기본) -->
       <div id="tvFolderPane">
@@ -2086,18 +2134,234 @@ sendMessage = function(){
     `);
 
     const finalDocs=teamDocs.filter(d=>d.status==='등록 요청됨').slice(0,10);
+    /* 문서 품질 자동 점수 계산 (샘플 로직) */
+    function docQualityScore(d){
+      var score=60;
+      if(d.chunks>300) score+=15; else if(d.chunks>150) score+=8;
+      if(d.type==='PDF') score+=10; else if(d.type==='DOCX') score+=7;
+      if(d.version.startsWith('v3')||d.version.startsWith('v4')) score+=10;
+      if(d.sec==='일반 공개') score+=5;
+      return Math.min(score,100);
+    }
+    function qualityBadge(score){
+      var cls=score>=85?'green':score>=70?'amber':'red';
+      var label=score>=85?'우수':score>=70?'보통':'보완 권장';
+      return `<span class="v23-pill ${cls}" title="AI 학습 적합도">📊 ${score}점 ${label}</span>`;
+    }
     addAdmSection('p-final', `
       ${pipelineBanner('final')}
-      <div class="v23-admin-title"><div><div class="v23-title-main">System Admin 최종 승인</div><div class="v23-title-sub">팀 Admin이 올린 등록 요청됨만 모아 검토합니다. 여기서 통합 폴더, 보안등급, AI 모드를 확정하면 최종 리스트로 이동합니다.</div></div><div class="v23-actions"><button class="v23-btn warn">보완 요청 사유 템플릿</button><button class="v23-btn primary" onclick="approveAllVisibleFinals()">✅ 화면 내 일괄 승인</button></div></div>
-      <div class="final-layout"><div>${finalDocs.map((d,i)=>`<div class="approval-card" data-final-id="${d.id}"><div class="approval-card-top"><div><div class="approval-doc">${esc(d.name)}</div><div class="approval-meta">${esc(d.team)} · ${esc(d.owner)} · ${d.date} · ${d.chunks} chunks 예상</div></div>${statusPill(d.status)}</div><div class="approval-settings"><div class="setting-box"><div class="setting-label">통합 폴더</div><select><option>구매업무규정</option><option>입찰관리</option><option>VAATZ 매뉴얼</option><option>품질 5스타</option><option>원가/단가</option></select></div><div class="setting-box"><div class="setting-label">보안등급</div><select><option>${d.sec}</option><option>리더 전용</option><option>일반 공개</option><option>지정 사용자</option></select></div><div class="setting-box"><div class="setting-label">AI 모드</div><select><option>${d.mode}</option>${modeList.map(m=>`<option>${m}</option>`).join('')}</select></div></div><div style="display:flex;gap:6px;margin-top:10px;justify-content:flex-end"><button class="v23-btn" onclick="previewFinalDoc('${d.id}')">원문 보기</button><button class="v23-btn danger" onclick="rejectFinalDoc(this)">보완 요청</button><button class="v23-btn primary" onclick="approveFinalDoc(this)">최종 승인</button></div></div>`).join('')}</div><div class="final-preview"><div class="v23-panel-title" style="margin-bottom:10px">🔎 검토 미리보기</div><div class="preview-doc-page" id="finalPreview"><h4>문서 미리보기</h4><p>왼쪽 문서의 <span class="preview-highlight">원문 보기</span>를 클릭하면 여기에 요약·하이라이트·중복 문서 여부가 표시됩니다.</p><p>최종 승인 전 확인 항목: 최신 버전 여부, 중복 등록 여부, 보안등급, AI 모드 매핑, 임베딩 제외 문구.</p></div><div class="mode-note">Tip. 최종 승인 시 문서가 최종 리스트로 이동하고, 선택한 AI 모드의 RAG Index에 반영됩니다.</div></div></div>
+      <div class="v23-admin-title"><div><div class="v23-title-main">System Admin 최종 승인</div><div class="v23-title-sub">팀 Admin이 올린 등록 요청됨만 모아 검토합니다. 문서별 AI 적합도 점수와 유사 문서 탐지 결과를 확인 후 승인하세요.</div></div><div class="v23-actions"><button class="v23-btn warn" onclick="safeToast('보완 요청 템플릿을 클립보드에 복사했습니다.','📋')">📋 보완 요청 템플릿</button><button class="v23-btn primary" onclick="approveAllVisibleFinals()">✅ 화면 내 일괄 승인</button></div></div>
+      <!-- 승인 대기 요약 바 -->
+      <div class="v23-final-summary-bar">
+        <div class="v23-fsb-item"><span class="v23-fsb-val">${finalDocs.length}</span><span class="v23-fsb-label">승인 대기</span></div>
+        <div class="v23-fsb-sep">|</div>
+        <div class="v23-fsb-item"><span class="v23-fsb-val" style="color:var(--g)">${finalDocs.filter((_,i)=>docQualityScore(finalDocs[i])>=85).length}</span><span class="v23-fsb-label">즉시 승인 가능</span></div>
+        <div class="v23-fsb-sep">|</div>
+        <div class="v23-fsb-item"><span class="v23-fsb-val" style="color:var(--a)">${finalDocs.filter((_,i)=>docQualityScore(finalDocs[i])<70).length}</span><span class="v23-fsb-label">보완 권장</span></div>
+        <div class="v23-fsb-sep">|</div>
+        <div class="v23-fsb-item"><span class="v23-fsb-val" style="color:var(--accent)">2</span><span class="v23-fsb-label">유사 문서 탐지</span></div>
+      </div>
+      <div class="final-layout"><div>${finalDocs.map((d,i)=>{
+        var score=docQualityScore(d);
+        var hasSimilar=(i===1||i===3);
+        return `<div class="approval-card${score<70?' low-quality':''}" data-final-id="${d.id}">
+          <div class="approval-card-top">
+            <div style="flex:1;min-width:0">
+              <div class="approval-doc">${esc(d.name)}</div>
+              <div class="approval-meta">${esc(d.team)} · ${esc(d.owner)} · ${d.date} · ${d.chunks} chunks 예상</div>
+              <div style="display:flex;gap:6px;margin-top:6px;flex-wrap:wrap">
+                ${qualityBadge(score)}
+                ${hasSimilar?'<span class="v23-pill amber" title="유사 문서 발견">⚠️ 유사 문서 있음</span>':'<span class="v23-pill green" style="font-size:9px">✓ 중복 없음</span>'}
+              </div>
+            </div>
+            ${statusPill(d.status)}
+          </div>
+          ${hasSimilar?`<div class="v23-similar-warn">⚠️ 유사 문서 탐지: "<b>구매업무규정_v2.3.pdf</b>" (유사도 84%) — 검토 후 대체 또는 버전 관리 권장</div>`:''}
+          <div class="approval-settings">
+            <div class="setting-box"><div class="setting-label">통합 폴더</div><select><option>구매업무규정</option><option>입찰관리</option><option>VAATZ 매뉴얼</option><option>품질 5스타</option><option>원가/단가</option></select></div>
+            <div class="setting-box"><div class="setting-label">보안등급</div><select><option>${d.sec}</option><option>리더 전용</option><option>일반 공개</option><option>지정 사용자</option></select></div>
+            <div class="setting-box"><div class="setting-label">AI 모드</div><select><option>${d.mode}</option>${modeList.map(m=>`<option>${m}</option>`).join('')}</select></div>
+            <div class="setting-box"><div class="setting-label">청크 전략</div><select><option>기본 (512 token)</option><option>세밀 (256 token)</option><option>광역 (1024 token)</option></select></div>
+          </div>
+          <div style="display:flex;gap:6px;margin-top:10px;justify-content:flex-end">
+            <button class="v23-btn" onclick="previewFinalDoc('${d.id}')">📄 원문 보기</button>
+            <button class="v23-btn danger" onclick="rejectFinalDoc(this)">↩ 보완 요청</button>
+            <button class="v23-btn primary" onclick="approveFinalDoc(this)">✅ 최종 승인 → AI</button>
+          </div>
+        </div>`;
+      }).join('')}</div>
+      <div class="final-preview">
+        <div class="v23-panel-title" style="margin-bottom:10px">🔎 검토 미리보기</div>
+        <div class="preview-doc-page" id="finalPreview">
+          <h4>문서 미리보기</h4>
+          <p>왼쪽 문서의 <span class="preview-highlight">원문 보기</span>를 클릭하면 여기에 요약·하이라이트·유사 문서 비교·임베딩 예측이 표시됩니다.</p>
+          <div style="background:var(--bg-3);border-radius:8px;padding:10px;margin-top:10px;font-size:11px;color:var(--text-3);line-height:1.7">
+            <b>AI 적합도 점수 기준</b><br>
+            • 85~100점: 즉시 승인 권장 (청크 충분, 최신 버전, 형식 적합)<br>
+            • 70~84점: 검토 후 승인 (일부 항목 개선 권장)<br>
+            • 70점 미만: 보완 요청 권장 (청크 부족, 형식 불적합 등)
+          </div>
+        </div>
+        <div class="mode-note">Tip. 최종 승인 시 문서가 최종 리스트로 이동하고, 선택한 AI 모드의 RAG Index에 반영됩니다.</div>
+      </div></div>
     `);
 
     const publishedDocs=teamDocs.filter(d=>d.status==='AI 검색 반영완료').slice(0,36);
+    /* 문서별 AI 활용도 샘플 데이터 */
+    function docHits(d,i){ return [142,89,231,55,178,320,44,97,215,63,188,72,256,33,141,88,200,65,175,92,311,47,159,84,222,38,196,77,244,52,168,99,287,41,153,71][i%36]||50; }
+    function hitsBadge(hits){ if(hits>=200) return `<span class="v23-pill green" title="활용도 높음">🔥 ${hits}</span>`; if(hits>=80) return `<span class="v23-pill amber" title="활용도 보통">📈 ${hits}</span>`; return `<span class="v23-pill" style="background:var(--bg-3);color:var(--text-3)" title="활용도 낮음 — 재검토 필요">📉 ${hits}</span>`; }
     addAdmSection('p-list', `
       ${pipelineBanner('list')}
-      <div class="v23-admin-title"><div><div class="v23-title-main">최종 리스트 관리</div><div class="v23-title-sub">실제 AI가 검색하는 최종 지식 목록입니다. 문서 버전·보안등급·AI 모드·임베딩 상태를 관리합니다.</div></div><div class="v23-actions"><button class="v23-btn">CSV 내보내기</button><button class="v23-btn primary">＋ 수동 등록</button></div></div>
-      <div class="final-list-filter"><input id="finalListSearch" placeholder="최종 문서 검색" oninput="filterFinalList()"><select id="finalModeFilter" onchange="filterFinalList()"><option value="">전체 모드</option>${modeList.map(m=>`<option>${m}</option>`).join('')}</select><select id="finalSecFilter" onchange="filterFinalList()"><option value="">전체 보안</option>${secList.map(s=>`<option>${s}</option>`).join('')}</select></div>
-      <div class="final-table-wrap"><table class="large-table" id="finalDocTable"><thead><tr><th>문서명</th><th>팀</th><th>유형</th><th>보안</th><th>AI 모드</th><th>버전</th><th>임베딩</th><th style="text-align:right">작업</th></tr></thead><tbody>${publishedDocs.map(d=>`<tr data-mode="${d.mode}" data-sec="${d.sec}" data-text="${(d.name+d.team+d.mode+d.sec).toLowerCase()}"><td><div class="doc-name-strong">${esc(d.name)}</div><div class="doc-subtle">최종 반영일 ${d.date} · ${d.chunks} chunks</div></td><td>${esc(d.team)}</td><td>${d.type}</td><td>${secPill(d.sec)}</td><td>${modeBadge(d.mode)}</td><td>${d.version}</td><td><span class="v23-pill green">활성</span></td><td><div class="row-actions"><button class="v23-btn" onclick="previewPublishedDoc(this)">상세</button><button class="v23-btn">재색인</button></div></td></tr>`).join('')}</tbody></table></div>
+      <div class="v23-admin-title"><div><div class="v23-title-main">최종 리스트 관리</div><div class="v23-title-sub">실제 AI가 검색하는 최종 지식 목록입니다. AI 활용도(쿼리 히트 수)·청크 품질·보안등급을 통합 관리합니다.</div></div><div class="v23-actions"><button class="v23-btn" onclick="adminExportCSV()">📥 CSV 내보내기</button><button class="v23-btn primary">＋ 수동 등록</button></div></div>
+      <!-- 복합 필터 바 -->
+      <div class="v23-list-filterbar">
+        <input id="finalListSearch" class="v23-search-inp" placeholder="🔍 문서명·팀·모드 검색..." oninput="filterFinalList()">
+        <select id="finalModeFilter" class="v23-filter-sel" onchange="filterFinalList()"><option value="">전체 모드</option>${modeList.map(m=>`<option>${m}</option>`).join('')}</select>
+        <select id="finalSecFilter" class="v23-filter-sel" onchange="filterFinalList()"><option value="">전체 보안</option>${secList.map(s=>`<option>${s}</option>`).join('')}</select>
+        <select id="finalTypeFilter" class="v23-filter-sel" onchange="filterFinalList()"><option value="">전체 유형</option>${['PDF','PPT','XLSX','DOCX'].map(t=>`<option>${t}</option>`).join('')}</select>
+        <select id="finalHitsFilter" class="v23-filter-sel" onchange="filterFinalList()">
+          <option value="">전체 활용도</option>
+          <option value="high">🔥 높음 (200+)</option>
+          <option value="mid">📈 보통 (80~199)</option>
+          <option value="low">📉 낮음 (~79)</option>
+        </select>
+        <button class="v23-btn" onclick="filterFinalList()" style="flex-shrink:0">적용</button>
+      </div>
+      <!-- 일괄 작업 바 -->
+      <div class="v23-bulk-bar" id="listBulkBar" style="display:none">
+        <span id="listBulkCount" class="v23-bulk-count">0건 선택됨</span>
+        <button class="v23-btn primary" onclick="bulkReindex()">🔄 일괄 재색인</button>
+        <button class="v23-btn warn" onclick="bulkDeactivate()">🚫 일괄 비활성화</button>
+        <button class="v23-btn danger" onclick="bulkDelete()">🗑 삭제</button>
+        <button class="v23-btn" onclick="clearListSelection()">✕ 선택 해제</button>
+      </div>
+      <div class="final-table-wrap"><table class="large-table" id="finalDocTable">
+        <thead><tr>
+          <th style="width:32px"><input type="checkbox" id="listSelectAll" onchange="toggleListSelectAll(this)"></th>
+          <th>문서명</th><th>팀</th><th>유형</th><th>보안</th><th>AI 모드</th><th>버전</th>
+          <th style="text-align:center" title="7일 쿼리 히트 수">AI 활용도</th>
+          <th style="text-align:center">청크</th>
+          <th style="text-align:center">상태</th>
+          <th style="text-align:right">작업</th>
+        </tr></thead>
+        <tbody>${publishedDocs.map((d,i)=>{const hits=docHits(d,i); return `<tr data-mode="${d.mode}" data-sec="${d.sec}" data-type="${d.type}" data-hits="${hits}" data-text="${(d.name+d.team+d.mode+d.sec).toLowerCase()}">
+          <td><input type="checkbox" class="list-doc-chk" data-id="${d.id}" onchange="onListCheckChange()"></td>
+          <td><div class="doc-name-strong">${esc(d.name)}</div><div class="doc-subtle">반영일 ${d.date}</div></td>
+          <td style="font-size:11px">${esc(d.team)}</td>
+          <td>${d.type}</td>
+          <td>${secPill(d.sec)}</td>
+          <td>${modeBadge(d.mode)}</td>
+          <td style="font-size:11px">${d.version}</td>
+          <td style="text-align:center">${hitsBadge(hits)}</td>
+          <td style="text-align:center;font-size:11px;color:var(--text-3)">${d.chunks}</td>
+          <td style="text-align:center"><span class="v23-pill green" style="font-size:9px">활성</span></td>
+          <td><div class="row-actions"><button class="v23-btn" onclick="previewPublishedDoc(this)">상세</button><button class="v23-btn" onclick="safeToast('재색인을 예약했습니다.','🔄',2000)">재색인</button></div></td>
+        </tr>`; }).join('')}</tbody>
+      </table></div>
+      <div style="padding:10px 4px;font-size:11px;color:var(--text-3)">총 ${publishedDocs.length}건 표시 · AI 활용도는 최근 7일 쿼리 히트 수 기준</div>
+    `);
+
+    /* ═══ AI 품질 모니터링 탭 ═══ */
+    const topDocs = publishedDocs.slice(0,5).map(function(d,i){return {name:d.name, team:d.team, hits:[142,89,231,55,178][i]||50};});
+    const unansweredQ = [
+      {q:'탄력적입찰 2회차 유찰 후 수의계약 전환 시 위원회 승인 기준은?', cat:'입찰', cnt:12},
+      {q:'VAATZ 글로벌 구매에서 EUR 결제 시 환율 적용 시점과 정산 방법', cat:'VAATZ', cnt:9},
+      {q:'5스타 3→4등급 승급 시 신규 평가 항목 및 가중치 기준', cat:'5스타', cnt:7},
+      {q:'MRO 반복 구매 단가 계약 유효기간 초과 시 처리 절차', cat:'일반자재', cnt:6},
+      {q:'원가모드에서 협력사 단가 이력 조회 가능 기간', cat:'원가', cnt:5},
+    ];
+    const trustDist=[{label:'90~100점',pct:28,cls:'green'},{label:'75~89점',pct:41,cls:'blue'},{label:'60~74점',pct:22,cls:'amber'},{label:'~59점',pct:9,cls:'red'}];
+    addAdmSection('p-quality', `
+      <div class="v23-admin-title">
+        <div>
+          <div class="v23-title-main">📊 AI 챗봇 품질 모니터링</div>
+          <div class="v23-title-sub">RAG 검색 성능, 답변 채택율, 미응답 쿼리를 통합 분석합니다. 문서 보강이 필요한 영역을 파악하고 AI 품질을 지속 개선하세요.</div>
+        </div>
+        <div class="v23-actions">
+          <button class="v23-btn" onclick="safeToast('품질 리포트를 PDF로 내보냅니다.','📊',2000)">📥 리포트 내보내기</button>
+          <button class="v23-btn primary" onclick="safeToast('미응답 쿼리 기반 문서 보강 권고안을 생성했습니다.','🤖',2500)">🤖 AI 보강 권고</button>
+        </div>
+      </div>
+
+      <!-- 핵심 품질 KPI -->
+      <div class="v23-hero-grid">
+        <div class="v23-kpi green"><div class="v23-kpi-label">답변 채택율</div><div class="v23-kpi-value">78.4<span>%</span></div><div class="v23-kpi-desc">▲ 3.2% vs 지난주</div><div class="spark"><i style="height:62%"></i><i style="height:68%"></i><i style="height:71%"></i><i style="height:74%"></i><i style="height:76%"></i><i style="height:78%"></i></div></div>
+        <div class="v23-kpi"><div class="v23-kpi-label">RAG 검색 히트율</div><div class="v23-kpi-value">91.2<span>%</span></div><div class="v23-kpi-desc">▲ 1.8% vs 지난주</div><div class="spark"><i style="height:85%"></i><i style="height:87%"></i><i style="height:88%"></i><i style="height:89%"></i><i style="height:90%"></i><i style="height:91%"></i></div></div>
+        <div class="v23-kpi amber"><div class="v23-kpi-label">미응답 쿼리 (7일)</div><div class="v23-kpi-value">23<span>건</span></div><div class="v23-kpi-desc">▲ 5건 증가 — 문서 보강 필요</div><div class="spark"><i style="height:30%"></i><i style="height:35%"></i><i style="height:38%"></i><i style="height:42%"></i><i style="height:48%"></i><i style="height:55%"></i></div></div>
+        <div class="v23-kpi"><div class="v23-kpi-label">평균 응답 신뢰도</div><div class="v23-kpi-value">4.1<span>/5</span></div><div class="v23-kpi-desc">▲ 0.3 vs 지난주</div><div class="spark"><i style="height:65%"></i><i style="height:70%"></i><i style="height:72%"></i><i style="height:75%"></i><i style="height:78%"></i><i style="height:82%"></i></div></div>
+      </div>
+
+      <div class="v23-quality-grid">
+        <!-- 미응답 쿼리 목록 -->
+        <div class="v23-qpanel">
+          <div class="v23-qpanel-hd">
+            <div class="v23-qpanel-title">⚠️ 미응답 쿼리 — 문서 보강 필요</div>
+            <span class="v23-pill amber">23건</span>
+          </div>
+          <div class="v23-qpanel-body">
+            ${unansweredQ.map(function(q){return `
+              <div class="v23-unanswered-row">
+                <div class="v23-ua-info">
+                  <div class="v23-ua-q">${esc(q.q)}</div>
+                  <div class="v23-ua-meta"><span class="qa36-cat-tag">${esc(q.cat)}</span> · 미응답 <b>${q.cnt}회</b></div>
+                </div>
+                <button class="v23-btn primary" style="font-size:10px;padding:4px 10px;flex-shrink:0" onclick="safeToast('해당 쿼리 관련 문서 보강 권고안을 생성했습니다.','📄',2200)">📄 문서 추가</button>
+              </div>`;}).join('')}
+          </div>
+        </div>
+
+        <!-- 신뢰도 분포 + AI 활용도 Top5 -->
+        <div style="display:flex;flex-direction:column;gap:14px">
+          <!-- 신뢰도 분포 -->
+          <div class="v23-qpanel">
+            <div class="v23-qpanel-hd"><div class="v23-qpanel-title">📊 응답 신뢰도 분포 (최근 7일)</div></div>
+            <div class="v23-qpanel-body" style="padding:12px 16px">
+              ${trustDist.map(function(t){return `
+                <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+                  <div style="font-size:11px;color:var(--text-2);width:70px;flex-shrink:0">${t.label}</div>
+                  <div style="flex:1;height:8px;background:var(--bg-4);border-radius:4px;overflow:hidden">
+                    <div style="height:100%;width:${t.pct}%;background:var(--${t.cls==='blue'?'accent':t.cls==='green'?'g':t.cls==='amber'?'a':'red-4,#EF5350'});border-radius:4px;transition:width .5s"></div>
+                  </div>
+                  <div style="font-size:11px;font-weight:700;color:var(--text-2);width:32px;text-align:right">${t.pct}%</div>
+                </div>`;}).join('')}
+              <div style="font-size:10px;color:var(--text-4);margin-top:8px">총 1,247건 쿼리 기준 · 90점 미만 응답은 출처 문서 재검토 권장</div>
+            </div>
+          </div>
+
+          <!-- AI 활용도 Top5 -->
+          <div class="v23-qpanel">
+            <div class="v23-qpanel-hd"><div class="v23-qpanel-title">🔥 AI 활용 문서 Top 5 (7일 히트)</div></div>
+            <div class="v23-qpanel-body" style="padding:10px 16px">
+              ${topDocs.map(function(d,i){var pct=[100,63,43,39,33][i]; return `
+                <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+                  <span style="font-size:14px;font-weight:900;color:var(--text-4);width:18px">${i+1}</span>
+                  <div style="flex:1;min-width:0">
+                    <div style="font-size:11.5px;font-weight:600;color:var(--text-1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(d.name)}</div>
+                    <div style="font-size:10px;color:var(--text-3)">${esc(d.team)} · ${d.hits}회 히트</div>
+                    <div style="height:4px;background:var(--bg-4);border-radius:2px;margin-top:4px;overflow:hidden">
+                      <div style="height:100%;width:${pct}%;background:var(--accent);border-radius:2px"></div>
+                    </div>
+                  </div>
+                </div>`;}).join('')}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- AI 모드별 활용 비율 -->
+      <div class="v23-qpanel" style="margin-top:14px">
+        <div class="v23-qpanel-hd"><div class="v23-qpanel-title">🧭 AI 모드별 쿼리 비율 (7일)</div><span style="font-size:11px;color:var(--text-3)">전체 1,247건</span></div>
+        <div class="v23-qpanel-body" style="padding:14px 16px">
+          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px">
+            ${[['통합모드','38%','#4A8EF0',472],['생산자재 모드','27%','#26A69A',337],['일반자재 모드','21%','#FFA726',262],['원가모드','14%','#EC407A',176]].map(function(m){return `
+              <div style="background:var(--bg-2);border:1px solid var(--border-1);border-radius:10px;padding:14px;text-align:center">
+                <div style="font-size:22px;font-weight:900;color:${m[2]}">${m[1]}</div>
+                <div style="font-size:11px;font-weight:600;color:var(--text-2);margin-top:3px">${m[0]}</div>
+                <div style="font-size:10px;color:var(--text-4);margin-top:2px">${m[3]}건</div>
+              </div>`;}).join('')}
+          </div>
+        </div>
+      </div>
     `);
 
     addAdmSection('p-datamart', `
@@ -2603,7 +2867,79 @@ sendMessage = function(){
   window.approveFinalDoc=function(btn){ const card=btn.closest('.approval-card'); if(card){card.style.opacity='.38'; card.style.pointerEvents='none'} safeToast('최종 승인 완료: 최종 리스트와 선택 AI 모드 Index에 반영됩니다.','✅'); };
   window.rejectFinalDoc=function(btn){ const card=btn.closest('.approval-card'); if(card){card.style.opacity='.38'; card.style.pointerEvents='none'} safeToast('보완 요청 처리했습니다. 팀 Admin에게 보완 요청 알림이 전송됩니다.','↩️'); };
   window.approveAllVisibleFinals=function(){ $$('.approval-card').forEach(c=>{c.style.opacity='.38'; c.style.pointerEvents='none'}); safeToast('화면에 표시된 등록 요청됨을 모두 승인했습니다.','✅'); };
-  window.filterFinalList=function(){ const q=($('#finalListSearch')?.value||'').toLowerCase(); const m=$('#finalModeFilter')?.value||''; const s=$('#finalSecFilter')?.value||''; $$('#finalDocTable tbody tr').forEach(tr=>{ const ok=(!q||tr.dataset.text.includes(q))&&(!m||tr.dataset.mode===m)&&(!s||tr.dataset.sec===s); tr.style.display=ok?'':'none'; }); };
+  /* ─── 최종 리스트 필터 (활용도 포함) ─── */
+  window.filterFinalList=function(){
+    const q=($('#finalListSearch')?.value||'').toLowerCase();
+    const m=$('#finalModeFilter')?.value||'';
+    const s=$('#finalSecFilter')?.value||'';
+    const t=$('#finalTypeFilter')?.value||'';
+    const h=$('#finalHitsFilter')?.value||'';
+    var shown=0;
+    $$('#finalDocTable tbody tr').forEach(tr=>{
+      const hits=parseInt(tr.dataset.hits||'0');
+      const hitsOk=!h||(h==='high'&&hits>=200)||(h==='mid'&&hits>=80&&hits<200)||(h==='low'&&hits<80);
+      const ok=(!q||tr.dataset.text.includes(q))&&(!m||tr.dataset.mode===m)&&(!s||tr.dataset.sec===s)&&(!t||tr.dataset.type===t)&&hitsOk;
+      tr.style.display=ok?'':'none';
+      if(ok) shown++;
+    });
+  };
+  /* ─── 일괄 선택·작업 ─── */
+  window.toggleListSelectAll=function(cb){
+    $$('.list-doc-chk').forEach(c=>c.checked=cb.checked);
+    onListCheckChange();
+  };
+  window.onListCheckChange=function(){
+    const checked=$$('.list-doc-chk:checked').length;
+    const bar=$('#listBulkBar'), cnt=$('#listBulkCount');
+    if(bar) bar.style.display=checked>0?'flex':'none';
+    if(cnt) cnt.textContent=checked+'건 선택됨';
+  };
+  window.clearListSelection=function(){
+    $$('.list-doc-chk').forEach(c=>c.checked=false);
+    const allChk=$('#listSelectAll'); if(allChk) allChk.checked=false;
+    onListCheckChange();
+  };
+  window.bulkReindex=function(){
+    const n=$$('.list-doc-chk:checked').length;
+    $$('.list-doc-chk:checked').forEach(c=>{ const tr=c.closest('tr'); if(tr) tr.style.opacity='.5'; });
+    safeToast(`${n}건의 재색인을 예약했습니다. 약 5~10분 내 완료됩니다.`,'🔄',3000);
+    clearListSelection();
+  };
+  window.bulkDeactivate=function(){
+    const n=$$('.list-doc-chk:checked').length;
+    if(!confirm(`선택된 ${n}건을 비활성화하시겠습니까? AI 검색에서 즉시 제외됩니다.`)) return;
+    $$('.list-doc-chk:checked').forEach(c=>{ const tr=c.closest('tr'); if(tr){ tr.style.opacity='.38'; tr.style.pointerEvents='none'; } });
+    safeToast(`${n}건을 비활성화했습니다. AI 검색 인덱스에서 제외됩니다.`,'🚫',2500);
+    clearListSelection();
+  };
+  window.bulkDelete=function(){
+    const n=$$('.list-doc-chk:checked').length;
+    if(!confirm(`선택된 ${n}건을 영구 삭제하시겠습니까?`)) return;
+    $$('.list-doc-chk:checked').forEach(c=>{ const tr=c.closest('tr'); if(tr) tr.remove(); });
+    safeToast(`${n}건을 삭제했습니다.`,'🗑',2000);
+    clearListSelection();
+  };
+  window.adminExportCSV=function(){
+    safeToast('최종 리스트 CSV를 다운로드합니다.','📥',2000);
+  };
+  /* ─── 팀별 폴더 상태 필터 ─── */
+  window.setTeamStatusFilter=function(status, btn){
+    $$('.v23-tf-chip').forEach(b=>b.classList.remove('on'));
+    if(btn) btn.classList.add('on');
+    $$('.tf-file-row,.tf-f').forEach(function(el){
+      if(status==='all'){ el.style.display=''; return; }
+      var st=el.dataset.status||el.getAttribute('data-status')||'';
+      el.style.display=(st===status)?'':'none';
+    });
+  };
+  window.filterTeamFolder=function(q){
+    const kw=(q||'').toLowerCase();
+    $$('.tf-file-row,.tf-f').forEach(function(el){
+      if(!kw){ el.style.display=''; return; }
+      const txt=(el.textContent||'').toLowerCase();
+      el.style.display=txt.includes(kw)?'':'none';
+    });
+  };
   window.previewPublishedDoc=function(btn){ const tr=btn.closest('tr'); const name=tr?.querySelector('.doc-name-strong')?.textContent||'문서'; safeToast(`${name} 상세 패널을 열었습니다. 실제 구현 시 원문/버전/인덱스 로그로 연결됩니다.`,'📚'); };
   window.safeV23Toast=safeToast;
 
