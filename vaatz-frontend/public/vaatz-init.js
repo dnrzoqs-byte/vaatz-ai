@@ -3140,12 +3140,55 @@ sendMessage = function(){
   var _tfActiveStatus = 'all';
   var _tfActiveSearch = '';
   function applyTeamFolderFilter(){
+    var isAll = (_tfActiveStatus === 'all') && !_tfActiveSearch;
+
+    if(isAll){
+      /* 전체 보기: 아코디언을 모두 원래대로(닫힌 상태) 복원 */
+      $$('.tf-team-tree-body').forEach(function(el){
+        el.style.display = 'none';
+        var ch = document.getElementById(el.id.replace('-tree','')+'-chev');
+        if(ch) ch.style.transform = '';
+      });
+      $$('.tf-catfolder-body, .tf-subfolder-body').forEach(function(el){
+        el.style.display = 'none';
+        var ch = document.getElementById(el.id.replace('-body','')+'-chev');
+        if(ch) ch.textContent = '▶';
+      });
+      $$('.tf-file-row').forEach(function(el){ el.style.display = ''; });
+      return;
+    }
+
+    /* ① 개별 행 show/hide */
     $$('.tf-file-row').forEach(function(el){
       var st  = el.dataset.status || '';
       var txt = el.dataset.text   || el.textContent.toLowerCase();
       var statusOk = (_tfActiveStatus === 'all') || (st === _tfActiveStatus);
       var searchOk = !_tfActiveSearch || txt.includes(_tfActiveSearch);
       el.style.display = (statusOk && searchOk) ? '' : 'none';
+    });
+
+    /* ② 매칭 행이 있는 컨테이너는 펼치고, 없으면 닫기 */
+    function hasVisible(container){
+      return Array.from(container.querySelectorAll('.tf-file-row'))
+                  .some(function(r){ return r.style.display !== 'none'; });
+    }
+    $$('.tf-subfolder-body').forEach(function(body){
+      var show = hasVisible(body);
+      body.style.display = show ? 'block' : 'none';
+      var ch = document.getElementById(body.id.replace('-body','')+'-chev');
+      if(ch) ch.textContent = show ? '▼' : '▶';
+    });
+    $$('.tf-catfolder-body').forEach(function(body){
+      var show = hasVisible(body);
+      body.style.display = show ? 'block' : 'none';
+      var ch = document.getElementById(body.id.replace('-body','')+'-chev');
+      if(ch) ch.textContent = show ? '▼' : '▶';
+    });
+    $$('.tf-team-tree-body').forEach(function(body){
+      var show = hasVisible(body);
+      body.style.display = show ? 'block' : 'none';
+      var ch = document.getElementById(body.id.replace('-tree','')+'-chev');
+      if(ch) ch.style.transform = show ? 'rotate(90deg)' : '';
     });
   }
   window.setTeamStatusFilter = function(status, btn){
