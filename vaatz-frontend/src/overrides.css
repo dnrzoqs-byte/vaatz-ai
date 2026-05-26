@@ -2,21 +2,41 @@
  * VAATZ AI — UX/UI Overrides (Web Only)
  * ═══════════════════════════════════════════ */
 
-html, body, #root {
-  height: 100vh;
+/* ── 기본: 뷰포트 완전 채우기 (dvh: 모바일/크롬 동적 주소창 대응) ── */
+html, body {
+  height: 100%;
+  height: 100dvh;
   overflow: hidden;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
 }
-
-/* ── 전체 레이아웃: 모바일 제거, 웹 최적화 ── */
-.app {
-  grid-template-columns: 240px 1fr !important;
-  min-width: 1024px;
+#root {
+  height: 100%;
+  overflow: hidden;
 }
 
-/* ── 스크롤 컨테이너: flex child에서 overflow-y:auto 정상 동작 ── */
+/* ── 전체 레이아웃: 반응형 (min-width 제거 → 좁은 화면도 대응) ── */
+.app {
+  height: 100%;          /* 부모(#root) 높이 상속 → 위아래 짤림 방지 */
+  grid-template-columns: 240px 1fr !important;
+  overflow: hidden;
+}
+
+/* ── 메인 컬럼: 높이 체인 완성 ── */
+.mn {
+  height: 100%;          /* .app grid cell 높이 채우기 */
+  min-height: 0;
+  overflow: hidden;
+}
+.mn-body {
+  min-height: 0;         /* 중첩 flex에서 height 계산 정상화 */
+}
+.mn-chat {
+  min-height: 0;
+}
+
+/* ── 스크롤 컨테이너: flex child overflow-y:auto 정상 동작 ── */
 .cs {
   min-height: 0;
 }
@@ -3506,4 +3526,59 @@ html:not([data-theme="light"]) #shopCharPreview {
 }
 .tf-more-row:hover { background: var(--bg-3); }
 
+/* ════════════════════════════════════════════════════
+ * ── 반응성 향상: transition 단축 + will-change ──
+ * ════════════════════════════════════════════════════ */
 
+/* 전역 transition 단축 (버벅임 원인: 너무 긴 animation) */
+.sb-i, .hi, .wc, .wt-i, .tb-b, .sc-btn, .ai-a, .fu-c,
+.rp-tab, .adm-tab, .comm-tab, .v34-ctrl-btn {
+  transition-duration: 80ms !important;
+}
+.sb-u, .brand-m, .new-c {
+  transition-duration: 100ms !important;
+}
+
+/* GPU 가속: 자주 hover/transition 되는 요소 */
+.sb-i, .hi, .wc, .new-c, .sd, .ibx, .tb-b {
+  will-change: background;
+}
+.sb-hist {
+  will-change: scroll-position;
+}
+
+/* 무거운 backdrop-filter 단순화 */
+.tb {
+  backdrop-filter: blur(10px) !important;
+  -webkit-backdrop-filter: blur(10px) !important;
+}
+
+/* ── 반응형: 좁은 화면 대응 (850px 미만) ── */
+@media (max-width: 1100px) {
+  .app {
+    grid-template-columns: 200px 1fr !important;
+  }
+  .sb { width: 200px !important; min-width: 200px !important; }
+  .cc { padding: 20px 24px 16px !important; }
+  .iw { padding: 0 24px 16px !important; }
+  .wl { max-width: 560px; }
+}
+
+@media (max-width: 850px) {
+  .app {
+    grid-template-columns: 0px 1fr !important;
+  }
+  .sb { width: 0 !important; min-width: 0 !important; overflow: hidden !important; }
+  .cc { padding: 16px 16px 12px !important; }
+  .iw { padding: 0 16px 12px !important; }
+  .msg-b { max-width: 80% !important; }
+}
+
+/* ── 사이드바: 고정 높이로 오버플로우 방지 ── */
+.sb {
+  height: 100%;
+  overflow: hidden;
+}
+.sb-hist {
+  overscroll-behavior: contain;
+}

@@ -209,7 +209,9 @@ function sendMessage(){
 function escHtml(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>')}
 function scrollChat(){
   const cs=document.querySelector('#v-ch.cs')||document.querySelector('.cs');
-  if(cs) cs.scrollTop=cs.scrollHeight;
+  if(!cs) return;
+  // rAF: 레이아웃 계산 완료 후 스크롤 → 버벅임 방지
+  requestAnimationFrame(function(){ cs.scrollTop=cs.scrollHeight; });
 }
 function copyAnswer(btn){
   const txt=btn.closest('.ab').querySelector('.ai-tx').innerText;
@@ -2562,7 +2564,10 @@ sendMessage = function(){
     const hub=$('#companionHub'); if(!hub)return; hub.style.overflow='visible'; if(!$('#v28BuddyNudge')){const n=document.createElement('div');n.id='v28BuddyNudge';n.className='v27-buddy-speech';n.textContent='공지와 중요한 답변은 제가 알려드릴게요.';hub.appendChild(n);} const say=()=>{const n=$('#v28BuddyNudge'); if(!n)return; const msgs=['오늘 공지: 신규 구매규정 개정안이 등록됐어요.','좋아요 10개 이상 채택 답변은 AI 검증 후보가 됩니다.','인용 번호를 누르면 근거 문서를 크게 볼 수 있어요.','중요한 답변은 내 메모에 저장해두세요.'];n.textContent=msgs[Math.floor(Math.random()*msgs.length)];n.classList.add('sh');clearTimeout(window.__v28Buddy);window.__v28Buddy=setTimeout(()=>n.classList.remove('sh'),4500)}; if(!hub.dataset.v28Speech){hub.dataset.v28Speech='1';hub.addEventListener('click',()=>setTimeout(say,60));setTimeout(say,1200);setInterval(say,38000)}
   }
   function patchMypageChar(){ $$('[onclick="openComm(\'char\')"]').forEach(b=>{if(b.closest('.mp-ov'))b.setAttribute('onclick','try{closeMypage()}catch(e){};setTimeout(()=>openComm(\'char\'),80)')}); }
-  function boot(){normText();installModalTools();installCommunityTools();installEvidenceClick();installBuddyFallback();patchMypageChar();setInterval(()=>{normText();installEvidenceClick();patchMypageChar();},2500)}
+  function boot(){normText();installModalTools();installCommunityTools();installEvidenceClick();installBuddyFallback();patchMypageChar();
+    // 주기 2500ms → 10000ms 로 완화 (성능 개선: DOM 전체 스캔 빈도 감소)
+    setInterval(()=>{normText();installEvidenceClick();patchMypageChar();},10000);
+  }
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot); else boot();
 })();
 
