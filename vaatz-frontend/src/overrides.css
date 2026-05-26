@@ -801,11 +801,16 @@ button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 textarea:focus { outline: none; }
 ::selection { background: var(--accent-dim); color: var(--accent); }
 
-/* ── 모달 ── */
-.mp-box { width: min(520px, 96vw); }
+/* ── 모달 — 가로폭 · 가시성 개선 ── */
+/* 마이페이지: 넓게 + 통계 가로 배열 */
+.mp-box { width: min(860px, 96vw) !important; }
 .mp-name { font-size: 14px; }
 .mp-stat-v { font-size: 18px; }
-.rq-b { width: min(460px, 96vw); }
+.mp-stats { display: grid !important; grid-template-columns: repeat(4,1fr) !important; gap: 8px !important; }
+/* 요청서: 넓게 + 2컬럼 폼 */
+.rq-b { width: min(700px, 96vw) !important; }
+.rq-form-grid { display: grid !important; grid-template-columns: 1fr 1fr !important; gap: 10px 16px !important; }
+.rq-form-full { grid-column: 1 / -1 !important; }
 .frm-i { font-size: 12.5px; padding: 9px 11px; }
 .bd { font-size: 9.5px; padding: 2px 7px; }
 
@@ -3874,12 +3879,13 @@ html:not([data-theme="light"]) #shopCharPreview {
   justify-content: center;
   animation: fadeIn .15s ease;
 }
+/* 업로드 모달 — 2단 레이아웃 (드롭존 좌 · 폼 우) */
 .v36-upload-modal {
   background: var(--bg-2);
   border: 1px solid var(--border-1);
   border-radius: 16px;
-  width: 520px;
-  max-width: 95vw;
+  width: min(820px, 96vw);
+  max-width: 96vw;
   box-shadow: 0 24px 60px rgba(0,0,0,.4);
   display: flex;
   flex-direction: column;
@@ -3902,7 +3908,26 @@ html:not([data-theme="light"]) #shopCharPreview {
   flex-direction: column;
   gap: 10px;
   overflow-y: auto;
-  max-height: 60vh;
+  max-height: 70vh;
+}
+/* 2단: 드롭존 좌 + 폼 우 */
+.v36-two-col {
+  flex-direction: row !important;
+  align-items: flex-start;
+  gap: 16px;
+}
+.v36-left-col {
+  flex: 0 0 260px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.v36-right-col {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
 }
 .v36-upload-ft {
   display: flex;
@@ -3967,3 +3992,76 @@ html:not([data-theme="light"]) #shopCharPreview {
   outline: none;
   border-color: var(--accent);
 }
+
+
+/* ══════════════════════════════════════════════
+ * 팝업 가시성 개선 — 가로폭 확장 · 정보 한눈에
+ * ══════════════════════════════════════════════ */
+
+/* Admin 탭 바: 8탭 모두 한 줄에 표시 */
+.atb {
+  font-size: 10.5px !important;
+  padding: 9px 10px !important;
+  white-space: nowrap;
+}
+.adm { width: min(1280px, 98vw) !important; }
+
+/* 마이페이지 body 최대 높이 늘려 스크롤 최소화 */
+.mp-body { max-height: calc(90vh - 260px) !important; }
+
+/* 마이페이지 프로필 + 캐릭터 2단 배치 */
+.mp-profile {
+  display: grid !important;
+  grid-template-columns: 1fr 1fr !important;
+  gap: 14px !important;
+  align-items: start !important;
+}
+
+/* 요청서 body 높이 */
+.rq-b > *:not(:first-child):not(:last-child) {
+  overflow-y: auto;
+  max-height: calc(85vh - 120px);
+}
+
+/* 히스토리 모달 — 더 넓게 */
+#historyModal .large-box { width: min(900px, 96vw) !important; }
+.history-row {
+  display: grid !important;
+  grid-template-columns: 36px 1fr auto !important;
+  gap: 10px;
+  align-items: center;
+}
+.history-row-main { min-width: 0; }
+.history-title { font-size: 12.5px; font-weight: 600; color: var(--text-1); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.history-meta  { font-size: 10px; color: var(--text-4); margin-top: 2px; }
+
+/* 보안등급 감사 로그 — 좁은 화면 대응 */
+.sp-audit-hd,
+.sp-audit-row {
+  grid-template-columns: 130px 110px 1fr 200px 70px !important;
+}
+@media (max-width: 1300px) {
+  .sp-audit-hd,
+  .sp-audit-row { grid-template-columns: 120px 100px 1fr 160px 60px !important; font-size: 10px !important; }
+}
+
+/* 보안등급 3단 카드 — 최소 너비 확보 */
+.sp-level-card { min-height: 320px; }
+.sp-level-grid { gap: 12px; }
+
+/* 운영 홈 process step — 너비가 충분하도록 */
+.v23-process {
+  display: flex !important;
+  align-items: stretch !important;
+  gap: 10px !important;
+}
+.v23-step { flex: 1; min-width: 200px; }
+
+/* 팀별 폴더 L4 서브폴더 들여쓰기 */
+.tf-subfolder { margin-left: 18px !important; }
+
+/* DB 오버레이 모달 (문서 DB 보기) — 넓게 */
+.db-box { width: min(1100px, 96vw) !important; }
+
+/* 커뮤니티 묻고답기 팝업 — 최소 너비 */
+.comm-box { min-width: min(900px, 96vw) !important; }

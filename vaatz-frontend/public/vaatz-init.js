@@ -2418,34 +2418,53 @@ sendMessage = function(){
           <span>📤 파일 업로드 — ${esc(teamName)}</span>
           <button class="v34-ctrl-btn close" onclick="document.getElementById('v36UploadModal').remove()">✕</button>
         </div>
-        <div class="v36-upload-body">
-          <div class="v36-dropzone" id="v36DropZone" onclick="document.getElementById('v36FileInput').click()">
-            <div class="v36-drop-ic">☁️</div>
-            <div class="v36-drop-txt">파일을 드래그하거나 클릭하여 선택</div>
-            <div class="v36-drop-sub">PDF · DOCX · XLSX · PPT · HWP 지원</div>
-            <input type="file" id="v36FileInput" style="display:none" multiple accept=".pdf,.docx,.xlsx,.ppt,.pptx,.hwp"
-              onchange="v36HandleFileSelect(this)">
+        <div class="v36-upload-body v36-two-col">
+          <!-- 좌: 드롭존 + 선택 파일 목록 -->
+          <div class="v36-left-col">
+            <div class="v36-dropzone" id="v36DropZone" onclick="document.getElementById('v36FileInput').click()">
+              <div class="v36-drop-ic">☁️</div>
+              <div class="v36-drop-txt">파일을 드래그하거나<br>클릭하여 선택</div>
+              <div class="v36-drop-sub">PDF · DOCX · XLSX · PPT · HWP</div>
+              <input type="file" id="v36FileInput" style="display:none" multiple accept=".pdf,.docx,.xlsx,.ppt,.pptx,.hwp"
+                onchange="v36HandleFileSelect(this)">
+            </div>
+            <div id="v36FileList" style="margin-top:10px"></div>
+            <div style="margin-top:10px;padding:10px;background:var(--bg-3);border-radius:9px;font-size:10.5px;color:var(--text-4);line-height:1.7">
+              📌 <b>안내</b><br>
+              파일 선택 후 우측 폼에서 카테고리·사유·보안등급을 지정한 뒤 <b>등록 요청</b>을 클릭하세요.<br>
+              System Admin이 검토 후 AI 지식 목록에 반영합니다.
+            </div>
           </div>
-          <div id="v36FileList" style="margin:8px 0"></div>
-          <div class="v36-form-row">
-            <label class="v36-label">📁 대분류 (L3)</label>
-            <select id="v36CatSel" class="v36-sel" onchange="v36UpdateSub(this.value)">
-              ${catData.map(function(c){return '<option value="'+c.id+'"'+(c.id===selectedCat?' selected':'')+'>'+c.icon+' '+c.label+'</option>';}).join('')}
-            </select>
-          </div>
-          <div class="v36-form-row">
-            <label class="v36-label">📂 소분류 (L4)</label>
-            <select id="v36SubSel" class="v36-sel">${renderSubOpts(selectedCat)}</select>
-          </div>
-          <div class="v36-form-row">
-            <label class="v36-label">📝 업로드 사유</label>
-            <input id="v36Reason" class="v36-input" placeholder="예: 2026년 기준 최신 규정 반영" />
-          </div>
-          <div class="v36-form-row">
-            <label class="v36-label">🔒 보안등급</label>
-            <select id="v36SecSel" class="v36-sel">
-              <option>일반 공개</option><option>리더 전용</option><option>지정 사용자</option>
-            </select>
+          <!-- 우: 메타데이터 폼 -->
+          <div class="v36-right-col">
+            <div class="v36-form-row">
+              <label class="v36-label">📁 대분류 (L3)</label>
+              <select id="v36CatSel" class="v36-sel" onchange="v36UpdateSub(this.value)">
+                ${catData.map(function(c){return '<option value="'+c.id+'"'+(c.id===selectedCat?' selected':'')+'>'+c.icon+' '+c.label+'</option>';}).join('')}
+              </select>
+            </div>
+            <div class="v36-form-row">
+              <label class="v36-label">📂 소분류 (L4)</label>
+              <select id="v36SubSel" class="v36-sel">${renderSubOpts(selectedCat)}</select>
+            </div>
+            <div class="v36-form-row">
+              <label class="v36-label">📝 업로드 사유</label>
+              <input id="v36Reason" class="v36-input" placeholder="예: 2026년 기준 최신 규정 반영" />
+            </div>
+            <div class="v36-form-row">
+              <label class="v36-label">🔒 보안등급</label>
+              <select id="v36SecSel" class="v36-sel">
+                <option>일반 공개</option><option>리더 전용</option><option>지정 사용자</option>
+              </select>
+            </div>
+            <div class="v36-form-row">
+              <label class="v36-label">🏷️ AI 모드 연결 (선택)</label>
+              <select class="v36-sel">
+                <option>자동 (System Admin 결정)</option>
+                <option>통합모드</option><option>생산자재 모드</option>
+                <option>일반자재 모드</option><option>원가모드</option>
+              </select>
+            </div>
           </div>
         </div>
         <div class="v36-upload-ft">
