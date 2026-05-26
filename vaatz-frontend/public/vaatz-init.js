@@ -1993,7 +1993,7 @@ sendMessage = function(){
       else
         btn=`<button class="v23-btn good tf-req-btn" style="padding:3px 9px;font-size:10px;white-space:nowrap;flex-shrink:0" onclick="event.stopPropagation();openAdminTab('p-list')">✅ 리스트 확인 ↗</button>`;
       const sCls=d.status==='AI 검색 반영완료'?'green':d.status==='등록 요청됨'?'blue':d.status==='보완 요청'?'red':'amber';
-      return `<div class="tf-file-row" data-doc-id="${d.id}">
+      return `<div class="tf-file-row" data-doc-id="${d.id}" data-status="${d.status}" data-text="${(d.name+' '+d.team+' '+d.owner).toLowerCase()}">
         <span class="tf-file-ic">${ic}</span>
         <div class="tf-file-info">
           <div class="tf-file-nm">${esc(d.name)}</div>
@@ -2923,22 +2923,26 @@ sendMessage = function(){
     safeToast('최종 리스트 CSV를 다운로드합니다.','📥',2000);
   };
   /* ─── 팀별 폴더 상태 필터 ─── */
-  window.setTeamStatusFilter=function(status, btn){
-    $$('.v23-tf-chip').forEach(b=>b.classList.remove('on'));
+  var _tfActiveStatus = 'all';
+  var _tfActiveSearch = '';
+  function applyTeamFolderFilter(){
+    $$('.tf-file-row').forEach(function(el){
+      var st  = el.dataset.status || '';
+      var txt = el.dataset.text   || el.textContent.toLowerCase();
+      var statusOk = (_tfActiveStatus === 'all') || (st === _tfActiveStatus);
+      var searchOk = !_tfActiveSearch || txt.includes(_tfActiveSearch);
+      el.style.display = (statusOk && searchOk) ? '' : 'none';
+    });
+  }
+  window.setTeamStatusFilter = function(status, btn){
+    _tfActiveStatus = status;
+    $$('.v23-tf-chip').forEach(function(b){ b.classList.remove('on'); });
     if(btn) btn.classList.add('on');
-    $$('.tf-file-row,.tf-f').forEach(function(el){
-      if(status==='all'){ el.style.display=''; return; }
-      var st=el.dataset.status||el.getAttribute('data-status')||'';
-      el.style.display=(st===status)?'':'none';
-    });
+    applyTeamFolderFilter();
   };
-  window.filterTeamFolder=function(q){
-    const kw=(q||'').toLowerCase();
-    $$('.tf-file-row,.tf-f').forEach(function(el){
-      if(!kw){ el.style.display=''; return; }
-      const txt=(el.textContent||'').toLowerCase();
-      el.style.display=txt.includes(kw)?'':'none';
-    });
+  window.filterTeamFolder = function(q){
+    _tfActiveSearch = (q || '').toLowerCase();
+    applyTeamFolderFilter();
   };
   window.previewPublishedDoc=function(btn){ const tr=btn.closest('tr'); const name=tr?.querySelector('.doc-name-strong')?.textContent||'문서'; safeToast(`${name} 상세 패널을 열었습니다. 실제 구현 시 원문/버전/인덱스 로그로 연결됩니다.`,'📚'); };
   window.safeV23Toast=safeToast;
