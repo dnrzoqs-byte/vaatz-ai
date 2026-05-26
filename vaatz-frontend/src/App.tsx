@@ -54,9 +54,7 @@ function AppShell() {
     // vaatz-init.js 전역 로드
     // async=false → DOM이 준비된 뒤 동기 실행, inline onclick 핸들러 정상 동작
     const script = document.createElement('script')
-    // index.html 기준 상대 경로 → 로컬 파일(file://) 및 서버 모두 동작
-    const base = window.location.href.replace(/[^/]*(\?.*)?$/, '')
-    script.src   = base + 'vaatz-init.js'
+    script.src   = '/vaatz-init.js'
     script.async = false
     document.body.appendChild(script)
   }, [])

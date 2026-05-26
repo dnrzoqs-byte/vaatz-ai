@@ -19,7 +19,6 @@ html, body, #root {
 /* ── 스크롤 컨테이너: flex child에서 overflow-y:auto 정상 동작 ── */
 .cs {
   min-height: 0;
-  scroll-behavior: smooth;
 }
 
 /* ── 채팅 콘텐츠: 좌우 공백, 꽉 채우기 ── */

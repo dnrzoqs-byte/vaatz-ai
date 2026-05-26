@@ -3457,7 +3457,7 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
     // 주기적으로 어색한 위치의 v28 힌트 제거 보장
     setInterval(()=>{
       $('#v28CommHint')?.remove();
-      unifyCommunityName();
+      // unifyCommunityName() 제거 — §14 interval과 충돌하여 팝업 제목이 계속 바뀌는 버그 원인
     },2000);
   }
 
@@ -3480,12 +3480,12 @@ const COMM_ICON='💡';
 
 function patchCommHeader(){
   const hd=$('.comm-hd'); if(!hd) return;
-  // 기존 버튼 및 힌트 제거
+  // 기존 레거시 버튼 및 힌트 제거
   $$('.v30-modal-tools,.v27-comm-toolbar,#v27CommMax,#v28CommHint').forEach(e=>e.remove());
 
-  // h2 텍스트 통일
-  const h2=hd.querySelector('h2');
-  if(h2) h2.innerHTML=`${COMM_ICON} ${COMM_TITLE}`;
+  // h2 타이틀은 V36 HTML 원본 유지 (덮어쓰지 않음) — title-changing 버그 방지
+  // const h2=hd.querySelector('h2');
+  // if(h2) h2.innerHTML=`${COMM_ICON} ${COMM_TITLE}`;  // ← 제거됨
 
   // 새 컨트롤 버튼이 없으면 삽입
   if(!hd.querySelector('.v34-hd-tools')){
@@ -3497,11 +3497,6 @@ function patchCommHeader(){
     `;
     hd.appendChild(tools);
   }
-
-  // 좌측 사이드바 타이틀 통일
-  $$('.v29-comm-left .v29-comm-title').forEach(el=>{
-    if(/구매|커뮤니티/.test(el.textContent)) el.innerHTML=`${COMM_ICON} 구매지식<br>커뮤니티`;
-  });
 }
 
 /* ═══════════════════════════════════════
@@ -3866,12 +3861,11 @@ function boot(){
     if(origAtFn) window.at=function(btn,id){origAtFn(btn,id);patchAdminTab(id)};
     if(window.openAdminTab){const origOAT=window.openAdminTab;window.openAdminTab=function(id){origOAT(id);patchAdminTab(id)}}
   }
-  // 주기적 이름 패치 (기존 v29/v31이 덮어쓰지 못하도록)
+  // 주기적 헤더 도구 보장 (제목 변경 없이 .v34-hd-tools 버튼 삽입만)
   setInterval(()=>{
     const hd=$('.comm-hd');
     if(hd){
-      const h2=hd.querySelector('h2');
-      if(h2&&!h2.textContent.includes(COMM_TITLE)) h2.innerHTML=`${COMM_ICON} ${COMM_TITLE}`;
+      // h2 텍스트 변경 제거 — §12 interval과 충돌하여 팝업 제목이 계속 바뀌는 버그 원인
       if(!hd.querySelector('.v34-hd-tools')) patchCommHeader();
     }
   },1500);
