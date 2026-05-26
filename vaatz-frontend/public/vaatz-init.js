@@ -1755,11 +1755,31 @@ sendMessage = function(){
       teams:['일반자재구매팀','원가관리팀'] }
   ];
   const folderCats=[
-    {id:'rule',    label:'구매규정·제도', icon:'📕'},
-    {id:'bid',     label:'입찰관리',      icon:'🏷️'},
-    {id:'vaatz',   label:'VAATZ 매뉴얼',  icon:'🖥️'},
-    {id:'quality', label:'품질·5스타',    icon:'⭐'},
-    {id:'cost',    label:'원가·단가',     icon:'💰'}
+    {id:'rule',    label:'구매규정·제도', icon:'📕', subs:[
+      {id:'rule-reg',  label:'구매규정서'},
+      {id:'rule-std',  label:'표준·절차서'},
+      {id:'rule-law',  label:'법령·공시문'}
+    ]},
+    {id:'bid',     label:'입찰관리',      icon:'🏷️', subs:[
+      {id:'bid-plan',   label:'입찰계획서'},
+      {id:'bid-doc',    label:'입찰서류'},
+      {id:'bid-result', label:'낙찰결과'}
+    ]},
+    {id:'vaatz',   label:'VAATZ 매뉴얼',  icon:'🖥️', subs:[
+      {id:'vaatz-user',  label:'사용자 가이드'},
+      {id:'vaatz-admin', label:'관리자 가이드'},
+      {id:'vaatz-api',   label:'API 문서'}
+    ]},
+    {id:'quality', label:'품질·5스타',    icon:'⭐', subs:[
+      {id:'quality-5s',    label:'5스타 평가'},
+      {id:'quality-audit', label:'품질감사'},
+      {id:'quality-defect',label:'불량관리'}
+    ]},
+    {id:'cost',    label:'원가·단가',     icon:'💰', subs:[
+      {id:'cost-unit',  label:'단가기준'},
+      {id:'cost-bench', label:'벤치마크'},
+      {id:'cost-fx',    label:'환율·시세'}
+    ]}
   ];
 
   let currentTeam = teams[0].name;
@@ -1780,7 +1800,9 @@ sendMessage = function(){
         if(i >= t.docs - t.published) status='AI 검색 반영완료';
         if(i===13 && ti%2===1) status='보완 요청';
         const cat=['rule','bid','vaatz','quality','cost'][(i+ti)%5];
-        rows.push({id:`${ti+1}-${i+1}`, team:t.name, name:`${name}_${String(i+1).padStart(3,'0')}.${type.toLowerCase()}`, type, sec, mode, cat, version:`v${1+(i%4)}.${i%10}`, owner:i%3===0?t.owner:(i%3===1?'팀 Admin':'팀원 업로드'), date:`2026.05.${String(1+(i%22)).padStart(2,'0')}`, status, chunks:80+(i*7)%420});
+        const subcatMap={'rule':['rule-reg','rule-std','rule-law'],'bid':['bid-plan','bid-doc','bid-result'],'vaatz':['vaatz-user','vaatz-admin','vaatz-api'],'quality':['quality-5s','quality-audit','quality-defect'],'cost':['cost-unit','cost-bench','cost-fx']};
+        const subcat=subcatMap[cat][(i)%3];
+        rows.push({id:`${ti+1}-${i+1}`, team:t.name, name:`${name}_${String(i+1).padStart(3,'0')}.${type.toLowerCase()}`, type, sec, mode, cat, subcat, version:`v${1+(i%4)}.${i%10}`, owner:i%3===0?t.owner:(i%3===1?'팀 Admin':'팀원 업로드'), date:`2026.05.${String(1+(i%22)).padStart(2,'0')}`, status, chunks:80+(i*7)%420});
       }
     });
     return rows;
@@ -1853,13 +1875,14 @@ sendMessage = function(){
         <div class="v23-kpi green"><div class="v23-kpi-label">AI AI 검색 반영완료</div><div class="v23-kpi-value">${published}<span>건</span></div><div class="v23-kpi-desc">임베딩 완료 및 검색 활성화</div><div class="spark"><i style="height:42%"></i><i style="height:54%"></i><i style="height:68%"></i><i style="height:79%"></i><i style="height:88%"></i></div></div>
         <div class="v23-kpi violet"><div class="v23-kpi-label">정형 I/F</div><div class="v23-kpi-value">7<span>개</span></div><div class="v23-kpi-desc">VAATZ DB, Autopedia, 타 부문 배치</div><div class="spark"><i style="height:60%"></i><i style="height:60%"></i><i style="height:60%"></i><i style="height:40%"></i><i style="height:80%"></i></div></div>
       </div>
-      <div class="v23-process">
-        <div class="v23-step" onclick="openAdminTab('p-team')"><div class="v23-step-num">1</div><div class="v23-step-title">팀별 폴더 관리</div><div class="v23-step-desc">각 팀 Admin이 문서를 업로드·수정·버전관리합니다. 항목이 많기 때문에 팀 카드 클릭 시 큰 팝업 리스트로 확인합니다.</div><div class="v23-step-foot"><span class="v23-pill amber">${teams.length}개 팀</span><span>열기 →</span></div></div>
+      <div class="v23-process" id="v23HomeProcess">
+        <div class="v23-step" id="v23Step1" onclick="filterAdminHomeStep(1)"><div class="v23-step-num">1</div><div class="v23-step-title">팀별 폴더 관리</div><div class="v23-step-desc">각 팀 Admin이 문서를 업로드·수정·버전관리합니다. 클릭하면 이 단계 문서를 바로 필터링합니다.</div><div class="v23-step-foot"><span class="v23-pill amber">${teams.length}개 팀</span><span class="v23-step-hint">클릭해서 필터링</span></div></div>
         <div class="v23-arrow">→</div>
-        <div class="v23-step" onclick="openAdminTab('p-final')"><div class="v23-step-num">2</div><div class="v23-step-title">System Admin 최종 승인</div><div class="v23-step-desc">구매디지털추진팀 Admin이 보안등급, AI 모드, 통합 폴더를 지정하고 최종 승인합니다.</div><div class="v23-step-foot"><span class="v23-pill blue">${totalFinal}건 대기</span><span>승인 →</span></div></div>
+        <div class="v23-step" id="v23Step2" onclick="filterAdminHomeStep(2)"><div class="v23-step-num">2</div><div class="v23-step-title">System Admin 최종 승인</div><div class="v23-step-desc">구매디지털추진팀 Admin이 보안등급, AI 모드, 통합 폴더를 지정하고 최종 승인합니다.</div><div class="v23-step-foot"><span class="v23-pill blue">${totalFinal}건 대기</span><span class="v23-step-hint">클릭해서 필터링</span></div></div>
         <div class="v23-arrow">→</div>
-        <div class="v23-step" onclick="openAdminTab('p-list')"><div class="v23-step-num">3</div><div class="v23-step-title">최종 리스트 관리</div><div class="v23-step-desc">승인된 문서는 최종 지식 리스트에서 버전, 모드, 보안, 임베딩 상태를 운영합니다.</div><div class="v23-step-foot"><span class="v23-pill green">${published}건 활성</span><span>관리 →</span></div></div>
+        <div class="v23-step" id="v23Step3" onclick="filterAdminHomeStep(3)"><div class="v23-step-num">3</div><div class="v23-step-title">최종 리스트 관리</div><div class="v23-step-desc">승인된 문서는 최종 지식 리스트에서 버전, 모드, 보안, 임베딩 상태를 운영합니다.</div><div class="v23-step-foot"><span class="v23-pill green">${published}건 활성</span><span class="v23-step-hint">클릭해서 필터링</span></div></div>
       </div>
+      <div id="v23HomeFilterPanel" style="display:none"></div>
       <div class="v23-workgrid"><div class="v23-panel"><div class="v23-panel-h"><div class="v23-panel-title">🚨 오늘 처리할 일</div><button class="v23-btn" onclick="openAdminTab('p-final')">전체 보기</button></div><div class="v23-panel-body"><div class="v23-mini-list">${teamDocs.filter(d=>d.status==='등록 요청됨').slice(0,5).map(d=>`<div class="v23-mini-row"><div class="v23-mini-icon">${d.type==='PPT'?'📊':d.type==='XLSX'?'📈':'📄'}</div><div class="v23-mini-main"><div class="v23-mini-title">${esc(d.name)}</div><div class="v23-mini-meta"><span>${esc(d.team)}</span><span>${esc(d.mode)}</span><span>${esc(d.sec)}</span></div></div><button class="v23-btn primary" onclick="openAdminTab('p-final')">검토</button></div>`).join('')}</div></div></div><div class="v23-panel"><div class="v23-panel-h"><div class="v23-panel-title">🔗 정형 데이터 배치 상태</div><button class="v23-btn" onclick="openAdminTab('p-datamart')">모니터링</button></div><div class="v23-panel-body"><div class="v23-mini-list"><div class="v23-mini-row"><div class="v23-mini-icon">🖥️</div><div class="v23-mini-main"><div class="v23-mini-title">VAATZ 업체·품목 마스터</div><div class="v23-mini-meta"><span>05:10 성공</span><span>+14,230 rows</span></div></div><span class="v23-pill green">정상</span></div><div class="v23-mini-row"><div class="v23-mini-icon">📖</div><div class="v23-mini-main"><div class="v23-mini-title">Autopedia 용어 DB</div><div class="v23-mini-meta"><span>06:00 성공</span><span>4,832 terms</span></div></div><span class="v23-pill green">정상</span></div><div class="v23-mini-row"><div class="v23-mini-icon">💰</div><div class="v23-mini-main"><div class="v23-mini-title">원가 DB 일 배치</div><div class="v23-mini-meta"><span>07:30 일부 실패</span><span>12 rows error</span></div></div><span class="v23-pill amber">확인</span></div></div></div></div></div>
     `);
 
@@ -1916,6 +1939,27 @@ sendMessage = function(){
         const pend=files.filter(d=>d.status==='등록 요청됨').length;
         const done=files.filter(d=>d.status==='AI 검색 반영완료').length;
         const cid=tid+'_'+cat.id;
+        // L4: 소분류 폴더 블록
+        const subBlocks=(cat.subs||[]).map(sub=>{
+          const subFiles=files.filter(d=>d.subcat===sub.id);
+          const sid=cid+'_'+sub.id;
+          const sp=subFiles.filter(d=>d.status==='등록 요청됨').length;
+          const sd=subFiles.filter(d=>d.status==='AI 검색 반영완료').length;
+          return `<div class="tf-subfolder" id="${sid}">
+            <div class="tf-subfolder-hd" onclick="toggleCatFolder('${sid}')">
+              <span class="tf-subfolder-chev" id="${sid}-chev">▶</span>
+              <span class="tf-subfolder-ic">📂</span>
+              <span class="tf-subfolder-label">${sub.label}</span>
+              <span class="v23-pill" style="font-size:8px;background:var(--bg-4);color:var(--text-3)">${subFiles.length}건</span>
+              ${sp>0?`<span class="v23-pill amber" style="font-size:8px">${sp} 대기</span>`:''}
+              ${sd>0?`<span class="v23-pill green" style="font-size:8px">${sd} 완료</span>`:''}
+              <button class="v23-btn" style="padding:2px 7px;font-size:9px;margin-left:auto;flex-shrink:0" onclick="event.stopPropagation();openUploadModal('${esc(t.name)}','${cat.id}','${sub.id}')">+ 업로드</button>
+            </div>
+            <div class="tf-subfolder-body" id="${sid}-body" style="display:none">
+              ${subFiles.length?subFiles.slice(0,5).map(d=>tfFileRow(d)).join(''):'<div class="tf-empty-sub">파일이 없습니다. 업로드 버튼을 클릭하세요.</div>'}
+            </div>
+          </div>`;
+        }).join('');
         return `<div class="tf-catfolder" id="${cid}">
           <div class="tf-catfolder-hd" onclick="toggleCatFolder('${cid}')">
             <span class="tf-catfolder-chev" id="${cid}-chev">▶</span>
@@ -1924,12 +1968,11 @@ sendMessage = function(){
             <span class="v23-pill" style="font-size:9px;background:var(--bg-4);color:var(--text-3)">${files.length}건</span>
             ${pend>0?`<span class="v23-pill amber" style="font-size:9px">${pend} 대기</span>`:''}
             ${done>0?`<span class="v23-pill green" style="font-size:9px">${done} 완료</span>`:''}
-            <button class="v23-btn" style="padding:3px 8px;font-size:9.5px;margin-left:auto;flex-shrink:0" onclick="event.stopPropagation();simUploadToFolder('${esc(t.name)}','${cat.id}')">+ 업로드</button>
+            <button class="v23-btn" style="padding:3px 8px;font-size:9.5px;margin-left:auto;flex-shrink:0" onclick="event.stopPropagation();openUploadModal('${esc(t.name)}','${cat.id}','')">+ 업로드</button>
           </div>
           <div class="tf-catfolder-body" id="${cid}-body" style="display:none">
-            ${files.slice(0,6).map(d=>tfFileRow(d)).join('')}
-            ${files.length>6?`<div class="tf-more-row" onclick="openTeamFolderModal('${esc(t.name)}')">+ ${files.length-6}건 더 보기 (전체 목록 열기 →)</div>`:''}
-            <div class="tf-upload-zone" onclick="simUploadToFolder('${esc(t.name)}','${cat.id}')">☁️ 파일 드래그 또는 클릭하여 <b>${cat.label}</b> 폴더에 업로드</div>
+            ${cat.subs&&cat.subs.length?subBlocks:files.slice(0,6).map(d=>tfFileRow(d)).join('')}
+            ${!cat.subs&&files.length>6?`<div class="tf-more-row" onclick="openTeamFolderModal('${esc(t.name)}')">+ ${files.length-6}건 더 보기 →</div>`:''}
           </div>
         </div>`;
       }).join('');
@@ -2038,6 +2081,60 @@ sendMessage = function(){
     $('#p-req').style.display='block';
   }
 
+  // ── 운영 홈 단계별 필터링 ─────────────────────────────────
+  var _homeActiveStep=0;
+  window.filterAdminHomeStep=function(step){
+    var statusMap={
+      1:['작성·보완중','보완 요청'],
+      2:['등록 요청됨'],
+      3:['AI 검색 반영완료']
+    };
+    var stepTitles={1:'팀별 폴더 관리 (작성·보완 단계)',2:'System Admin 최종 승인 대기',3:'AI 반영 완료 문서'};
+    var panel=document.getElementById('v23HomeFilterPanel');
+    if(!panel) return;
+    // toggle off if clicking same step
+    if(_homeActiveStep===step){
+      _homeActiveStep=0;
+      panel.style.display='none'; panel.innerHTML='';
+      [1,2,3].forEach(function(n){var el=document.getElementById('v23Step'+n);if(el)el.classList.remove('v23-step-active');});
+      return;
+    }
+    _homeActiveStep=step;
+    [1,2,3].forEach(function(n){
+      var el=document.getElementById('v23Step'+n);
+      if(el) el.classList.toggle('v23-step-active',n===step);
+    });
+    var statuses=statusMap[step]||[];
+    var docs=teamDocs.filter(function(d){return statuses.includes(d.status);});
+    var pillCls=step===1?'amber':step===2?'blue':'green';
+    var rows=docs.slice(0,50).map(function(d){
+      var ic=d.type==='PDF'?'📄':d.type==='PPT'?'📊':d.type==='XLSX'?'📈':d.type==='DOCX'?'📝':'📋';
+      var sCls=d.status==='AI 검색 반영완료'?'green':d.status==='등록 요청됨'?'blue':d.status==='보완 요청'?'red':'amber';
+      var action='';
+      if(step===1) action='<button class="v23-btn primary" style="padding:3px 9px;font-size:10px" onclick="requestAIDoc(\''+d.id+'\',this)">✈ 등록요청</button>';
+      else if(step===2) action='<button class="v23-btn" style="padding:3px 9px;font-size:10px" onclick="openAdminTab(\'p-final\')">검토 →</button>';
+      else action='<button class="v23-btn good" style="padding:3px 9px;font-size:10px" onclick="openAdminTab(\'p-list\')">리스트 확인 →</button>';
+      return '<div class="v23hf-row">'+
+        '<span class="v23hf-ic">'+ic+'</span>'+
+        '<div class="v23hf-info">'+
+          '<div class="v23hf-name">'+esc(d.name)+'</div>'+
+          '<div class="v23hf-meta">'+esc(d.team)+' · '+esc(d.owner)+' · '+d.date+'</div>'+
+        '</div>'+
+        '<span class="v23-pill '+sCls+'" style="flex-shrink:0;font-size:9px">'+d.status+'</span>'+
+        action+
+      '</div>';
+    }).join('');
+    panel.innerHTML=
+      '<div class="v23hf-header">'+
+        '<span class="v23hf-title">🔎 '+stepTitles[step]+'</span>'+
+        '<span class="v23-pill '+pillCls+'" style="font-size:10px">'+docs.length+'건</span>'+
+        '<button class="v23-btn" style="margin-left:auto;padding:3px 10px;font-size:10px" onclick="filterAdminHomeStep('+step+')">✕ 닫기</button>'+
+      '</div>'+
+      (rows||'<div style="padding:20px;color:var(--text-4);text-align:center">해당 단계에 문서가 없습니다.</div>')+
+      (docs.length>50?'<div style="padding:10px;text-align:center;font-size:11px;color:var(--text-3)">+ '+(docs.length-50)+'건 더 있음</div>':'');
+    panel.style.display='block';
+  };
+
   // ── 팀 뷰 전환 & 폴더 접기/펼치기 ──────────────────────────
   window.switchTeamView = function(view) {
     var fp=$('#tvFolderPane'), lp=$('#tvListPane');
@@ -2094,11 +2191,118 @@ sendMessage = function(){
     });
     safeToast('AI 등록 요청됨이 최종 승인 대기열에 추가됐습니다. [최종 승인] 탭에서 검토하세요.','🚀');
   };
-  window.simUploadToFolder = function(teamName, catId) {
-    var cats=[{id:'rule',label:'구매규정·제도'},{id:'bid',label:'입찰관리'},{id:'vaatz',label:'VAATZ 매뉴얼'},{id:'quality',label:'품질·5스타'},{id:'cost',label:'원가·단가'}];
-    var cat=cats.find(function(c){return c.id===catId;});
-    var label=cat?cat.label:catId;
-    safeToast(teamName+' › '+label+' 폴더에 파일을 업로드했습니다. 실제 연동 시 서버 업로드 API로 대체됩니다.','📤');
+  // ── 업로드 모달 (카테고리·소분류 combo 포함) ────────────────
+  window.openUploadModal = function(teamName, preCatId, preSubId){
+    var existingModal=document.getElementById('v36UploadModal');
+    if(existingModal) existingModal.remove();
+    var catData=[
+      {id:'rule',   label:'구매규정·제도',icon:'📕', subs:[{id:'rule-reg',label:'구매규정서'},{id:'rule-std',label:'표준·절차서'},{id:'rule-law',label:'법령·공시문'}]},
+      {id:'bid',    label:'입찰관리',     icon:'🏷️', subs:[{id:'bid-plan',label:'입찰계획서'},{id:'bid-doc',label:'입찰서류'},{id:'bid-result',label:'낙찰결과'}]},
+      {id:'vaatz',  label:'VAATZ 매뉴얼', icon:'🖥️', subs:[{id:'vaatz-user',label:'사용자 가이드'},{id:'vaatz-admin',label:'관리자 가이드'},{id:'vaatz-api',label:'API 문서'}]},
+      {id:'quality',label:'품질·5스타',   icon:'⭐', subs:[{id:'quality-5s',label:'5스타 평가'},{id:'quality-audit',label:'품질감사'},{id:'quality-defect',label:'불량관리'}]},
+      {id:'cost',   label:'원가·단가',    icon:'💰', subs:[{id:'cost-unit',label:'단가기준'},{id:'cost-bench',label:'벤치마크'},{id:'cost-fx',label:'환율·시세'}]}
+    ];
+    var selectedCat=preCatId||catData[0].id;
+    function renderSubOpts(catId){
+      var c=catData.find(function(x){return x.id===catId;});
+      if(!c) return '';
+      return c.subs.map(function(s){return '<option value="'+s.id+'"'+(s.id===preSubId?' selected':'')+'>'+s.label+'</option>';}).join('');
+    }
+    var modal=document.createElement('div');
+    modal.id='v36UploadModal';
+    modal.className='v36-upload-overlay';
+    modal.innerHTML=`
+      <div class="v36-upload-modal">
+        <div class="v36-upload-hd">
+          <span>📤 파일 업로드 — ${esc(teamName)}</span>
+          <button class="v34-ctrl-btn close" onclick="document.getElementById('v36UploadModal').remove()">✕</button>
+        </div>
+        <div class="v36-upload-body">
+          <div class="v36-dropzone" id="v36DropZone" onclick="document.getElementById('v36FileInput').click()">
+            <div class="v36-drop-ic">☁️</div>
+            <div class="v36-drop-txt">파일을 드래그하거나 클릭하여 선택</div>
+            <div class="v36-drop-sub">PDF · DOCX · XLSX · PPT · HWP 지원</div>
+            <input type="file" id="v36FileInput" style="display:none" multiple accept=".pdf,.docx,.xlsx,.ppt,.pptx,.hwp"
+              onchange="v36HandleFileSelect(this)">
+          </div>
+          <div id="v36FileList" style="margin:8px 0"></div>
+          <div class="v36-form-row">
+            <label class="v36-label">📁 대분류 (L3)</label>
+            <select id="v36CatSel" class="v36-sel" onchange="v36UpdateSub(this.value)">
+              ${catData.map(function(c){return '<option value="'+c.id+'"'+(c.id===selectedCat?' selected':'')+'>'+c.icon+' '+c.label+'</option>';}).join('')}
+            </select>
+          </div>
+          <div class="v36-form-row">
+            <label class="v36-label">📂 소분류 (L4)</label>
+            <select id="v36SubSel" class="v36-sel">${renderSubOpts(selectedCat)}</select>
+          </div>
+          <div class="v36-form-row">
+            <label class="v36-label">📝 업로드 사유</label>
+            <input id="v36Reason" class="v36-input" placeholder="예: 2026년 기준 최신 규정 반영" />
+          </div>
+          <div class="v36-form-row">
+            <label class="v36-label">🔒 보안등급</label>
+            <select id="v36SecSel" class="v36-sel">
+              <option>일반 공개</option><option>리더 전용</option><option>지정 사용자</option>
+            </select>
+          </div>
+        </div>
+        <div class="v36-upload-ft">
+          <span id="v36UploadStatus" style="font-size:11px;color:var(--text-3)"></span>
+          <div style="display:flex;gap:8px">
+            <button class="v23-btn" onclick="document.getElementById('v36UploadModal').remove()">취소</button>
+            <button class="v23-btn primary" onclick="v36SubmitUpload('${esc(teamName)}')">✈ 시스템 관리자에게 등록 요청</button>
+          </div>
+        </div>
+      </div>`;
+    document.body.appendChild(modal);
+    // drag support
+    var dz=document.getElementById('v36DropZone');
+    if(dz){
+      dz.ondragover=function(e){e.preventDefault();dz.classList.add('drag');};
+      dz.ondragleave=function(){dz.classList.remove('drag');};
+      dz.ondrop=function(e){e.preventDefault();dz.classList.remove('drag');v36HandleFileSelect({files:e.dataTransfer.files});};
+    }
+  };
+  window.simUploadToFolder = function(teamName, catId){
+    window.openUploadModal(teamName, catId, '');
+  };
+  window.v36UpdateSub = function(catId){
+    var subData={
+      'rule':    [{id:'rule-reg',label:'구매규정서'},{id:'rule-std',label:'표준·절차서'},{id:'rule-law',label:'법령·공시문'}],
+      'bid':     [{id:'bid-plan',label:'입찰계획서'},{id:'bid-doc',label:'입찰서류'},{id:'bid-result',label:'낙찰결과'}],
+      'vaatz':   [{id:'vaatz-user',label:'사용자 가이드'},{id:'vaatz-admin',label:'관리자 가이드'},{id:'vaatz-api',label:'API 문서'}],
+      'quality': [{id:'quality-5s',label:'5스타 평가'},{id:'quality-audit',label:'품질감사'},{id:'quality-defect',label:'불량관리'}],
+      'cost':    [{id:'cost-unit',label:'단가기준'},{id:'cost-bench',label:'벤치마크'},{id:'cost-fx',label:'환율·시세'}]
+    };
+    var sel=document.getElementById('v36SubSel'); if(!sel) return;
+    var subs=subData[catId]||[];
+    sel.innerHTML=subs.map(function(s){return '<option value="'+s.id+'">'+s.label+'</option>';}).join('');
+  };
+  window.v36HandleFileSelect = function(inputOrEvent){
+    var files=inputOrEvent.files||[];
+    var list=document.getElementById('v36FileList'); if(!list) return;
+    var names=Array.from(files).map(function(f){
+      var ext=(f.name||'').split('.').pop().toUpperCase();
+      var ic={PDF:'📄',DOCX:'📝',XLSX:'📊',PPT:'📑',PPTX:'📑',HWP:'📋'}[ext]||'📄';
+      return '<div class="v36-file-chip">'+ic+' <span>'+esc(f.name)+'</span></div>';
+    }).join('');
+    list.innerHTML=names||'<div class="v36-file-chip">📄 <span>샘플_문서.pdf</span></div>';
+    var st=document.getElementById('v36UploadStatus');
+    if(st) st.textContent=files.length+'개 파일 선택됨';
+  };
+  window.v36SubmitUpload = function(teamName){
+    var cat=document.getElementById('v36CatSel')?.value||'rule';
+    var sub=document.getElementById('v36SubSel')?.value||'';
+    var reason=document.getElementById('v36Reason')?.value||'(사유 없음)';
+    var sec=document.getElementById('v36SecSel')?.value||'일반 공개';
+    var catLabels={'rule':'구매규정·제도','bid':'입찰관리','vaatz':'VAATZ 매뉴얼','quality':'품질·5스타','cost':'원가·단가'};
+    var subLabels={'rule-reg':'구매규정서','rule-std':'표준·절차서','rule-law':'법령·공시문','bid-plan':'입찰계획서','bid-doc':'입찰서류','bid-result':'낙찰결과','vaatz-user':'사용자 가이드','vaatz-admin':'관리자 가이드','vaatz-api':'API 문서','quality-5s':'5스타 평가','quality-audit':'품질감사','quality-defect':'불량관리','cost-unit':'단가기준','cost-bench':'벤치마크','cost-fx':'환율·시세'};
+    var catLabel=catLabels[cat]||cat;
+    var subLabel=subLabels[sub]||'';
+    var path=teamName+' › '+catLabel+(subLabel?' › '+subLabel:'');
+    document.getElementById('v36UploadModal')?.remove();
+    safeToast('📤 '+path+' — 등록 요청이 System Admin에게 전달됐습니다. (보안: '+sec+', 사유: '+reason+')','✅',4000);
   };
 
   window.openTeamFolderModal=function(team, focus){

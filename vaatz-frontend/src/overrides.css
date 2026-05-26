@@ -3582,3 +3582,208 @@ html:not([data-theme="light"]) #shopCharPreview {
 .sb-hist {
   overscroll-behavior: contain;
 }
+
+/* ══════════════════════════════════════════════
+ * Admin 운영 홈 — step 필터링 & L4 폴더 & 업로드 모달
+ * ══════════════════════════════════════════════ */
+
+/* Step 카드 active 상태 */
+.v23-step { cursor: pointer; transition: all .15s; }
+.v23-step-active {
+  border-color: var(--accent) !important;
+  box-shadow: 0 0 0 2px rgba(75,142,240,.35), 0 4px 16px rgba(75,142,240,.18) !important;
+  background: var(--accent-dim, rgba(75,142,240,.08)) !important;
+}
+.v23-step-active .v23-step-num {
+  background: var(--accent) !important;
+  color: #fff !important;
+}
+.v23-step-hint {
+  font-size: 9px;
+  color: var(--text-4);
+  font-style: italic;
+}
+
+/* 필터 패널 */
+#v23HomeFilterPanel {
+  margin-top: 12px;
+  background: var(--bg-2);
+  border: 1px solid var(--border-1);
+  border-radius: 12px;
+  overflow: hidden;
+  animation: fadeSlideDown .18s ease;
+}
+@keyframes fadeSlideDown {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.v23hf-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--border-1);
+  background: var(--bg-3);
+}
+.v23hf-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-1);
+}
+.v23hf-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 14px;
+  border-bottom: 1px solid var(--border-1);
+  transition: background .1s;
+}
+.v23hf-row:last-child { border-bottom: none; }
+.v23hf-row:hover { background: var(--bg-3); }
+.v23hf-ic { font-size: 18px; flex-shrink: 0; }
+.v23hf-info { flex: 1; min-width: 0; }
+.v23hf-name {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-1);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.v23hf-meta { font-size: 10px; color: var(--text-3); margin-top: 1px; }
+
+/* L4 소분류 폴더 */
+.tf-subfolder {
+  margin: 4px 0 4px 14px;
+  border: 1px solid var(--border-1);
+  border-radius: 8px;
+  overflow: hidden;
+  background: var(--bg-2);
+}
+.tf-subfolder-hd {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 10px;
+  cursor: pointer;
+  font-size: 11.5px;
+  user-select: none;
+  transition: background .1s;
+}
+.tf-subfolder-hd:hover { background: var(--bg-3); }
+.tf-subfolder-chev { font-size: 8px; color: var(--text-4); transition: transform .15s; }
+.tf-subfolder-chev.open { transform: rotate(90deg); }
+.tf-subfolder-ic { font-size: 13px; }
+.tf-subfolder-label { font-weight: 600; color: var(--text-2); flex: 1; }
+.tf-subfolder-body { padding: 4px 10px 6px; }
+.tf-empty-sub {
+  font-size: 10.5px;
+  color: var(--text-4);
+  padding: 8px 0;
+  text-align: center;
+}
+
+/* 업로드 모달 오버레이 */
+.v36-upload-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.52);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: fadeIn .15s ease;
+}
+.v36-upload-modal {
+  background: var(--bg-2);
+  border: 1px solid var(--border-1);
+  border-radius: 16px;
+  width: 520px;
+  max-width: 95vw;
+  box-shadow: 0 24px 60px rgba(0,0,0,.4);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.v36-upload-hd {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--border-1);
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-1);
+  background: var(--bg-3);
+}
+.v36-upload-body {
+  padding: 16px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  overflow-y: auto;
+  max-height: 60vh;
+}
+.v36-upload-ft {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 12px 18px;
+  border-top: 1px solid var(--border-1);
+  background: var(--bg-3);
+}
+.v36-dropzone {
+  border: 2px dashed var(--border-2);
+  border-radius: 12px;
+  padding: 28px 20px;
+  text-align: center;
+  cursor: pointer;
+  transition: all .15s;
+  background: var(--bg-1);
+}
+.v36-dropzone:hover, .v36-dropzone.drag {
+  border-color: var(--accent);
+  background: rgba(75,142,240,.05);
+}
+.v36-drop-ic { font-size: 28px; margin-bottom: 6px; }
+.v36-drop-txt { font-size: 13px; font-weight: 600; color: var(--text-1); }
+.v36-drop-sub { font-size: 10.5px; color: var(--text-4); margin-top: 4px; }
+.v36-file-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: var(--bg-3);
+  border: 1px solid var(--border-1);
+  border-radius: 6px;
+  padding: 4px 10px;
+  font-size: 11px;
+  color: var(--text-2);
+  margin: 2px;
+}
+.v36-form-row {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.v36-label {
+  font-size: 10.5px;
+  font-weight: 600;
+  color: var(--text-3);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.v36-sel, .v36-input {
+  background: var(--bg-1);
+  border: 1px solid var(--border-2);
+  border-radius: 8px;
+  padding: 8px 10px;
+  font-size: 12.5px;
+  color: var(--text-1);
+  width: 100%;
+  transition: border-color .1s;
+}
+.v36-sel:focus, .v36-input:focus {
+  outline: none;
+  border-color: var(--accent);
+}
