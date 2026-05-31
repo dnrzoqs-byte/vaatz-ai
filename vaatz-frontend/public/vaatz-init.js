@@ -1861,7 +1861,9 @@ sendMessage = function(){
   const secList=['리더 전용','일반 공개','지정 사용자'];
   const modeList=['통합모드','생산자재 모드','일반자재 모드','원가모드'];
   const statusList=['작성·보완중','등록 요청됨','보완 요청','AI 검색 반영완료'];
-  const docNames=['입찰운영 업무표준','수의계약 운영지침','협력사 품질 5스타 기준','전동화 부품 단가 벤치마크','VAATZ 발주 생성 매뉴얼','해외법인 구매 승인 프로세스','조달청 물품구매계약 특수조건','반도체 수출규제 국가별 현황','원가 산정 기준표','일반자재 MRO 구매 가이드','납기 리스크 대응 매뉴얼','검수확인 업무표준','업체 평가 데이터셋','구매용어 표준정의집','계약관리 규정'];
+  const docNames=['입찰운영 업무표준','수의계약 운영지침','협력사 품질 5스타 기준','전동화 부품 단가 벤치마크','VAATZ 발주 생성 매뉴얼','해외법인 구매 승인 프로세스','조달청 물품구매계약 특수조건','반도체 수출규제 국가별 현황','원가 산정 기준표','일반자재 MRO 구매 가이드','납기 리스크 대응 매뉴얼','검수확인 업무표준','업체 평가 데이터셋','구매용어 표준정의집','계약관리 규정','ESG 구매 운영 가이드','협력사 신규 등록 절차','전략구매 연간 운영계획','경쟁입찰 평가기준표','단가계약 갱신 체크리스트','글로벌 소싱 가이드라인','공급망 리스크 모니터링 지표','구매 윤리·청렴 규정','전자조달 시스템 사용법','대금지급 프로세스 표준','하도급거래 공정화 지침','품질 클레임 처리 절차','수입검사 기준서','협력사 동반성장 정책','구매 KPI 산정기준','계약서 표준 양식집','BOM 기반 견적 가이드','환율 헤지 운영기준','재고 적정화 가이드','긴급구매 예외 승인절차','신기술 도입 평가서','부품 표준화 로드맵','공급사 이원화 전략','원자재 시황 리포트','구매 디지털 전환 계획','협력사 ESG 평가표','5스타 현장심사 체크리스트','전동화 핵심부품 소싱맵','반도체 장기계약 가이드','MRO 카탈로그 운영지침'];
+  const ownerPool=['김도윤 책임','이서준 매니저','박지호 책임매니저','최예린 매니저','정우진 책임','강민서 매니저','조하늘 매니저','윤지후 책임매니저','임수아 매니저','한지민 책임','오세훈 매니저','신유나 매니저','권태양 책임매니저','배현우 매니저','문가은 책임'];
+  const reasonPool=['근거·출처 불명확 — 규정 조항/문서번호 명시 필요','문서 품질 미흡 — 청크 부족, 본문 보강 요망','중복·유사 문서 존재 — 기존본과 통합 검토','보안등급 재지정 필요 — 원가·계약 정보 포함','최신 버전 아님 — 2026 개정분 반영 요청','표·수치 깨짐 — 원본 형식으로 재업로드 요청','담당자/팀 정보 누락 — 메타데이터 보완'];
   // ── 팀별 폴더 뷰: 부서 그룹핑 ──────────────────────────────
   const teamGroups = [
     { id:'tg-strategy', label:'구매전략·기획', icon:'🏛️',
@@ -1906,20 +1908,27 @@ sendMessage = function(){
 
   function makeDocs(){
     let rows=[];
+    const ymPool=['2025.09','2025.10','2025.11','2025.12','2026.01','2026.02','2026.02','2026.03','2026.04','2026.05'];
     teams.forEach((t,ti)=>{
       for(let i=0;i<t.docs;i++){
-        const name=docNames[(i+ti)%docNames.length];
-        const type=typeList[(i+ti)%typeList.length];
-        const sec=secList[(i+ti)%secList.length];
+        // 문서명/유형/보안/모드를 서로 다른 보폭으로 섞어 다양하게
+        const name=docNames[(i*7+ti*5)%docNames.length];
+        const type=typeList[(i*3+ti)%typeList.length];
+        const sec=secList[(i*2+ti)%secList.length];
         const mode=modeList[(i+ti*2)%modeList.length];
         let status='작성·보완중';
         if(i < t.finalReq) status='등록 요청됨';
-        if(i >= t.docs - t.published) status='AI 검색 반영완료';
-        if(i===13 && ti%2===1) status='보완 요청';
+        else if(i >= t.docs - t.published) status='AI 검색 반영완료';
+        else if(i%17===5 || (i===13 && ti%2===1)) status='보완 요청';
         const cat=['rule','bid','vaatz','quality','cost'][(i+ti)%5];
         const subcatMap={'rule':['rule-reg','rule-std','rule-law'],'bid':['bid-plan','bid-doc','bid-result'],'vaatz':['vaatz-user','vaatz-admin','vaatz-api'],'quality':['quality-5s','quality-audit','quality-defect'],'cost':['cost-unit','cost-bench','cost-fx']};
         const subcat=subcatMap[cat][(i)%3];
-        rows.push({id:`${ti+1}-${i+1}`, team:t.name, name:`${name}_${String(i+1).padStart(3,'0')}.${type.toLowerCase()}`, type, sec, mode, cat, subcat, version:`v${1+(i%4)}.${i%10}`, owner:i%3===0?t.owner:(i%3===1?'팀 Admin':'팀원 업로드'), date:`2026.05.${String(1+(i%22)).padStart(2,'0')}`, status, chunks:80+(i*7)%420});
+        // 담당자: 팀 대표/Admin + 다양한 실무자 풀 섞기
+        const owner=i%5===0?t.owner:(i%5===1?'팀 Admin':ownerPool[(i*3+ti)%ownerPool.length]);
+        const date=ymPool[(i*5+ti*3)%ymPool.length]+'.'+String(1+((i*7+ti)%27)).padStart(2,'0');
+        const d={id:`${ti+1}-${i+1}`, team:t.name, name:`${name}_${String(i+1).padStart(3,'0')}.${type.toLowerCase()}`, type, sec, mode, cat, subcat, version:`v${1+(i%4)}.${i%10}`, owner, date, status, chunks:80+(i*7)%460};
+        if(status==='보완 요청') d.rejectReason=reasonPool[(i*3+ti)%reasonPool.length];
+        rows.push(d);
       }
     });
     return rows;
