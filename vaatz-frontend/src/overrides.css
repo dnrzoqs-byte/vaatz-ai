@@ -4523,3 +4523,61 @@ html:not([data-theme="light"]) #shopCharPreview {
 /* 켜진 상태 강조 */
 .web-tg-mini:has(.web-tg.on){ border-color: var(--accent-bd); background: var(--accent-dim); }
 .web-tg-mini:has(.web-tg.on) .web-tg-label{ color: var(--accent); }
+
+/* ════════════════════════════════════════════════════════════
+   최종 승인 — 반려(보완 요청) 사유 모달 + 담당자 재업로드 흐름
+   ════════════════════════════════════════════════════════════ */
+.final-reject-ov{
+  position: fixed; inset: 0; z-index: 1300;
+  display: none; align-items: center; justify-content: center;
+  background: rgba(0,0,0,.55); backdrop-filter: blur(4px);
+}
+.final-reject-ov.sh{ display: flex; animation: oi .16s var(--ease); }
+.final-reject-box{
+  width: min(560px, 94vw);
+  background: var(--bg-1);
+  border: 1px solid var(--border-2);
+  border-radius: 16px;
+  box-shadow: 0 24px 72px rgba(0,0,0,.55);
+  overflow: hidden; display: flex; flex-direction: column;
+}
+.final-reject-hd{
+  display: flex; align-items: flex-start; justify-content: space-between; gap: 10px;
+  padding: 16px 18px; border-bottom: 1px solid var(--border-1);
+  background: linear-gradient(135deg, rgba(239,83,80,.10), var(--bg-1));
+}
+.final-reject-title{ font-size: 14px; font-weight: 800; color: var(--text-1); }
+.final-reject-sub{ font-size: 11px; color: var(--text-3); margin-top: 3px; }
+.final-reject-x{
+  width: 30px; height: 30px; flex-shrink: 0; border-radius: 8px;
+  border: 1px solid var(--border-1); background: var(--bg-3); color: var(--text-3); cursor: pointer;
+}
+.final-reject-x:hover{ background: var(--bg-4); color: var(--text-1); }
+.final-reject-body{ padding: 16px 18px; }
+.final-reject-label{ font-size: 12px; font-weight: 700; color: var(--text-1); margin-bottom: 8px; }
+.final-reject-chips{ display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
+.final-reject-chip{
+  font-size: 11.5px; font-weight: 600; padding: 6px 11px; border-radius: 999px;
+  border: 1px solid var(--border-2); background: var(--bg-3); color: var(--text-2);
+  cursor: pointer; font-family: inherit; transition: all .12s;
+}
+.final-reject-chip:hover{ border-color: var(--accent-bd); color: var(--text-1); }
+.final-reject-chip.on{ background: rgba(239,83,80,.14); border-color: #ef5350; color: #ef5350; }
+.final-reject-text{
+  width: 100%; min-height: 84px; resize: vertical;
+  background: var(--bg-3); border: 1px solid var(--border-2); border-radius: 10px;
+  color: var(--text-1); font-family: inherit; font-size: 12.5px; line-height: 1.6; padding: 10px 12px; outline: none;
+}
+.final-reject-text:focus{ border-color: var(--accent); }
+.final-reject-ft{
+  display: flex; justify-content: flex-end; gap: 8px;
+  padding: 14px 18px; border-top: 1px solid var(--border-1); background: var(--bg-2);
+}
+
+/* 팀 폴더 — 보완 요청 문서의 반려 사유 표시 */
+.tf-reject-reason{
+  margin-top: 4px; font-size: 10px; font-weight: 600; line-height: 1.4;
+  color: #ef5350; background: rgba(239,83,80,.10);
+  border-left: 2px solid #ef5350; border-radius: 4px; padding: 3px 7px;
+  display: inline-block; max-width: 100%;
+}

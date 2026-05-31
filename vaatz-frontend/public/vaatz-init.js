@@ -2093,15 +2093,17 @@ sendMessage = function(){
       else if(d.status==='등록 요청됨')
         btn=`<button class="v23-btn tf-req-btn" style="padding:3px 9px;font-size:10px;white-space:nowrap;flex-shrink:0;color:var(--accent)" onclick="event.stopPropagation();openAdminTab('p-final')">⏳ 승인대기 ↗</button>`;
       else if(d.status==='보완 요청')
-        btn=`<button class="v23-btn warn tf-req-btn" style="padding:3px 9px;font-size:10px;white-space:nowrap;flex-shrink:0" onclick="event.stopPropagation();requestAIDoc('${d.id}',this)">↩ 보완 재요청</button>`;
+        btn=`<button class="v23-btn warn tf-req-btn" style="padding:3px 9px;font-size:10px;white-space:nowrap;flex-shrink:0" onclick="event.stopPropagation();requestAIDoc('${d.id}',this)">🔄 재확인·재업로드</button>`;
       else
         btn=`<button class="v23-btn good tf-req-btn" style="padding:3px 9px;font-size:10px;white-space:nowrap;flex-shrink:0" onclick="event.stopPropagation();openAdminTab('p-list')">✅ 리스트 확인 ↗</button>`;
       const sCls=d.status==='AI 검색 반영완료'?'green':d.status==='등록 요청됨'?'blue':d.status==='보완 요청'?'red':'amber';
+      const reasonHtml=(d.status==='보완 요청'&&d.rejectReason)?`<div class="tf-reject-reason">↩ 보완 사유: ${esc(d.rejectReason)}</div>`:'';
       return `<div class="tf-file-row" data-doc-id="${d.id}" data-status="${d.status}" data-text="${(d.name+' '+d.team+' '+d.owner).toLowerCase()}">
         <span class="tf-file-ic">${ic}</span>
         <div class="tf-file-info">
           <div class="tf-file-nm">${esc(d.name)}</div>
           <div class="tf-file-meta">${d.version} · ${esc(d.owner)} · ${d.date} · ${d.chunks} chunks</div>
+          ${reasonHtml}
         </div>
         <span class="v23-pill ${sCls} tf-file-status" style="flex-shrink:0;font-size:9px">${d.status}</span>
         ${btn}
@@ -2882,9 +2884,15 @@ sendMessage = function(){
     if(chev) chev.textContent = open ? '▶' : '▼';
   };
   window.requestAIDoc = function(id, btn) {
+    // 데이터 반영: 보완 요청/작성중 → 등록 요청됨 (재확인·재업로드 후 최종 승인 재진입)
+    var doc = teamDocs.find(function(x){return x.id===id;});
+    var wasRework = doc && doc.status==='보완 요청';
+    if(doc){ doc.status='등록 요청됨'; doc.rejectReason=''; doc.resubmittedAt='방금'; }
     var row = btn ? btn.closest('[data-doc-id]') : document.querySelector('[data-doc-id="'+id+'"]');
     var statusEl = row ? row.querySelector('.tf-file-status') : null;
     var btnEl = row ? row.querySelector('.tf-req-btn') : null;
+    var reasonEl = row ? row.querySelector('.tf-reject-reason') : null;
+    if(reasonEl) reasonEl.remove();
     if(statusEl){
       statusEl.textContent = '등록 요청됨';
       statusEl.className = 'v23-pill blue tf-file-status';
@@ -2899,7 +2907,7 @@ sendMessage = function(){
       var n=parseInt((el.textContent||'0').replace(/[^0-9]/g,''))||0;
       el.textContent=(n+1)+'건 대기';
     });
-    safeToast('AI 등록 요청됨이 최종 승인 대기열에 추가됐습니다. [최종 승인] 탭에서 검토하세요.','🚀');
+    safeToast((wasRework?'🔄 재확인·재업로드 완료 — ':'🚀 ')+'최종 승인 대기열에 추가됐습니다. [최종 승인] 탭에서 검토하세요.','🚀',3000);
   };
   // ── 업로드 모달 (카테고리·소분류 combo 포함) ────────────────
   window.openUploadModal = function(teamName, preCatId, preSubId){
@@ -3063,42 +3071,75 @@ sendMessage = function(){
   window.submitSelectedTeamDocs=function(){ const checked=$$('.team-doc-check:checked'); if(!checked.length){safeToast('등록 요청할 문서를 선택해주세요.','⚠️');return} checked.forEach(c=>{const d=teamDocs.find(x=>x.id===c.dataset.id); if(d)d.status='등록 요청됨'}); safeToast(`${checked.length}건을 System Admin 최종 승인 대기열로 보냈습니다.`,'🚀'); renderTeamDocRows(); renderAdmin(); };
   window.requestOneTeamDoc=function(id,btn){ const d=teamDocs.find(x=>x.id===id); if(d){d.status='등록 요청됨'; safeToast(`${d.name} 등록 요청 완료`,'🚀'); btn.closest('tr')?.querySelector('td:nth-child(8)') && (btn.closest('tr').querySelector('td:nth-child(8)').innerHTML=statusPill('등록 요청됨')); renderAdmin();} };
   window.previewTeamDoc=function(id){ const d=teamDocs.find(x=>x.id===id); if(!d)return; safeToast(`${d.name} 미리보기: 보안 ${d.sec}, ${d.mode}, ${d.chunks} chunks`,'🔎',3200); };
-  /* ─── ⚡ 스마트 최종 승인 함수 (v37) ─── */
-  window.approveFinalRow=function(btn){var el=btn.closest('.approval-card')||btn.closest('.v23-final-row')||btn.closest('tr');if(el){el.style.opacity='.35';el.style.pointerEvents='none';}safeToast('최종 승인 완료: AI DB에 반영됩니다.','✅');};
-  window.rejectFinalRow=function(btn){var el=btn.closest('.approval-card')||btn.closest('.v23-final-row')||btn.closest('tr');if(el){el.style.opacity='.35';el.style.pointerEvents='none';}safeToast('보완 요청 발송: 팀 Admin에게 알림이 전송됩니다.','↩️');};
+  /* ─── ⚡ 스마트 최종 승인 함수 (v41: 데이터 기반 승인/반려 흐름) ─── */
+  function _qScore(d){
+    var score=60;
+    if(d.chunks>300) score+=15; else if(d.chunks>150) score+=8;
+    if(d.type==='PDF') score+=10; else if(d.type==='DOCX') score+=7;
+    if(d.version&&(d.version.indexOf('v3')===0||d.version.indexOf('v4')===0)) score+=10;
+    if(d.sec==='일반 공개') score+=5;
+    return Math.min(score,100);
+  }
+  function _short(s){ s=String(s||''); return s.length>26?s.slice(0,26)+'…':s; }
+  function _finalDocId(btn){
+    var el=btn&&(btn.closest('[data-id]')||btn.closest('[data-final-id]')||btn.closest('[data-doc-id]'));
+    return el&&(el.getAttribute('data-id')||el.getAttribute('data-final-id')||el.getAttribute('data-doc-id'));
+  }
+  // 최종 승인 탭만 다시 그려서 현재 탭·뷰·스크롤 유지 (한 번에 렌더 → 깜빡임 없음)
+  window.refreshFinalApproval=function(){
+    var wasTable=document.getElementById('finalVTable')&&document.getElementById('finalVTable').classList.contains('on');
+    var sec=document.getElementById('p-final'); var sc=sec?sec.scrollTop:0;
+    if(typeof renderAdmin==='function') renderAdmin();
+    var btn=document.querySelector('.atb[onclick*="p-final"]'); if(window.at) window.at(btn,'p-final');
+    if(wasTable&&window.setFinalView) setFinalView('table');
+    var s2=document.getElementById('p-final'); if(s2) s2.scrollTop=sc;
+  };
+  function _approveDocs(ids){
+    var n=0; ids.forEach(function(id){ var d=teamDocs.find(function(x){return x.id===id;}); if(d&&d.status==='등록 요청됨'){ d.status='AI 검색 반영완료'; d.approvedAt='방금'; d.rejectReason=''; n++; } });
+    return n;
+  }
+  window.approveFinalRow=function(btn){
+    var id=_finalDocId(btn); var d=id&&teamDocs.find(function(x){return x.id===id;});
+    var n=_approveDocs(id?[id]:[]);
+    safeToast(d?('✅ 최종 승인: '+_short(d.name)+' → AI DB 반영 완료'):'최종 승인 완료','✅',2400);
+    window.refreshFinalApproval();
+  };
+  window.rejectFinalRow=function(btn){ var id=_finalDocId(btn); window.openRejectModal(id?[id]:[]); };
   window.approveFinalDoc=window.approveFinalRow;
   window.rejectFinalDoc=window.rejectFinalRow;
   window.approveAllVisibleFinals=function(){if(window.batchApproveAll)batchApproveAll('auto');};
   window.previewFinalDoc=function(id){if(window.showFinalPreview)showFinalPreview(id);};
+  function _finalsInLane(lane,team){
+    return teamDocs.filter(function(d){
+      if(d.status!=='등록 요청됨') return false;
+      if(team&&d.team!==team) return false;
+      var s=_qScore(d);
+      return lane==='auto'?s>=85:lane==='review'?(s>=70&&s<85):lane==='low'?s<70:true;
+    });
+  }
   window.batchApproveAll=function(lane){
-    var sel=lane==='auto'?'#autoLaneBody':lane==='review'?'#reviewLaneBody':'#lowLaneBody';
-    var els=$$(sel+' .approval-card, '+sel+' .v23-final-row');
-    els.forEach(function(el){el.style.opacity='.35';el.style.pointerEvents='none';});
-    var cntMap={auto:'#autoLaneCnt',review:'#reviewLaneCnt',low:'#lowLaneCnt'};
-    var cntEl=$(cntMap[lane]); if(cntEl)cntEl.textContent='0건';
-    safeToast((els.length||0)+'건 일괄 승인 완료. AI 임베딩 대기열에 추가됩니다.','✅',3500);
+    var ids=_finalsInLane(lane).map(function(d){return d.id;});
+    if(!ids.length){safeToast('대상 문서가 없습니다.','⚠️');return;}
+    var n=_approveDocs(ids);
+    safeToast('✅ '+n+'건 일괄 승인 완료 — AI 임베딩 대기열에 추가됩니다.','✅',3500);
+    window.refreshFinalApproval();
   };
   window.batchApproveByTeam=function(lane){
     var selId=lane==='auto'?'autoTeamSel':'reviewTeamSel';
-    var team=document.getElementById(selId)?.value;
+    var team=document.getElementById(selId)&&document.getElementById(selId).value;
     if(!team){safeToast('팀을 선택하세요.','⚠️');return;}
-    var bodyId=lane==='auto'?'#autoLaneBody':'#reviewLaneBody';
-    var els=$$(bodyId+' [data-team="'+team+'"]');
-    els.forEach(function(el){el.style.opacity='.35';el.style.pointerEvents='none';});
-    safeToast(team+' '+els.length+'건 일괄 승인 완료.','✅');
+    var ids=_finalsInLane(lane,team).map(function(d){return d.id;});
+    if(!ids.length){safeToast(team+' 대상 문서가 없습니다.','⚠️');return;}
+    var n=_approveDocs(ids);
+    safeToast('✅ '+team+' '+n+'건 일괄 승인 완료.','✅');
+    window.refreshFinalApproval();
   };
-  window.batchRejectAll=function(){
-    $$('#lowLaneBody .approval-card').forEach(function(el){el.style.opacity='.35';el.style.pointerEvents='none';});
-    safeToast('보완 권장 문서 전체에 보완 요청 발송 완료.','↩️',3000);
-  };
+  window.batchRejectAll=function(){ window.openRejectModal(_finalsInLane('low').map(function(d){return d.id;})); };
   window.batchRejectByTeam=function(lane){
     var selId=lane==='review'?'reviewTeamSel':'autoTeamSel';
-    var team=document.getElementById(selId)?.value;
+    var team=document.getElementById(selId)&&document.getElementById(selId).value;
     if(!team){safeToast('팀을 선택하세요.','⚠️');return;}
-    var bodyId=lane==='review'?'#reviewLaneBody':'#lowLaneBody';
-    var els=$$(bodyId+' [data-team="'+team+'"]');
-    els.forEach(function(el){el.style.opacity='.35';el.style.pointerEvents='none';});
-    safeToast(team+' '+els.length+'건에 보완 요청 발송.','↩️');
+    window.openRejectModal(_finalsInLane(lane,team).map(function(d){return d.id;}));
   };
   window.showFinalPreview=function(id){
     var d=teamDocs.find(function(x){return x.id===id;});
@@ -3129,9 +3170,55 @@ sendMessage = function(){
       +'<div style="display:flex;justify-content:space-between;font-size:10px"><span>보안등급</span><span>'+esc(d.sec)+'</span></div>'
       +'</div>'
       +'<div style="display:flex;gap:6px">'
-      +'<button class="v23-btn danger" style="flex:1;font-size:11px" onclick="rejectFinalRow(this)">↩ 보완 요청</button>'
-      +'<button class="v23-btn primary" style="flex:1;font-size:11px" onclick="approveFinalRow(this)">✅ 최종 승인</button>'
+      +'<button class="v23-btn danger" style="flex:1;font-size:11px" onclick="rejectFinalById(\''+id+'\')">↩ 보완 요청</button>'
+      +'<button class="v23-btn primary" style="flex:1;font-size:11px" onclick="approveFinalById(\''+id+'\')">✅ 최종 승인</button>'
       +'</div></div>';
+  };
+  window.approveFinalById=function(id){
+    var d=teamDocs.find(function(x){return x.id===id;});
+    _approveDocs([id]);
+    safeToast(d?('✅ 최종 승인: '+_short(d.name)+' → AI DB 반영'):'최종 승인 완료','✅',2400);
+    window.refreshFinalApproval();
+  };
+  window.rejectFinalById=function(id){ window.openRejectModal([id]); };
+  // ── 반려(보완 요청) 사유 모달 — 담당자에게 사유 전달 후 재업로드 흐름 ──
+  window.openRejectModal=function(ids){
+    ids=(ids||[]).filter(Boolean);
+    if(!ids.length){ safeToast('반려할 문서가 없습니다.','⚠️'); return; }
+    window.__rejectIds=ids;
+    var d=teamDocs.find(function(x){return x.id===ids[0];});
+    var title=ids.length>1?(ids.length+'건 일괄 보완 요청'):('보완 요청 — '+(d?esc(d.name):''));
+    var who=ids.length>1?'각 문서 담당자':((d?esc(d.owner)+' · '+esc(d.team):''));
+    var reasons=['근거·출처 불명확','문서 품질 미흡(청크 부족)','중복·유사 문서','보안등급 재지정 필요','최신 버전 아님','내용 보완 필요'];
+    var old=document.getElementById('finalRejectModal'); if(old) old.remove();
+    var ov=document.createElement('div'); ov.id='finalRejectModal'; ov.className='final-reject-ov';
+    ov.onclick=function(e){ if(e.target===ov) window.closeRejectModal(); };
+    ov.innerHTML='<div class="final-reject-box">'
+      +'<div class="final-reject-hd"><div><div class="final-reject-title">↩ '+title+'</div><div class="final-reject-sub">'+who+'</div></div><button class="final-reject-x" onclick="closeRejectModal()">✕</button></div>'
+      +'<div class="final-reject-body">'
+        +'<div class="final-reject-label">보완 사유 <span style="color:var(--text-4);font-weight:400">— 담당자 폴더에 함께 전달됩니다</span></div>'
+        +'<div class="final-reject-chips">'+reasons.map(function(r){return '<button type="button" class="final-reject-chip" onclick="pickRejectReason(this,\''+r.replace(/'/g,"")+'\')">'+r+'</button>';}).join('')+'</div>'
+        +'<textarea id="rejectReasonText" class="final-reject-text" placeholder="추가 코멘트(선택) — 어떤 부분을 보완하면 되는지 구체적으로 적어주세요."></textarea>'
+      +'</div>'
+      +'<div class="final-reject-ft"><button class="v23-btn" onclick="closeRejectModal()">취소</button><button class="v23-btn danger" onclick="submitReject()">↩ 보완 요청 발송</button></div>'
+      +'</div>';
+    document.body.appendChild(ov);
+    setTimeout(function(){ ov.classList.add('sh'); var t=document.getElementById('rejectReasonText'); if(t)t.focus(); },10);
+  };
+  window.pickRejectReason=function(btn,r){
+    $$('.final-reject-chip').forEach(function(c){c.classList.remove('on');});
+    btn.classList.add('on');
+    var t=document.getElementById('rejectReasonText'); if(t&&!t.value.trim()) t.value=r;
+  };
+  window.closeRejectModal=function(){ var ov=document.getElementById('finalRejectModal'); if(ov){ ov.classList.remove('sh'); setTimeout(function(){ov.remove();},160); } };
+  window.submitReject=function(){
+    var ids=window.__rejectIds||[];
+    var reason=((document.getElementById('rejectReasonText')||{}).value||'').trim()||'보완 요청';
+    var n=0;
+    ids.forEach(function(id){ var d=teamDocs.find(function(x){return x.id===id;}); if(d&&d.status==='등록 요청됨'){ d.status='보완 요청'; d.rejectReason=reason; d.rejectedAt='방금'; n++; } });
+    window.closeRejectModal();
+    safeToast('↩ '+n+'건 보완 요청 발송 — 담당자 폴더(보완 요청)로 이동했습니다.','↩️',3400);
+    window.refreshFinalApproval();
   };
   window.setFinalView=function(mode){
     var isTable=mode==='table';
@@ -3175,14 +3262,15 @@ sendMessage = function(){
   window.batchApproveSelected=function(){
     var ch=$$('#finalApprovalTable .final-row-chk:checked');
     if(!ch.length){safeToast('선택된 문서가 없습니다.','⚠️');return;}
-    ch.forEach(function(c){var tr=c.closest('tr');if(tr){tr.style.opacity='.35';tr.style.pointerEvents='none';}});
-    safeToast(ch.length+'건 승인 완료.','✅');
+    var ids=ch.map(function(c){return c.dataset.id;});
+    var n=_approveDocs(ids);
+    safeToast('✅ '+n+'건 승인 완료 — AI DB 반영.','✅');
+    window.refreshFinalApproval();
   };
   window.batchRejectSelected=function(){
     var ch=$$('#finalApprovalTable .final-row-chk:checked');
     if(!ch.length){safeToast('선택된 문서가 없습니다.','⚠️');return;}
-    ch.forEach(function(c){var tr=c.closest('tr');if(tr){tr.style.opacity='.35';tr.style.pointerEvents='none';}});
-    safeToast(ch.length+'건에 보완 요청 발송.','↩️');
+    window.openRejectModal(ch.map(function(c){return c.dataset.id;}));
   };
   /* ─── 최종 리스트 필터 (활용도 포함) ─── */
   window.filterFinalList=function(){
