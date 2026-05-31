@@ -2310,11 +2310,13 @@ sendMessage = function(){
         +'<button class="v23-btn danger" style="padding:2px 6px;font-size:10px" onclick="event.stopPropagation();rejectFinalRow(this)">↩</button>'
         +'</div></td></tr>';
     }
-    /* ── Pre-build HTML ── */
-    var _autoRowsHtml=_autoFinal.map(_finalRow).join('')||'<div class="v23-lane-empty">즉시 승인 가능한 문서가 없습니다.</div>';
-    var _reviewCardsHtml=_reviewFinal.map(_finalCard).join('')||'<div class="v23-lane-empty">검토 필요 문서가 없습니다.</div>';
-    var _lowCardsHtml=_lowFinal.map(_finalCard).join('')||'<div class="v23-lane-empty">보완 권장 문서가 없습니다.</div>';
-    var _finalTblHtml=finalDocs.map(_finalTblRow).join('');
+    /* ── Pre-build HTML (대량 대응: 레인은 최대 10건 미리보기 → 나머지는 목록으로) ── */
+    var LANE_LIM=10;
+    function _laneMore(n){ return n>LANE_LIM?'<div class="v23-lane-more" onclick="setFinalView(\'table\')">+ '+(n-LANE_LIM)+'건 더 — 📋 목록으로 한 번에 관리 →</div>':''; }
+    var _autoRowsHtml=(_autoFinal.slice(0,LANE_LIM).map(_finalRow).join('')||'<div class="v23-lane-empty">즉시 승인 가능한 문서가 없습니다.</div>')+_laneMore(_autoFinal.length);
+    var _reviewCardsHtml=(_reviewFinal.slice(0,LANE_LIM).map(_finalCard).join('')||'<div class="v23-lane-empty">검토 필요 문서가 없습니다.</div>')+_laneMore(_reviewFinal.length);
+    var _lowCardsHtml=(_lowFinal.slice(0,LANE_LIM).map(_finalCard).join('')||'<div class="v23-lane-empty">보완 권장 문서가 없습니다.</div>')+_laneMore(_lowFinal.length);
+    var _finalTblHtml=finalDocs.slice(0,25).map(_finalTblRow).join('');
     var _autoTeamOpts=Object.keys(_autoByTeam).map(function(t){return '<option value="'+esc(t)+'">'+esc(t)+' ('+_autoByTeam[t]+'건)</option>';}).join('');
     var _reviewTeamOpts=Object.keys(_reviewByTeam).map(function(t){return '<option value="'+esc(t)+'">'+esc(t)+' ('+_reviewByTeam[t]+'건)</option>';}).join('');
     var _teamOptHtml=teams.map(function(t){return '<option value="'+esc(t.name)+'">'+esc(t.name)+'</option>';}).join('');
@@ -2398,7 +2400,7 @@ sendMessage = function(){
           <!-- 목록(테이블) 뷰 — 기본 숨김 -->
           <div id="finalTableView" style="display:none">
             <div class="v23-lane-hd t-total" style="background:var(--bg-2);border-radius:10px 10px 0 0">
-              <div>📋 전체 목록 <span class="v23-lane-cnt">${finalDocs.length}건</span></div>
+              <div>📋 전체 목록 <span class="v23-lane-cnt" id="finalTableCount">${finalDocs.length}건</span><span style="font-size:10px;font-weight:400;opacity:.65;margin-left:6px">필터로 좁히고 페이지 단위로 처리하세요</span></div>
               <div class="v23-lane-actions">
                 <button class="v23-btn primary" style="font-size:10px;padding:3px 10px" onclick="batchApproveSelected()">✅ 선택 승인</button>
                 <button class="v23-btn danger" style="font-size:10px;padding:3px 10px" onclick="batchRejectSelected()">↩ 선택 보완 요청</button>
@@ -2408,6 +2410,7 @@ sendMessage = function(){
               <thead><tr><th style="width:32px"><input type="checkbox" id="finalSelectAll" onchange="toggleFinalSelectAll(this)"></th><th>문서명</th><th>팀</th><th>유형</th><th>AI 점수</th><th>등록일</th><th>담당</th><th style="text-align:right">작업</th></tr></thead>
               <tbody>${_finalTblHtml}</tbody>
             </table></div>
+            <div class="v23-table-pager" id="finalTablePager"></div>
           </div>
         </div>
         <!-- 미리보기 패널 (우측 고정) -->
@@ -3101,7 +3104,7 @@ sendMessage = function(){
     var sec=document.getElementById('p-final'); var sc=sec?sec.scrollTop:0;
     if(typeof renderAdmin==='function') renderAdmin();
     var btn=document.querySelector('.atb[onclick*="p-final"]'); if(window.at) window.at(btn,'p-final');
-    if(wasTable&&window.setFinalView) setFinalView('table');
+    if(wasTable&&window.setFinalView) setFinalView('table', true);
     var s2=document.getElementById('p-final'); if(s2) s2.scrollTop=sc;
   };
   function _approveDocs(ids){
@@ -3230,7 +3233,68 @@ sendMessage = function(){
     safeToast('↩ '+n+'건 보완 요청 발송 — 담당자 폴더(보완 요청)로 이동했습니다.','↩️',3400);
     window.refreshFinalApproval();
   };
-  window.setFinalView=function(mode){
+  // ── 최종 승인 목록(표) — 데이터 기반 필터 + 페이지네이션 (대량 관리) ──
+  var _finalPage=1, _finalPageSize=25;
+  function _qBadge(score){ var cls=score>=85?'green':score>=70?'amber':'red'; var label=score>=85?'우수':score>=70?'보통':'보완'; return '<span class="v23-pill '+cls+'" style="font-size:9px">📊 '+score+' '+label+'</span>'; }
+  function _finalFilteredDocs(){
+    var team=($('#fTeamFilt')&&$('#fTeamFilt').value)||'';
+    var score=($('#fScoreFilt')&&$('#fScoreFilt').value)||'';
+    var type=(($('#fTypeFilt')&&$('#fTypeFilt').value)||'').toLowerCase();
+    var q=(($('#fSearchFinal')&&$('#fSearchFinal').value)||'').toLowerCase();
+    return teamDocs.filter(function(d){
+      if(d.status!=='등록 요청됨') return false;
+      if(team&&d.team!==team) return false;
+      if(type&&String(d.type).toLowerCase()!==type) return false;
+      var s=_qScore(d);
+      if(score==='auto'&&!(s>=85)) return false;
+      if(score==='review'&&!(s>=70&&s<85)) return false;
+      if(score==='low'&&!(s<70)) return false;
+      if(q&&(d.name+' '+d.team+' '+d.owner).toLowerCase().indexOf(q)<0) return false;
+      return true;
+    });
+  }
+  window.renderFinalTable=function(){
+    var tbody=$('#finalApprovalTable tbody'); if(!tbody) return;
+    var docs=_finalFilteredDocs();
+    var total=docs.length;
+    var pages=Math.max(1,Math.ceil(total/_finalPageSize));
+    if(_finalPage>pages)_finalPage=pages; if(_finalPage<1)_finalPage=1;
+    var start=(_finalPage-1)*_finalPageSize;
+    var slice=docs.slice(start,start+_finalPageSize);
+    tbody.innerHTML=slice.map(function(d){
+      var score=_qScore(d);
+      return '<tr class="v23-tbl-row" data-id="'+d.id+'" data-team="'+esc(d.team)+'" data-score="'+score+'" data-type="'+d.type+'" onclick="showFinalPreview(\''+d.id+'\')">'
+        +'<td><input type="checkbox" class="final-row-chk" onclick="event.stopPropagation()" data-id="'+d.id+'"></td>'
+        +'<td><div class="doc-name-strong" style="font-size:11px">'+esc(d.name)+'</div></td>'
+        +'<td style="font-size:11px">'+esc(d.team)+'</td>'
+        +'<td style="font-size:11px">'+d.type+'</td>'
+        +'<td>'+_qBadge(score)+'</td>'
+        +'<td style="font-size:10px;color:var(--text-3)">'+d.date+'</td>'
+        +'<td style="font-size:10px;color:var(--text-3)">'+esc(d.owner)+'</td>'
+        +'<td><div class="row-actions">'
+        +'<button class="v23-btn primary" style="padding:2px 8px;font-size:10px" onclick="event.stopPropagation();approveFinalById(\''+d.id+'\')">✅</button>'
+        +'<button class="v23-btn danger" style="padding:2px 6px;font-size:10px" onclick="event.stopPropagation();rejectFinalById(\''+d.id+'\')">↩</button>'
+        +'</div></td></tr>';
+    }).join('')||'<tr><td colspan="8" style="text-align:center;padding:28px;color:var(--text-4)">조건에 맞는 문서가 없습니다.</td></tr>';
+    var pager=$('#finalTablePager');
+    if(pager){
+      var from=total?start+1:0, to=Math.min(start+_finalPageSize,total);
+      pager.innerHTML='<div class="v23-pg-info">총 <b>'+total+'</b>건 · '+from+'–'+to+' 표시</div>'
+        +'<div class="v23-pg-ctrl">'
+        +'<button class="v23-btn" '+(_finalPage<=1?'disabled':'')+' onclick="gotoFinalPage(1)" title="처음">«</button>'
+        +'<button class="v23-btn" '+(_finalPage<=1?'disabled':'')+' onclick="gotoFinalPage('+(_finalPage-1)+')">‹ 이전</button>'
+        +'<span class="v23-pg-cur">'+_finalPage+' / '+pages+'</span>'
+        +'<button class="v23-btn" '+(_finalPage>=pages?'disabled':'')+' onclick="gotoFinalPage('+(_finalPage+1)+')">다음 ›</button>'
+        +'<button class="v23-btn" '+(_finalPage>=pages?'disabled':'')+' onclick="gotoFinalPage('+pages+')" title="끝">»</button>'
+        +'<select class="v23-filter-sel" onchange="setFinalPageSize(this.value)" style="margin-left:6px"><option value="25"'+(_finalPageSize===25?' selected':'')+'>25/쪽</option><option value="50"'+(_finalPageSize===50?' selected':'')+'>50/쪽</option><option value="100"'+(_finalPageSize===100?' selected':'')+'>100/쪽</option></select>'
+        +'</div>';
+    }
+    var cnt=$('#finalTableCount'); if(cnt)cnt.textContent=total+'건';
+    var selAll=$('#finalSelectAll'); if(selAll)selAll.checked=false;
+  };
+  window.gotoFinalPage=function(p){ _finalPage=p; window.renderFinalTable(); var tw=$('#finalTableView .final-table-wrap'); if(tw)tw.scrollTop=0; };
+  window.setFinalPageSize=function(n){ _finalPageSize=parseInt(n,10)||25; _finalPage=1; window.renderFinalTable(); };
+  window.setFinalView=function(mode, keepPage){
     var isTable=mode==='table';
     var la=$('#laneAuto'),lr=$('#laneReview'),ll=$('#laneLow'),tv=$('#finalTableView');
     if(la)la.style.display=isTable?'none':'';
@@ -3240,8 +3304,12 @@ sendMessage = function(){
     var vc=$('#finalVCard'),vt=$('#finalVTable');
     if(vc)vc.classList.toggle('on',!isTable);
     if(vt)vt.classList.toggle('on',isTable);
+    if(isTable){ if(!keepPage)_finalPage=1; window.renderFinalTable(); }
   };
   window.applyFinalFilter=function(){
+    // 표 뷰: 데이터 기반 필터 + 1페이지로 재구성 (대량 관리)
+    if($('#finalVTable')&&$('#finalVTable').classList.contains('on')){ _finalPage=1; window.renderFinalTable(); return; }
+    // 카드 뷰: 보이는 카드 즉시 숨김
     var team=($('#fTeamFilt')?.value||'');
     var score=$('#fScoreFilt')?.value||'';
     var type=($('#fTypeFilt')?.value||'').toLowerCase();
@@ -3254,7 +3322,6 @@ sendMessage = function(){
       return (!team||et===team)&&(!score||(score==='auto'&&es>=85)||(score==='review'&&es>=70&&es<85)||(score==='low'&&es<70))&&(!type||ety===type)&&(!q||etxt.includes(q));
     }
     $$('.v23-final-row,.approval-card').forEach(function(el){el.style.display=rowOk(el)?'':'none';});
-    $$('#finalApprovalTable tbody tr').forEach(function(tr){tr.style.display=rowOk(tr)?'':'none';});
   };
   window.clearFinalFilter=function(){
     ['fTeamFilt','fScoreFilt','fTypeFilt','fSearchFinal'].forEach(function(id){var el=document.getElementById(id);if(el)el.value='';});

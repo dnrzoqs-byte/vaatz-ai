@@ -4624,3 +4624,26 @@ html:not([data-theme="light"]) #shopCharPreview {
 
 /* 목록(표) 뷰 — 일괄 처리 툴바를 상단 고정해 대량 관리 편의 ↑ */
 #finalTableView .v23-lane-hd.t-total{ position: sticky; top: 0; z-index: 6; }
+
+/* 최종 승인 — 페이지네이션 (대량 문서 관리) */
+.v23-table-pager{
+  display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;
+  padding: 10px 12px; margin-top: 8px;
+  background: var(--bg-2); border: 1px solid var(--border-1); border-radius: 10px;
+}
+.v23-pg-info{ font-size: 11.5px; color: var(--text-3); }
+.v23-pg-info b{ color: var(--text-1); }
+.v23-pg-ctrl{ display: flex; align-items: center; gap: 5px; flex-wrap: wrap; }
+.v23-pg-ctrl .v23-btn{ padding: 5px 10px; font-size: 11px; }
+.v23-pg-ctrl .v23-btn[disabled]{ opacity: .4; pointer-events: none; }
+.v23-pg-cur{ font-size: 12px; font-weight: 800; color: var(--text-1); padding: 0 8px; font-family: 'Outfit', sans-serif; }
+
+/* 카드 레인 — 10건 초과 시 '목록으로' 유도 푸터 */
+.v23-lane-more{
+  text-align: center; cursor: pointer;
+  font-size: 11.5px; font-weight: 700; color: var(--accent);
+  padding: 9px; margin-top: 6px;
+  background: var(--accent-dim); border: 1px dashed var(--accent-bd); border-radius: 9px;
+  transition: background .12s;
+}
+.v23-lane-more:hover{ background: rgba(75,142,240,.2); }
