@@ -4581,3 +4581,46 @@ html:not([data-theme="light"]) #shopCharPreview {
   border-left: 2px solid #ef5350; border-radius: 4px; padding: 3px 7px;
   display: inline-block; max-width: 100%;
 }
+
+/* ════════════════════════════════════════════════════════════
+   최종 승인 — 처리 현황 보드 (대량 문서 한눈에 관리)
+   ════════════════════════════════════════════════════════════ */
+.v23-final-board{
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 18px;
+  padding: 14px 18px;
+  margin: 12px 0;
+  background: linear-gradient(135deg, var(--bg-2), var(--bg-1));
+  border: 1px solid var(--border-2);
+  border-radius: 14px;
+}
+.v23-fb-left{ text-align: center; padding-right: 18px; border-right: 1px solid var(--border-1); }
+.v23-fb-count{ font-size: 34px; font-weight: 900; line-height: 1; color: var(--accent); font-family: 'Outfit', sans-serif; }
+.v23-fb-count span{ font-size: 14px; font-weight: 700; color: var(--text-3); margin-left: 2px; }
+.v23-fb-label{ font-size: 11.5px; font-weight: 700; color: var(--text-2); margin-top: 4px; }
+.v23-fb-done{ font-size: 10px; color: var(--text-4); margin-top: 4px; white-space: nowrap; }
+.v23-fb-bars{ display: flex; flex-direction: column; gap: 7px; min-width: 0; }
+.v23-fb-row{ display: flex; align-items: center; gap: 10px; cursor: pointer; padding: 2px 4px; border-radius: 7px; transition: background .12s; }
+.v23-fb-row:hover{ background: var(--bg-3); }
+.v23-fb-tag{ font-size: 11px; font-weight: 700; width: 78px; flex-shrink: 0; }
+.v23-fb-track{ flex: 1; height: 9px; background: var(--bg-4); border-radius: 6px; overflow: hidden; min-width: 60px; }
+.v23-fb-track > span{ display: block; height: 100%; border-radius: 6px; transition: width .35s var(--ease); }
+.v23-fb-row b{ font-size: 12px; font-weight: 800; width: 44px; text-align: right; flex-shrink: 0; }
+.v23-fb-row.t-auto   .v23-fb-track > span{ background: #22c55e; }
+.v23-fb-row.t-auto   .v23-fb-tag, .v23-fb-row.t-auto b{ color: #22c55e; }
+.v23-fb-row.t-review .v23-fb-track > span{ background: #f59e0b; }
+.v23-fb-row.t-review .v23-fb-tag, .v23-fb-row.t-review b{ color: #f59e0b; }
+.v23-fb-row.t-warn   .v23-fb-track > span{ background: #ef4444; }
+.v23-fb-row.t-warn   .v23-fb-tag, .v23-fb-row.t-warn b{ color: #ef4444; }
+.v23-fb-actions{ display: flex; flex-direction: column; gap: 7px; flex-shrink: 0; }
+.v23-fb-actions .v23-btn{ white-space: nowrap; }
+@media (max-width: 1100px){
+  .v23-final-board{ grid-template-columns: 1fr; gap: 12px; }
+  .v23-fb-left{ border-right: none; border-bottom: 1px solid var(--border-1); padding: 0 0 10px; padding-right: 0; }
+  .v23-fb-actions{ flex-direction: row; }
+}
+
+/* 목록(표) 뷰 — 일괄 처리 툴바를 상단 고정해 대량 관리 편의 ↑ */
+#finalTableView .v23-lane-hd.t-total{ position: sticky; top: 0; z-index: 6; }

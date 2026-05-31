@@ -2321,12 +2321,22 @@ sendMessage = function(){
     addAdmSection('p-final', `
       ${pipelineBanner('final')}
       <div class="v23-admin-title"><div><div class="v23-title-main">⚡ 스마트 최종 승인 센터</div><div class="v23-title-sub">AI 적합도로 3단계 자동 분류 · 팀 단위 일괄 승인 · 수백~수천 건도 효율적으로 처리</div></div><div class="v23-actions"><button class="v23-btn warn" onclick="safeToast('보완 요청 템플릿 복사됨.','📋')">📋 보완 템플릿</button><button class="v23-btn" onclick="toggleAutoSettings()">⚙️ 자동 승인 규칙</button></div></div>
-      <!-- 트리아지 KPI 타일 -->
-      <div class="v23-triage-bar">
-        <div class="v23-triage-tile t-auto" onclick="setFinalLane('auto')"><div class="v23-triage-ic">🚀</div><div class="v23-triage-val">${_autoFinal.length}</div><div class="v23-triage-label">즉시 승인 가능</div><div class="v23-triage-sub">AI 85점 이상</div></div>
-        <div class="v23-triage-tile t-review" onclick="setFinalLane('review')"><div class="v23-triage-ic">🔍</div><div class="v23-triage-val">${_reviewFinal.length}</div><div class="v23-triage-label">검토 필요</div><div class="v23-triage-sub">70 ~ 84점</div></div>
-        <div class="v23-triage-tile t-warn" onclick="setFinalLane('low')"><div class="v23-triage-ic">⚠️</div><div class="v23-triage-val">${_lowFinal.length}</div><div class="v23-triage-label">보완 권장</div><div class="v23-triage-sub">69점 이하</div></div>
-        <div class="v23-triage-tile t-total" onclick="setFinalLane('all')"><div class="v23-triage-ic">📋</div><div class="v23-triage-val">${finalDocs.length}</div><div class="v23-triage-label">전체 대기</div><div class="v23-triage-sub">모든 등록 요청</div></div>
+      <!-- 처리 현황 보드 (대량 문서 한눈에 관리) -->
+      <div class="v23-final-board">
+        <div class="v23-fb-left">
+          <div class="v23-fb-count">${finalDocs.length}<span>건</span></div>
+          <div class="v23-fb-label">검토 대기 문서</div>
+          <div class="v23-fb-done">✅ AI 반영 ${cntDone}건 · 진행률 ${(cntDone+finalDocs.length)>0?Math.round(cntDone/(cntDone+finalDocs.length)*100):0}%</div>
+        </div>
+        <div class="v23-fb-bars">
+          <div class="v23-fb-row t-auto" onclick="setFinalLane('auto')" title="즉시 승인 가능 레인으로 이동"><span class="v23-fb-tag">🚀 즉시승인</span><div class="v23-fb-track"><span style="width:${finalDocs.length?Math.round(_autoFinal.length/finalDocs.length*100):0}%"></span></div><b>${_autoFinal.length}건</b></div>
+          <div class="v23-fb-row t-review" onclick="setFinalLane('review')" title="검토 필요 레인으로 이동"><span class="v23-fb-tag">🔍 검토필요</span><div class="v23-fb-track"><span style="width:${finalDocs.length?Math.round(_reviewFinal.length/finalDocs.length*100):0}%"></span></div><b>${_reviewFinal.length}건</b></div>
+          <div class="v23-fb-row t-warn" onclick="setFinalLane('low')" title="보완 권장 레인으로 이동"><span class="v23-fb-tag">⚠️ 보완권장</span><div class="v23-fb-track"><span style="width:${finalDocs.length?Math.round(_lowFinal.length/finalDocs.length*100):0}%"></span></div><b>${_lowFinal.length}건</b></div>
+        </div>
+        <div class="v23-fb-actions">
+          <button class="v23-btn primary" onclick="batchApproveAll('auto')">🚀 즉시승인 ${_autoFinal.length}건 일괄</button>
+          <button class="v23-btn" onclick="setFinalView('table')">📋 목록으로 관리</button>
+        </div>
       </div>
       <!-- 자동 승인 규칙 패널 -->
       <div class="v23-auto-rules" id="finalAutoRules" style="display:none">
