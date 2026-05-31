@@ -3873,13 +3873,14 @@ sendMessage = function(){
   const types=['PDF','PPT','DOCX','XLSX'];
   let v27Team='구매전략팀', v27Folder='all';
   let v27Docs=[];
+  // (안정화 1단계: 데이터 단일화) v27Docs를 단일 소스 window.teamDocs에서 파생.
+  //   cat(rule/bid/vaatz/quality/cost) → v27 folder(policy/bid/manual/quality/cost) 매핑.
+  //   팀명은 main teams와 동일(9개)하여 그대로 사용. 변경은 teamDocs에 써서 최종 승인과 연동.
+  const _catToV27Folder={rule:'policy',bid:'bid',vaatz:'manual',quality:'quality',cost:'cost'};
   function makeV27Docs(){
-    let out=[]; teams.forEach((team,ti)=>{for(let i=0;i<92+(ti%4)*14;i++){
-      let st='작성·보완중'; if(i<6+ti%4)st='등록 요청됨'; if(i%37===0)st='시스템 검토중'; if(i%41===0)st='보완 요청'; if(i>72+(ti%4)*10)st='AI 검색 반영완료';
-      const f=folders[1+((i+ti)% (folders.length-1))][0];
-      const myModes=modes.filter((m,mi)=>(i+mi+ti)%3!==0); if(!myModes.length)myModes.push('통합모드');
-      out.push({id:`V27-${ti}-${i}`,team,folder:f,name:`${names[(i+ti)%names.length]}_${String(i+1).padStart(3,'0')}.${types[(i+ti)%types.length].toLowerCase()}`,type:types[(i+ti)%types.length],sec:secs[(i+ti)%secs.length],modes:myModes,version:`v${1+i%5}.${i%10}`,owner:i%4===0?'팀 Admin':i%4===1?'팀장 검토':'팀원 업로드',date:`2026.05.${String(1+i%23).padStart(2,'0')}`,status:st,chunks:80+(i*13)%520});
-    }}); return out;
+    return (window.teamDocs||[]).map(function(d){
+      return {id:d.id, team:d.team, folder:(_catToV27Folder[d.cat]||'policy'), name:d.name, type:d.type, sec:d.sec, modes:[d.mode], version:d.version, owner:d.owner, date:d.date, status:d.status, chunks:d.chunks};
+    });
   }
   v27Docs=makeV27Docs();
   function secPill(sec){let cls=sec==='리더 전용'?'red':sec==='지정 사용자'?'violet':'green'; return `<span class="v27-pill ${cls}">${esc(sec)}</span>`}
@@ -3892,6 +3893,7 @@ sendMessage = function(){
   }
   window.openTeamFolderModal=function(team){
     v27Team=team||v27Team; v27Folder='all'; const m=$('#teamFolderModal'); if(!m)return;
+    v27Docs=makeV27Docs();   // 모달 열 때 최신 teamDocs에서 재파생
     const teamDocs=v27Docs.filter(d=>d.team===v27Team);
     m.classList.remove('full');
     m.innerHTML=`<div class="large-box"><div class="large-hd"><div><div class="large-title">📁 ${esc(v27Team)} 문서함</div><div class="large-sub">문서가 많아도 폴더·검색·상태 필터로 좁혀보고, 필요한 문서만 System Admin 승인 요청으로 보냅니다.</div></div><div class="v27-modal-actions"><button class="v27-icon-btn v27-max-btn" onclick="toggleLargeModalMaxV27('#teamFolderModal')" title="전체창">⛶</button><button class="large-close" onclick="closeTeamFolderModal()">✕</button></div></div><div class="large-toolbar"><label style="font-size:13px;color:var(--text-3);display:flex;gap:7px;align-items:center"><input type="checkbox" class="check-lg" onchange="toggleTeamDocAll(this)"> 전체 선택</label><div class="large-search"><span>🔍</span><input id="teamDocSearch" placeholder="문서명, 담당자, 보안등급, AI 모드, 상태 검색" oninput="renderTeamDocRows()"></div><select class="frm-i frm-sel" id="teamDocStatusFilter" style="width:160px" onchange="renderTeamDocRows()"><option value="">전체 단계</option><option>작성·보완중</option><option>등록 요청됨</option><option>시스템 검토중</option><option>보완 요청</option><option>AI 검색 반영완료</option></select><select class="frm-i frm-sel" id="teamDocSecFilter" style="width:150px" onchange="renderTeamDocRows()"><option value="">전체 보안</option><option>리더 전용</option><option>일반 공개</option><option>지정 사용자</option></select><button class="v27-btn primary" onclick="submitSelectedTeamDocs()">🚀 선택 승인 요청</button><span id="teamDocCount" style="margin-left:auto;color:var(--text-4);font-size:13px"></span></div><div class="large-body"><div class="v27-stage-strip"><div class="v27-stage-card"><div class="n">${teamDocs.filter(d=>d.status==='작성·보완중').length}</div><div class="l">작성·보완중<br>업로드·보완 단계</div></div><div class="v27-stage-card"><div class="n">${teamDocs.filter(d=>d.status==='등록 요청됨'||d.status==='시스템 검토중').length}</div><div class="l">System 승인 대기<br>구매디지털추진팀 검토</div></div><div class="v27-stage-card"><div class="n">${teamDocs.filter(d=>d.status==='보완 요청').length}</div><div class="l">보완 요청<br>보안·중복·버전 보완</div></div><div class="v27-stage-card"><div class="n">${teamDocs.filter(d=>d.status==='AI 검색 반영완료').length}</div><div class="l">AI 검색 반영완료<br>RAG 검색 활성</div></div></div><div class="v25-folder-layout"><div class="v25-folder-tree"><div class="v25-folder-head">${esc(v27Team)} 폴더</div>${folders.map(f=>`<button class="v25-folder ${f[0]==='all'?'on':''}" onclick="selectTeamFolder('${f[0]}',this)"><span>${f[2]} ${f[1]}</span><span class="cnt">${f[0]==='all'?teamDocs.length:teamDocs.filter(d=>d.folder===f[0]).length}</span></button>`).join('')}<div class="mode-note" style="margin-top:12px">상태 용어: 작성·보완중 → 등록 요청됨 → 시스템 검토중 → AI 검색 반영완료. 보완 요청는 “보완 요청”으로 표시합니다.</div></div><div class="large-table-wrap"><table class="large-table"><thead><tr><th></th><th>문서명</th><th>유형</th><th>보안</th><th>AI 모드</th><th>버전</th><th>담당자</th><th>단계</th><th>작업</th></tr></thead><tbody id="teamDocRows"></tbody></table></div></div></div></div>`;
@@ -3901,8 +3903,8 @@ sendMessage = function(){
   window.selectTeamFolder=(id,btn)=>{v27Folder=id;$$('#teamFolderModal .v25-folder').forEach(b=>b.classList.remove('on'));btn?.classList.add('on');renderTeamRowsV27();};
   window.renderTeamDocRows=renderTeamRowsV27;
   window.toggleTeamDocAll=chk=>$$('#teamFolderModal .team-doc-check').forEach(c=>c.checked=chk.checked);
-  window.submitSelectedTeamDocs=()=>{const ids=$$('#teamFolderModal .team-doc-check:checked').map(c=>c.dataset.id); if(!ids.length)return say('승인 요청할 문서를 선택해주세요.','⚠️'); ids.forEach(id=>{const d=v27Docs.find(x=>x.id===id); if(d)d.status='등록 요청됨'}); renderTeamRowsV27(); say(`${ids.length}건을 System Admin 승인 대기열로 보냈습니다.`,'🚀')};
-  window.requestOneTeamDoc=id=>{const d=v27Docs.find(x=>x.id===id); if(d)d.status='등록 요청됨'; renderTeamRowsV27(); say('System Admin 승인 대기열로 보냈습니다.','🚀')};
+  window.submitSelectedTeamDocs=()=>{const ids=$$('#teamFolderModal .team-doc-check:checked').map(c=>c.dataset.id); if(!ids.length)return say('승인 요청할 문서를 선택해주세요.','⚠️'); ids.forEach(id=>{const d=(window.teamDocs||[]).find(x=>x.id===id); if(d&&d.status!=='AI 검색 반영완료')d.status='등록 요청됨'}); v27Docs=makeV27Docs(); renderTeamRowsV27(); say(`${ids.length}건을 System Admin 승인 대기열로 보냈습니다. [최종 승인] 탭에 반영됩니다.`,'🚀')};
+  window.requestOneTeamDoc=id=>{const d=(window.teamDocs||[]).find(x=>x.id===id); if(d&&d.status!=='AI 검색 반영완료')d.status='등록 요청됨'; v27Docs=makeV27Docs(); renderTeamRowsV27(); say('System Admin 승인 대기열로 보냈습니다.','🚀')};
   window.previewTeamDocV27=id=>{const d=v27Docs.find(x=>x.id===id); if(!d)return; say(`${d.name} 원문 미리보기: 근거 뷰어 형식으로 열 수 있습니다.`,'📄',2600)};
 
   /* Community v27 */
