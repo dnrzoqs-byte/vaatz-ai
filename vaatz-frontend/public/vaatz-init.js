@@ -1934,6 +1934,7 @@ sendMessage = function(){
     return rows;
   }
   teamDocs = makeDocs();
+  window.teamDocs = teamDocs;   // 다른 IIFE(v25 최종리스트, v27 팀모달)에서 동일 데이터 접근용 (같은 배열 참조 → 변경 공유)
 
   function modeCls(mode){ if(mode.includes('생산'))return'mode-prod'; if(mode.includes('일반'))return'mode-general'; if(mode.includes('원가'))return'mode-cost'; return'mode-all'; }
   function statusPill(status){ const cls=status==='AI 검색 반영완료'?'green':status==='등록 요청됨'?'blue':status==='보완 요청'?'red':'amber'; return `<span class="v23-pill ${cls}">${status}</span>`; }
@@ -3132,8 +3133,8 @@ sendMessage = function(){
     if($('#fScoreFilt')&&fv.s)$('#fScoreFilt').value=fv.s;
     if($('#fTypeFilt')&&fv.ty)$('#fTypeFilt').value=fv.ty;
     if($('#fSearchFinal')&&fv.q)$('#fSearchFinal').value=fv.q;
-    if(wasTable&&window.setFinalView) setFinalView('table', true);
-    if((fv.t||fv.s||fv.ty||fv.q)&&window.applyFinalFilter) window.applyFinalFilter();
+    if(wasTable&&window.setFinalView){ setFinalView('table', true); }
+    else if(window.applyFinalFilter){ window.applyFinalFilter(); }  // 카드뷰: 항상 데이터 기반 레인 + 보드 갱신
     var s2=document.getElementById('p-final'); if(s2) s2.scrollTop=sc;
   };
   // 처리 현황 보드를 현재 팀 필터에 맞춰 갱신 (팀 선택 → 값이 바뀜)
@@ -3363,23 +3364,45 @@ sendMessage = function(){
     if(vt)vt.classList.toggle('on',isTable);
     if(isTable){ if(!keepPage)_finalPage=1; window.renderFinalTable(); }
   };
-  window.applyFinalFilter=function(){
-    if(window._updateFinalBoard) window._updateFinalBoard();  // 팀 선택 → 보드 값 갱신
-    // 표 뷰: 데이터 기반 필터 + 1페이지로 재구성 (대량 관리)
-    if($('#finalVTable')&&$('#finalVTable').classList.contains('on')){ _finalPage=1; window.renderFinalTable(); return; }
-    // 카드 뷰: 보이는 카드 즉시 숨김
-    var team=($('#fTeamFilt')?.value||'');
-    var score=$('#fScoreFilt')?.value||'';
-    var type=($('#fTypeFilt')?.value||'').toLowerCase();
-    var q=($('#fSearchFinal')?.value||'').toLowerCase();
-    function rowOk(el){
-      var et=(el.dataset.team||'');
-      var es=parseInt(el.dataset.score||'0');
-      var ety=(el.dataset.type||'').toLowerCase();
-      var etxt=el.textContent.toLowerCase();
-      return (!team||et===team)&&(!score||(score==='auto'&&es>=85)||(score==='review'&&es>=70&&es<85)||(score==='low'&&es<70))&&(!type||ety===type)&&(!q||etxt.includes(q));
+  // 카드 레인용 컴팩트 행 (필터/팀 선택 시 데이터에서 다시 그림)
+  function _finalCompactRow(d){
+    var score=_qScore(d);
+    var qb='<span class="v23-pill '+(score>=85?'green':score>=70?'amber':'red')+'" style="font-size:9px">📊 '+score+'점</span>';
+    return '<div class="v23-final-row" data-id="'+d.id+'" data-team="'+esc(d.team)+'" data-score="'+score+'" data-type="'+d.type+'" onclick="showFinalPreview(\''+d.id+'\')">'
+      +'<input type="checkbox" class="final-row-chk" onclick="event.stopPropagation()" data-id="'+d.id+'">'
+      +'<div class="v23-fr-info"><div class="v23-fr-name">'+esc(d.name)+'</div><div class="v23-fr-meta">'+esc(d.team)+' · '+esc(d.owner)+' · '+d.date+' · '+d.chunks+'ch</div></div>'
+      +'<div class="v23-fr-badges">'+qb+'</div>'
+      +'<div class="v23-fr-acts"><button class="v23-btn primary" style="padding:3px 10px;font-size:10px" onclick="event.stopPropagation();approveFinalById(\''+d.id+'\')">✅ 승인</button>'
+      +'<button class="v23-btn danger" style="padding:3px 8px;font-size:10px" onclick="event.stopPropagation();rejectFinalById(\''+d.id+'\')">↩</button></div></div>';
+  }
+  // 카드 레인을 현재 필터(팀/유형/검색/점수)에 맞춰 데이터에서 재렌더 → 팀 선택 시 실제로 바뀜
+  window.renderFinalLanes=function(){
+    if(!$('#autoLaneBody')) return;
+    var team=($('#fTeamFilt')&&$('#fTeamFilt').value)||'';
+    var sf=($('#fScoreFilt')&&$('#fScoreFilt').value)||'';
+    var type=(($('#fTypeFilt')&&$('#fTypeFilt').value)||'').toLowerCase();
+    var q=(($('#fSearchFinal')&&$('#fSearchFinal').value)||'').toLowerCase();
+    function pass(d){ return (!team||d.team===team)&&(!type||String(d.type).toLowerCase()===type)&&(!q||(d.name+' '+d.team+' '+d.owner).toLowerCase().indexOf(q)>=0); }
+    var pend=teamDocs.filter(function(d){return d.status==='등록 요청됨'&&pass(d);});
+    var lanes={auto:[],review:[],low:[]};
+    pend.forEach(function(d){var s=_qScore(d); lanes[s>=85?'auto':s>=70?'review':'low'].push(d);});
+    function fill(bodyId,cntSel,arr,lane){
+      var body=$(bodyId); if(body){
+        var html = (sf&&sf!==lane) ? '<div class="v23-lane-empty">점수 필터로 숨김 — 다른 레인을 확인하세요.</div>'
+          : (arr.slice(0,10).map(_finalCompactRow).join('')||'<div class="v23-lane-empty">해당 조건의 문서가 없습니다.</div>')
+            +(arr.length>10?'<div class="v23-lane-more" onclick="setFinalView(\'table\')">+ '+(arr.length-10)+'건 더 — 📋 목록으로 한 번에 관리 →</div>':'');
+        body.innerHTML=html;
+      }
+      var c=$(cntSel); if(c)c.textContent=arr.length+'건';
     }
-    $$('.v23-final-row,.approval-card').forEach(function(el){el.style.display=rowOk(el)?'':'none';});
+    fill('#autoLaneBody','#laneAuto .v23-lane-cnt',lanes.auto,'auto');
+    fill('#reviewLaneBody','#laneReview .v23-lane-cnt',lanes.review,'review');
+    fill('#lowLaneBody','#laneLow .v23-lane-cnt',lanes.low,'low');
+  };
+  window.applyFinalFilter=function(){
+    if(window._updateFinalBoard) window._updateFinalBoard();          // 팀 선택 → 보드 값 갱신
+    if($('#finalVTable')&&$('#finalVTable').classList.contains('on')){ _finalPage=1; window.renderFinalTable(); return; }
+    if(window.renderFinalLanes) window.renderFinalLanes();            // 카드 레인을 데이터에서 재렌더
   };
   window.clearFinalFilter=function(){
     ['fTeamFilt','fScoreFilt','fTypeFilt','fSearchFinal'].forEach(function(id){var el=document.getElementById(id);if(el)el.value='';});
@@ -3654,7 +3677,7 @@ sendMessage = function(){
  function countFolder(id){return id==='all'?docs.length:docs.filter(d=>d.folder===id).length}
  function renderRows(sel='#v25Rows'){let q=($('#v25Search')?.value||'').toLowerCase(), team=$('#v25Team')?.value||'', sec=$('#v25Sec')?.value||'', mode=$('#v25Mode')?.value||'', status=$('#v25Status')?.value||''; let list=docs.filter(d=>(activeFolder==='all'||d.folder===activeFolder)&&(!team||d.team===team)&&(!q||(d.name+d.team+d.owner).toLowerCase().includes(q))&&(!sec||d.sec===sec)&&(!mode||d.modes.includes(mode))&&(!status||d.status===status)); let body=$(sel); if(!body)return; body.innerHTML=list.map(d=>`<tr><td><input type="checkbox" class="check-lg v25-check" data-id="${d.id}"></td><td><div class="v25-doc-title">${esc(d.name)}</div><div class="v25-doc-path">/${folders.find(f=>f[0]===d.folder)?.[2]} · ${d.chunks} chunks</div></td><td>${d.team}</td><td>${d.type}</td><td>${secPill(d.sec)}</td><td><div class="v25-mode-set">${modeBtns(d)}</div></td><td>${d.ver}</td><td>${statPill(d.status)}</td><td><button class="v25-btn" onclick="say('상세 패널을 열었습니다.','📚')">상세</button></td></tr>`).join('')||`<tr><td colspan="9" style="text-align:center;padding:30px;color:var(--text-4)">검색 결과가 없습니다.</td></tr>`}
  window.v25SelectFolder=(id,btn)=>{activeFolder=id; $$('.v25-folder').forEach(b=>b.classList.remove('on'));btn?.classList.add('on');renderRows()}; window.v25Filter=()=>renderRows(); window.v25All=chk=>$$('.v25-check').forEach(c=>c.checked=chk.checked); window.v25BulkMode=m=>{let ids=$$('.v25-check:checked').map(c=>c.dataset.id); if(!ids.length)return say('먼저 문서를 선택해주세요.','⚠️'); ids.forEach(id=>{let d=docs.find(x=>x.id===id); if(d&&!d.modes.includes(m))d.modes.push(m)}); renderRows(); say(`${ids.length}개 문서를 ${m}에 추가했습니다.`,'🧭')}
- function renderFinalList(){let el=$('#p-list'); if(!el)return; docs=teamDocs.map(function(d){return {id:d.id,name:d.name,team:d.team,folder:d.cat,type:d.type,sec:d.sec,modes:[d.mode],ver:d.version,chunks:d.chunks,owner:d.owner,status:d.status,date:d.date};}); el.innerHTML=`<div class="v23-admin-title"><div><div class="v23-title-main">최종 리스트 · 폴더 기반 지식 관리</div><div class="v23-title-sub">파일이 많아도 폴더, 검색, 필터, 대량 모드 반영으로 관리합니다. 하나의 파일은 여러 AI 모드에 독립적으로 연결될 수 있습니다.</div></div><div class="v23-actions"><button class="v25-btn">CSV 내보내기</button><button class="v25-btn primary">＋ 수동 등록</button></div></div><div class="v25-folder-layout">${folderTree('v25SelectFolder')}<div class="v25-manager"><div class="v25-manager-h"><div><div class="v25-manager-title">최종 지식 목록</div><div class="v25-manager-sub">모드 칩을 클릭하면 문서별 검색 모드를 ON/OFF 합니다.</div></div><button class="v25-btn primary" onclick="say('변경된 모드 매핑 정책을 저장했습니다.','✅')">변경 저장</button></div><div class="v25-tools"><label style="font-size:11px;color:var(--text-3);display:flex;gap:6px"><input type="checkbox" class="check-lg" onchange="v25All(this)"> 전체</label><div class="v25-search"><span>🔍</span><input id="v25Search" placeholder="문서명, 팀, 담당자 검색" oninput="v25Filter()"></div><select class="v25-select" id="v25Team" onchange="v25Filter()"><option value="">팀 전체</option>${teams.map(t=>`<option>${t}</option>`).join('')}</select><select class="v25-select" id="v25Sec" onchange="v25Filter()"><option value="">보안 전체</option>${secs.map(s=>`<option>${s}</option>`).join('')}</select><select class="v25-select" id="v25Mode" onchange="v25Filter()"><option value="">모드 전체</option>${modes.map(m=>`<option>${m}</option>`).join('')}</select><select class="v25-select" id="v25Status" onchange="v25Filter()"><option value="">상태 전체</option><option>AI 검색 반영완료</option><option>작성·보완중</option><option>등록 요청됨</option><option>보완 요청</option></select></div><div class="v25-bulk"><b>대량 작업</b><button class="v25-btn" onclick="v25BulkMode('생산자재 모드')">생산자재 추가</button><button class="v25-btn" onclick="v25BulkMode('일반자재 모드')">일반자재 추가</button><button class="v25-btn" onclick="v25BulkMode('원가모드')">원가 추가</button><span style="margin-left:auto">모드별 복수 연결 가능</span></div><div class="v25-table-wrap"><table class="v25-table"><thead><tr><th></th><th>문서</th><th>팀</th><th>유형</th><th>보안</th><th>AI 모드</th><th>버전</th><th>상태</th><th>작업</th></tr></thead><tbody id="v25Rows"></tbody></table></div></div></div>`;activeFolder='all';renderRows()}
+ function renderFinalList(){let el=$('#p-list'); if(!el)return; var _src=(window.teamDocs||[]); docs=_src.map(function(d){return {id:d.id,name:d.name,team:d.team,folder:d.cat,type:d.type,sec:d.sec,modes:[d.mode],ver:d.version,chunks:d.chunks,owner:d.owner,status:d.status,date:d.date};}); el.innerHTML=`<div class="v23-admin-title"><div><div class="v23-title-main">최종 리스트 · 폴더 기반 지식 관리</div><div class="v23-title-sub">파일이 많아도 폴더, 검색, 필터, 대량 모드 반영으로 관리합니다. 하나의 파일은 여러 AI 모드에 독립적으로 연결될 수 있습니다.</div></div><div class="v23-actions"><button class="v25-btn">CSV 내보내기</button><button class="v25-btn primary">＋ 수동 등록</button></div></div><div class="v25-folder-layout">${folderTree('v25SelectFolder')}<div class="v25-manager"><div class="v25-manager-h"><div><div class="v25-manager-title">최종 지식 목록</div><div class="v25-manager-sub">모드 칩을 클릭하면 문서별 검색 모드를 ON/OFF 합니다.</div></div><button class="v25-btn primary" onclick="say('변경된 모드 매핑 정책을 저장했습니다.','✅')">변경 저장</button></div><div class="v25-tools"><label style="font-size:11px;color:var(--text-3);display:flex;gap:6px"><input type="checkbox" class="check-lg" onchange="v25All(this)"> 전체</label><div class="v25-search"><span>🔍</span><input id="v25Search" placeholder="문서명, 팀, 담당자 검색" oninput="v25Filter()"></div><select class="v25-select" id="v25Team" onchange="v25Filter()"><option value="">팀 전체</option>${teams.map(t=>`<option>${t}</option>`).join('')}</select><select class="v25-select" id="v25Sec" onchange="v25Filter()"><option value="">보안 전체</option>${secs.map(s=>`<option>${s}</option>`).join('')}</select><select class="v25-select" id="v25Mode" onchange="v25Filter()"><option value="">모드 전체</option>${modes.map(m=>`<option>${m}</option>`).join('')}</select><select class="v25-select" id="v25Status" onchange="v25Filter()"><option value="">상태 전체</option><option>AI 검색 반영완료</option><option>작성·보완중</option><option>등록 요청됨</option><option>보완 요청</option></select></div><div class="v25-bulk"><b>대량 작업</b><button class="v25-btn" onclick="v25BulkMode('생산자재 모드')">생산자재 추가</button><button class="v25-btn" onclick="v25BulkMode('일반자재 모드')">일반자재 추가</button><button class="v25-btn" onclick="v25BulkMode('원가모드')">원가 추가</button><span style="margin-left:auto">모드별 복수 연결 가능</span></div><div class="v25-table-wrap"><table class="v25-table"><thead><tr><th></th><th>문서</th><th>팀</th><th>유형</th><th>보안</th><th>AI 모드</th><th>버전</th><th>상태</th><th>작업</th></tr></thead><tbody id="v25Rows"></tbody></table></div></div></div>`;activeFolder='all';renderRows()}
  function renderMode(){let el=$('#p-mode'); if(!el)return; el.innerHTML=`<div class="v23-admin-title"><div><div class="v23-title-main">AI 모드 · 대용량 DB 운영 콘솔</div><div class="v23-title-sub">모드별로 검색 가능한 폴더와 데이터 소스를 독립 운영합니다. 드래그보다 폴더·검색·대량선택·규칙 기반 관리를 우선합니다.</div></div><button class="v25-btn primary" onclick="say('AI 모드 정책을 저장했습니다.','🧭')">정책 저장</button></div><div class="v25-mode-work"><div class="v25-mode-side"><div class="v25-folder-head">AI 모드</div>${modes.map((m,i)=>`<button class="v25-mode-tab ${m===activeMode?'on':''}" onclick="selectMode('${m}',this)"><span>${i===0?'🌐':i===1?'🏭':i===2?'📦':'💰'} ${m}</span><span>${docs.filter(d=>d.modes.includes(m)).length}</span></button>`).join('')}<div class="v25-rule" style="margin-top:10px"><div class="v25-rule-title">운영 원칙</div><div style="font-size:11px;color:var(--text-3);line-height:1.65">한 파일은 여러 모드에 들어갈 수 있고, 각 모드는 독립 색인·권한·배치 정책을 가집니다.</div></div></div><div><div class="v25-kpis" id="modeKpi"></div><div class="v25-rule"><div class="v25-rule-title" id="modeRuleTitle">${activeMode} 규칙</div><div class="v25-rule-row"><span>정형 DB 자동 반영</span><div class="v25-toggle on" onclick="this.classList.toggle('on')"></div></div><div class="v25-rule-row"><span>비정형 문서 승인 후 후보 등록</span><div class="v25-toggle on" onclick="this.classList.toggle('on')"></div></div><div class="v25-rule-row"><span>지정 사용자 문서 검색 허용</span><div class="v25-toggle ${activeMode==='원가모드'?'':'on'}" onclick="this.classList.toggle('on')"></div></div></div><div class="v25-manager"><div class="v25-manager-h"><div><div class="v25-manager-title" id="modeListTitle">${activeMode} 연결 데이터</div><div class="v25-manager-sub">현재 모드에 연결된 데이터만 표시합니다. 폴더 단위 일괄 연결을 지원합니다.</div></div><button class="v25-btn warn" onclick="say('선택 폴더를 현재 모드에 일괄 연결했습니다.','🧭')">폴더 일괄 연결</button></div><div class="v25-tools"><div class="v25-search"><span>🔍</span><input id="modeSearch" placeholder="현재 모드 내 검색" oninput="renderModeRows()"></div><select class="v25-select" id="modeFolder" onchange="renderModeRows()"><option value="">폴더 전체</option>${folders.slice(1).map(f=>`<option value="${f[0]}">${f[2]}</option>`).join('')}</select></div><div class="v25-table-wrap"><table class="v25-table"><thead><tr><th>소스</th><th>폴더</th><th>유형</th><th>보안</th><th>연결 모드</th><th>상태</th></tr></thead><tbody id="modeRows"></tbody></table></div></div></div></div>`;renderModeRows();updateModeKpi()}
  window.selectMode=(m,btn)=>{activeMode=m;$$('.v25-mode-tab').forEach(b=>b.classList.remove('on'));btn?.classList.add('on');$('#modeRuleTitle')&&($('#modeRuleTitle').textContent=m+' 규칙');$('#modeListTitle')&&($('#modeListTitle').textContent=m+' 연결 데이터');renderModeRows();updateModeKpi()}; function updateModeKpi(){let l=docs.filter(d=>d.modes.includes(activeMode));$('#modeKpi')&&($('#modeKpi').innerHTML=`<div class="v25-kpi"><div class="v">${l.length}</div><div class="l">연결 소스</div></div><div class="v25-kpi"><div class="v">${new Set(l.map(d=>d.folder)).size}</div><div class="l">연결 폴더</div></div><div class="v25-kpi"><div class="v">${l.filter(d=>d.status==='AI 검색 반영완료').length}</div><div class="l">색인 활성</div></div><div class="v25-kpi"><div class="v">${l.reduce((a,d)=>a+d.chunks,0).toLocaleString()}</div><div class="l">Chunks</div></div>`)}
  window.renderModeRows=()=>{let q=($('#modeSearch')?.value||'').toLowerCase(), f=$('#modeFolder')?.value||'';let l=docs.filter(d=>d.modes.includes(activeMode)&&(!q||(d.name+d.team).toLowerCase().includes(q))&&(!f||d.folder===f));$('#modeRows')&&($('#modeRows').innerHTML=l.map(d=>`<tr><td><div class="v25-doc-title">${esc(d.name)}</div><div class="v25-doc-path">${d.team} · ${d.chunks} chunks</div></td><td>${folders.find(x=>x[0]===d.folder)?.[1]} ${folders.find(x=>x[0]===d.folder)?.[2]}</td><td>${d.type}</td><td>${secPill(d.sec)}</td><td><div class="v25-mode-set">${modeBtns(d)}</div></td><td>${statPill(d.status)}</td></tr>`).join('')||`<tr><td colspan="6" style="text-align:center;padding:30px;color:var(--text-4)">연결 데이터가 없습니다.</td></tr>`)};
