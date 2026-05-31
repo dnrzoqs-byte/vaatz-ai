@@ -1001,47 +1001,54 @@ textarea:focus { outline: none; }
 }
 .atb:hover:not(.on) { color: var(--text-1); background: var(--bg-3); }
 
-/* ── Admin 탭 Depth 그룹핑 (v38) ───────────────────────────── */
-.adm-t { align-items: stretch !important; gap: 0 !important; padding: 0 12px !important; }
-.atb-home { align-self: center; margin-right: 4px; }
+/* ── Admin 탭 Depth 그룹핑 (v38 → 가시성 강화 #3) ─────────────── */
+.adm-t { align-items: stretch !important; gap: 0 !important; padding: 4px 14px 0 !important; min-height: 62px; }
+.atb-home { align-self: center; margin-right: 8px; font-weight: 800 !important; }
 .adm-t-grp {
   display: inline-flex;
   flex-direction: column;
   justify-content: flex-end;
   flex-shrink: 0;
-  padding: 0 8px;
+  padding: 0 12px;
   position: relative;
 }
 .adm-t-grp + .adm-t-grp::before,
 .atb-home + .adm-t-grp::before {
   content: '';
   position: absolute;
-  left: 0; top: 22%; bottom: 14%;
+  left: 0; top: 26%; bottom: 14%;
   width: 1px;
-  background: var(--border-1);
+  background: var(--border-2);
 }
+/* 그룹 라벨: 또렷한 칩 형태로 격상 */
 .adm-t-grp-label {
-  font-size: 8.5px;
-  font-weight: 700;
+  display: inline-flex;
+  align-self: flex-start;
+  font-size: 10.5px;
+  font-weight: 800;
   letter-spacing: 0.2px;
-  color: var(--text-4);
+  color: var(--accent);
+  background: var(--accent-dim);
+  border-radius: 6px;
   text-transform: none;
-  padding: 5px 4px 1px;
+  padding: 3px 8px;
+  margin: 0 0 5px 2px;
   white-space: nowrap;
-  opacity: .85;
+  opacity: 1;
 }
-.adm-t-grp-tabs { display: inline-flex; align-items: stretch; gap: 1px; }
+.adm-t-grp-tabs { display: inline-flex; align-items: stretch; gap: 3px; }
 /* 워크플로우 그룹: 1→2→3 한 스텝처럼 보이도록 연결 */
-.atb-wf { display: inline-flex; align-items: center; gap: 5px; }
+.atb-wf { display: inline-flex; align-items: center; gap: 6px; }
 .atb-step {
   display: inline-flex; align-items: center; justify-content: center;
-  width: 15px; height: 15px; border-radius: 50%;
-  background: var(--bg-4); color: var(--text-3);
-  font-size: 9px; font-weight: 800; flex-shrink: 0;
+  width: 19px; height: 19px; border-radius: 50%;
+  background: var(--bg-4); color: var(--text-2);
+  font-size: 11px; font-weight: 800; flex-shrink: 0;
   font-family: 'Outfit', sans-serif;
+  box-shadow: inset 0 0 0 1px var(--border-2);
 }
-.atb-wf.on .atb-step { background: var(--accent); color: #fff; }
-.atb-wf-arrow { align-self: center; color: var(--text-5, var(--border-3)); font-size: 13px; padding: 0 1px; user-select: none; }
+.atb-wf.on .atb-step { background: var(--accent); color: #fff; box-shadow: 0 2px 8px var(--accent-dim); }
+.atb-wf-arrow { align-self: center; color: var(--accent); opacity: .55; font-size: 16px; padding: 0 1px; user-select: none; }
 
 /* ── 요청 관리 테이블 ── */
 .at2 {
@@ -1837,11 +1844,11 @@ textarea:focus { outline: none; }
 .shop-item[data-bg="snow"] .shop-ic { background: linear-gradient(135deg,#B3E5FC,#FFFFFF); }
 .shop-item[data-bg="sunset"] .shop-ic { background: linear-gradient(135deg,#FF6F00,#87CEEB); }
 
-/* ── 플로팅 캐릭터: 우측 패널 열릴 때 위치 조정 ── */
+/* ── 플로팅 캐릭터: 우측 패널 열릴 때 위치 조정 (패널 폭 연동) ── */
 .rp.sh ~ * .float-char,
 .app:has(.rp.sh) .float-char {
-  right: 360px !important;
-  transition: right 0.25s ease;
+  right: calc(var(--rp-w, 400px) + 24px) !important;
+  transition: right 0.18s ease;
   pointer-events: none !important;
 }
 
@@ -2035,6 +2042,31 @@ textarea:focus { outline: none; }
    ════════════════════════════════════════ */
 .rp { width: 340px; min-width: 340px; }
 
+/* ── 작업 패널 리사이즈 복구 (#10) ──────────────────────────────
+   드래그 핸들(#rpResize)이 갱신하는 --rp-w 를 패널 너비의 '권위값'으로 사용.
+   index.css 후순위의 .rp.sh{width:min(720px,48vw)!important} 하드코딩이
+   리사이즈를 막고 있었으므로, 마지막에 로드되는 overrides.css에서 덮어쓴다.
+   - source-full(근거뷰어 전체화면)에는 영향을 주지 않도록 :not(.source-full) 한정
+   - 데스크톱(≥901px)에서만 적용 → 모바일 전체화면(@max-width:900px) 동작 보존 */
+@media (min-width: 901px){
+  .rp.sh:not(.source-full){
+    width: var(--rp-w, 400px) !important;
+    min-width: var(--rp-w, 400px) !important;
+    max-width: 82vw !important;
+  }
+}
+/* 드래그 중에는 트랜지션 제거 → 핸들을 따라 실시간으로 좌우 비율 조정 */
+.rp:has(.rp-rs.dragging){ transition: none !important; }
+.rp:has(.rp-rs.dragging) ~ * { transition: none !important; }
+/* 핸들을 더 넓고 잡기 쉽게 + 호버 시 가시성 */
+.rp-rs{ width: 12px !important; left: -6px !important; z-index: 30 !important; }
+.rp-rs::after{
+  content:''; position:absolute; left:5px; top:50%; transform:translateY(-50%);
+  width:2px; height:42px; border-radius:2px; background:var(--border-2);
+  transition:background .15s, height .15s;
+}
+.rp-rs:hover::after, .rp-rs.dragging::after{ background:var(--accent); height:64px; }
+
 /* 출처 패널: 충분한 하단 여백 */
 #rpPaneSrc > .src-vw {
   padding: 6px 16px 48px !important;
@@ -2096,12 +2128,14 @@ textarea:focus { outline: none; }
   font-size: 11px !important;
 }
 
-/* 우측 패널 열릴 때 float-char 위치 + 클릭 차단 방지 */
+/* 우측 패널 열릴 때 float-char 위치 + 클릭 차단 방지
+   (#8/#10) 패널이 가변폭이 되었으므로 --rp-w 에 연동해 겹침 방지 */
 .app:has(.rp.sh) .float-char {
-  right: 360px !important;
-  transition: right 0.25s ease;
+  right: calc(var(--rp-w, 400px) + 24px) !important;
+  transition: right 0.18s ease;
   pointer-events: none !important;
 }
+.app:has(.rp.sh:not(.source-full)) .float-char { right: calc(var(--rp-w, 400px) + 24px) !important; }
 
 /* ════════════════════════════════════════
    Q&A v36 — 지식IN 스타일 재설계
@@ -3435,6 +3469,12 @@ html:not([data-theme="light"]) #shopCharPreview {
 .adm-pipe-done .adm-pipe-label { color: var(--g, #4ead7b); }
 .adm-pipe-step { cursor: pointer; transition: background .12s; }
 .adm-pipe-step:hover { background: var(--bg-3); border-radius: 8px; }
+/* (#4) 상단 업무 흐름도 — 단계별 카운트 색상 + 가독성 강화 */
+.adm-pipe-pend-c { color: var(--a, #e0a23b) !important; font-weight: 800 !important; }
+.adm-pipe-done-c { color: var(--g, #4ead7b) !important; font-weight: 800 !important; }
+.adm-pipeline .adm-pipe-label { font-size: 12px; font-weight: 700; }
+.adm-pipeline .adm-pipe-arrow { color: var(--accent); opacity: .5; font-size: 17px; }
+.adm-pipe-active { box-shadow: inset 0 0 0 1px var(--accent-bd); }
 
 /* ── 팀 노드 (그룹 바디 내부) ── */
 .tf-team-node {
@@ -3776,39 +3816,7 @@ html:not([data-theme="light"]) #shopCharPreview {
 }
 .sp-sec-sel:focus { outline: none; border-color: var(--accent); }
 
-/* 감사 로그 */
-.sp-audit-table {
-  background: var(--bg-2);
-  border: 1px solid var(--border-1);
-  border-radius: 10px;
-  overflow: hidden;
-  font-size: 11px;
-}
-.sp-audit-hd {
-  display: grid;
-  grid-template-columns: 140px 120px 1fr 1fr 80px;
-  gap: 0;
-  padding: 8px 14px;
-  background: var(--bg-3);
-  border-bottom: 1px solid var(--border-1);
-  font-weight: 700;
-  color: var(--text-3);
-  font-size: 9.5px;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-.sp-audit-row {
-  display: grid;
-  grid-template-columns: 140px 120px 1fr 1fr 80px;
-  gap: 0;
-  padding: 9px 14px;
-  border-bottom: 1px solid var(--border-1);
-  color: var(--text-2);
-  transition: background .1s;
-}
-.sp-audit-row:last-child { border-bottom: none; }
-.sp-audit-row:hover { background: var(--bg-3); }
-.sp-audit-doc { color: var(--text-1); font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+/* (보안등급 감사 로그/리포트 제거됨 — #5) */
 
 /* ══════════════════════════════════════════════
  * Admin 운영 홈 — step 필터링 & L4 폴더 & 업로드 모달
@@ -3889,11 +3897,22 @@ html:not([data-theme="light"]) #shopCharPreview {
 .v23hf-meta { font-size: 10px; color: var(--text-3); margin-top: 1px; }
 
 /* ─── 4단계 파이프라인 바 ──────────────────────────────────── */
+/* 운영 홈 단계 헤더 (#1) */
+.v23-home-flow-hd {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 12px; flex-wrap: wrap;
+  margin: 18px 0 2px; padding: 10px 14px;
+  background: var(--bg-2); border: 1px solid var(--border-1); border-radius: 12px;
+}
+.v23-home-flow-t { font-size: 13px; font-weight: 800; color: var(--text-1); }
+.v23-home-flow-legend { display: flex; gap: 6px; flex-wrap: wrap; }
+.v23-home-flow-legend .v23-pill { font-size: 10px; }
+
 .v23-pipe-bar {
   display: flex;
   flex-direction: column;
   gap: 10px;
-  margin: 14px 0 0;
+  margin: 12px 0 0;
 }
 .v23-pipe-all {
   align-self: flex-start;
@@ -4087,13 +4106,19 @@ html:not([data-theme="light"]) #shopCharPreview {
  * 팝업 가시성 개선 — 가로폭 확장 · 정보 한눈에
  * ══════════════════════════════════════════════ */
 
-/* Admin 탭 바: 8탭 모두 한 줄에 표시 */
+/* Admin 탭 바: 탭 가시성 강화 (#3) — 글씨·패딩 확대 */
 .atb {
-  font-size: 10.5px !important;
-  padding: 9px 10px !important;
+  font-size: 12.5px !important;
+  padding: 11px 13px !important;
   white-space: nowrap;
 }
-.adm { width: min(1280px, 98vw) !important; }
+/* Admin 모달 확대 (#2) — 핵심 내용을 한눈에 */
+.adm {
+  width: min(1560px, 98vw) !important;
+  max-height: 97vh !important;
+}
+/* 본문 영역 여백·가독성 ↑ */
+.adm-b { padding: 18px 24px !important; }
 
 /* 마이페이지 body 최대 높이 늘려 스크롤 최소화 */
 .mp-body { max-height: calc(90vh - 260px) !important; }
@@ -4124,15 +4149,6 @@ html:not([data-theme="light"]) #shopCharPreview {
 .history-title { font-size: 12.5px; font-weight: 600; color: var(--text-1); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .history-meta  { font-size: 10px; color: var(--text-4); margin-top: 2px; }
 
-/* 보안등급 감사 로그 — 좁은 화면 대응 */
-.sp-audit-hd,
-.sp-audit-row {
-  grid-template-columns: 130px 110px 1fr 200px 70px !important;
-}
-@media (max-width: 1300px) {
-  .sp-audit-hd,
-  .sp-audit-row { grid-template-columns: 120px 100px 1fr 160px 60px !important; font-size: 10px !important; }
-}
 
 /* 보안등급 3단 카드 — 최소 너비 확보 */
 .sp-level-card { min-height: 320px; }

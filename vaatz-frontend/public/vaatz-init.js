@@ -1709,8 +1709,8 @@ setTimeout(initSourceViewer, 50);
   const rp = document.getElementById('rp');
   if(!handle||!rp) return;
   const root = document.documentElement;
-  const MIN=300, MAX=760, DEFAULT=400;
-  const SNAP_SIZES=[320,360,400,460,540,640];
+  const MIN=300, MAX=900, DEFAULT=400;
+  const SNAP_SIZES=[320,360,400,460,540,640,760,860];
   let isDragging=false, startX=0, startW=0;
 
   function setW(w, persist){
@@ -2015,41 +2015,10 @@ sendMessage = function(){
         <div class="v23-kpi green"><div class="v23-kpi-label">AI DB 반영완료</div><div class="v23-kpi-value">${cntDone}<span>건</span></div><div class="v23-kpi-desc">임베딩 완료 및 검색 활성화</div><div class="spark"><i style="height:42%"></i><i style="height:54%"></i><i style="height:68%"></i><i style="height:79%"></i><i style="height:88%"></i></div></div>
         <div class="v23-kpi violet"><div class="v23-kpi-label">정형 I/F</div><div class="v23-kpi-value">7<span>개</span></div><div class="v23-kpi-desc">VAATZ DB, Autopedia, 타 부문 배치</div><div class="spark"><i style="height:60%"></i><i style="height:60%"></i><i style="height:60%"></i><i style="height:40%"></i><i style="height:80%"></i></div></div>
       </div>
-      <!-- KPI Row 2: AI 챗봇 품질 지표 -->
-      <div class="v23-quality-bar">
-        <div class="v23-qkpi" onclick="openAdminTab('p-quality')">
-          <div class="v23-qkpi-icon">🎯</div>
-          <div class="v23-qkpi-body">
-            <div class="v23-qkpi-val">78.4<span class="v23-qkpi-unit">%</span></div>
-            <div class="v23-qkpi-label">답변 채택율</div>
-            <div class="v23-qkpi-trend up">▲ 3.2% vs 지난주</div>
-          </div>
-        </div>
-        <div class="v23-qkpi" onclick="openAdminTab('p-quality')">
-          <div class="v23-qkpi-icon">🔍</div>
-          <div class="v23-qkpi-body">
-            <div class="v23-qkpi-val">91.2<span class="v23-qkpi-unit">%</span></div>
-            <div class="v23-qkpi-label">RAG 검색 히트율</div>
-            <div class="v23-qkpi-trend up">▲ 1.8% vs 지난주</div>
-          </div>
-        </div>
-        <div class="v23-qkpi warn" onclick="openAdminTab('p-quality')">
-          <div class="v23-qkpi-icon">⚠️</div>
-          <div class="v23-qkpi-body">
-            <div class="v23-qkpi-val">23<span class="v23-qkpi-unit">건</span></div>
-            <div class="v23-qkpi-label">미응답 쿼리 (7일)</div>
-            <div class="v23-qkpi-trend down">▲ 5건 증가 → 문서 보강 필요</div>
-          </div>
-        </div>
-        <div class="v23-qkpi" onclick="openAdminTab('p-quality')">
-          <div class="v23-qkpi-icon">⭐</div>
-          <div class="v23-qkpi-body">
-            <div class="v23-qkpi-val">4.1<span class="v23-qkpi-unit">/5</span></div>
-            <div class="v23-qkpi-label">평균 응답 신뢰도</div>
-            <div class="v23-qkpi-trend up">▲ 0.3 vs 지난주</div>
-          </div>
-        </div>
-        <div class="v23-qkpi-more" onclick="openAdminTab('p-quality')">📊 AI 품질<br>상세 보기 →</div>
+      <!-- (운영 홈 단순화 #1) AI 품질 지표 바 제거 — 'AI 품질' 탭에서 상세 확인 -->
+      <div class="v23-home-flow-hd">
+        <div class="v23-home-flow-t">📑 문서 처리 단계 — 단계 카드를 누르면 해당 상태의 파일만 모아 봅니다</div>
+        <div class="v23-home-flow-legend"><span class="v23-pill amber">업로드</span><span class="v23-pill red">보완</span><span class="v23-pill blue">승인대기</span><span class="v23-pill green">AI 반영</span></div>
       </div>
       <div class="v23-pipe-bar">
         <button class="v23-pipe-all" id="v23StepAll" onclick="filterAdminHomeStep('all')">🗂 전체 보기 (${totalDocs})</button>
@@ -2681,7 +2650,6 @@ sendMessage = function(){
           <div class="v23-title-sub">VAATZ AI 문서의 접근 권한을 3단계로 분류하여 관리합니다. 보안등급은 최종 승인 시 지정하며 AI 검색 노출 범위를 직접 제어합니다.</div>
         </div>
         <div class="v23-actions">
-          <button class="v23-btn" onclick="safeV23Toast('보안등급 감사 리포트를 생성했습니다.','📋',2800)">📋 감사 리포트</button>
           <button class="v23-btn primary" onclick="safeV23Toast('보안정책 변경사항을 저장했습니다.','🔒',2200)">정책 저장</button>
         </div>
       </div>
@@ -2742,19 +2710,6 @@ sendMessage = function(){
         ${secList.map(s=>`<button class="v23-btn sp-filter-btn" onclick="filterSecDocs('${s}',this)">${s} (${secCounts[s]})</button>`).join('')}
       </div>
       <div id="spDocList">${secDocSample}</div>
-
-      <!-- 보안 이벤트 감사 로그 -->
-      <div class="sp-section-title">🕵️ 최근 보안 이벤트 로그</div>
-      <div class="sp-audit-table">
-        <div class="sp-audit-hd"><span>일시</span><span>사용자</span><span>문서</span><span>변경 내용</span><span>결과</span></div>
-        ${[
-          ['2026.05.26 09:12','김도윤 책임','원가 벤치마크_022.xlsx','일반 공개 → 리더 전용','✅ 완료'],
-          ['2026.05.25 17:38','System Admin','NDA_계약서_특수조건_001.pdf','리더 전용 → 지정 사용자','✅ 완료'],
-          ['2026.05.25 14:20','박성민 책임','반도체 수출규제 현황_003.xlsx','등록 시 리더 전용 설정','✅ 완료'],
-          ['2026.05.24 11:05','이준혁 책임','해외법인_구매승인프로세스_001.docx','지정 사용자 접근 요청','⏳ 승인대기'],
-          ['2026.05.23 16:30','System Admin','단가_벤치마크_비교_015.pdf','일괄 보안 등급 감사 실행','✅ 완료'],
-        ].map(r=>`<div class="sp-audit-row"><span>${r[0]}</span><span>${r[1]}</span><span class="sp-audit-doc">${r[2]}</span><span>${r[3]}</span><span>${r[4]}</span></div>`).join('')}
-      </div>
     `);
 
     const pusr=$('#p-usr'); if(pusr){ pusr.style.display='none'; }
@@ -3788,8 +3743,8 @@ sendMessage = function(){
   }
   function patchMypageChar(){ $$('[onclick="openComm(\'char\')"]').forEach(b=>{if(b.closest('.mp-ov'))b.setAttribute('onclick','try{closeMypage()}catch(e){};setTimeout(()=>openComm(\'char\'),80)')}); }
   function boot(){normText();installModalTools();installCommunityTools();installEvidenceClick();installBuddyFallback();patchMypageChar();
-    // 주기 2500ms → 10000ms 로 완화 (성능 개선: DOM 전체 스캔 빈도 감소)
-    setInterval(()=>{normText();installEvidenceClick();patchMypageChar();},10000);
+    // 주기 2500ms → 10000ms → 20000ms 로 완화 (성능 #6: DOM 전체 스캔 빈도 감소)
+    setInterval(()=>{normText();installEvidenceClick();patchMypageChar();},20000);
   }
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot); else boot();
 })();
@@ -3949,7 +3904,7 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
   }
   function boot(){patchCommunity();}
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot);else boot();
-  setInterval(patchCommunity,1800);
+  // (성능 #6) 1.8초 폴링 제거 — renderCommunityV29/openComm 래퍼가 이미 patchCommunity 호출
 })();
 
 

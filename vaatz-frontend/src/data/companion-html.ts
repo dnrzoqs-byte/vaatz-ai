@@ -529,6 +529,18 @@ html[data-user-role="admin"] .v29-action-row button[onclick*="v29Nominate"]{
   font-size:10px;color:var(--text-4);text-align:center;
   margin-top:6px;line-height:1.5;
 }
+
+/* ── 캐릭터 비주얼 개선 v39 (#8) ── */
+.companion-card{
+  box-shadow:0 20px 60px rgba(0,0,0,.5),0 0 0 1px rgba(106,161,247,.22),0 0 30px -6px rgba(75,142,240,.5)!important;
+}
+.v29-buddy-bubble,.float-char-bubble{backdrop-filter:blur(8px)!important}
+.float-char-lv{
+  background:linear-gradient(135deg,var(--accent),#6AA1F7)!important;color:#fff!important;
+  font-weight:800!important;box-shadow:0 4px 14px rgba(75,142,240,.4)!important;border:0!important;
+}
+.companion-hub:hover .companion-main>.buddy-3d{filter:drop-shadow(0 16px 24px rgba(75,142,240,.42)) brightness(1.05)!important}
+.float-char:hover .float-char-body{filter:drop-shadow(0 10px 18px rgba(75,142,240,.4)) brightness(1.05)}
 </style>
 
 <!-- ═══════════════════════════════════════════════════════════
