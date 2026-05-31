@@ -1107,12 +1107,12 @@ button, .tb-b, .abtn, .shop-item, .inv-slot, .team-folder-card, .v23-click{touch
 .comm-mini-votes::before{content:'👍 ';font-size:9px}
 
 /* ─── 리사이즈 핸들 개선 ─── */
-.rp-rs{position:absolute;left:0;top:0;bottom:0;width:5px;cursor:col-resize;z-index:10;
-  background:transparent;transition:background .15s;display:flex;align-items:center;justify-content:center}
-.rp-rs::before{content:'';position:absolute;left:1px;top:50%;transform:translateY(-50%);
-  width:3px;height:32px;border-radius:2px;background:var(--border-2);transition:all .15s}
-.rp-rs:hover::before,.rp-rs.dragging::before{background:var(--accent);width:3px;height:48px;box-shadow:0 0 0 3px var(--accent-dim)}
-.rp-rs:hover,.rp-rs.dragging{background:transparent}
+.rp-rs{position:absolute;left:-4px;top:0;bottom:0;width:10px;cursor:col-resize;z-index:20;
+  background:transparent;transition:background .15s;display:flex;align-items:center;justify-content:center;touch-action:none}
+.rp-rs::before{content:'';position:absolute;left:5px;top:50%;transform:translateY(-50%);
+  width:4px;height:40px;border-radius:3px;background:var(--border-2);transition:all .15s}
+.rp-rs:hover::before,.rp-rs.dragging::before{background:var(--accent);width:4px;height:60px;box-shadow:0 0 0 3px var(--accent-dim)}
+.rp-rs:hover,.rp-rs.dragging{background:var(--accent-dim)}
 
 /* ─── 스코프 스위치 개선 ─── */
 .sc-sw{display:flex;background:var(--bg-2);padding:3px;border-radius:8px;border:1px solid var(--border-2);gap:2px}
@@ -1242,8 +1242,8 @@ body{font-size:calc(14.5px * var(--v26-text-scale))!important}
 .v27-state{display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:5px 9px;font-size:12px;font-weight:900;white-space:nowrap}.v27-state.draft{background:var(--a-dim);color:var(--a)}.v27-state.requested{background:var(--accent-dim);color:var(--accent)}.v27-state.review{background:var(--v-dim);color:var(--v)}.v27-state.returned{background:var(--r-dim);color:var(--r)}.v27-state.live{background:var(--g-dim);color:var(--g)}
 .v27-stage-strip{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px}.v27-stage-card{background:var(--bg-2);border:1px solid var(--border-1);border-radius:14px;padding:13px}.v27-stage-card .n{font-family:'Outfit';font-size:22px;font-weight:900;color:var(--text-1)}.v27-stage-card .l{font-size:12px;color:var(--text-3);line-height:1.45;margin-top:2px}
 
-/* Source evidence panel: bigger and can be expanded */
-.rp.sh{width:540px!important;min-width:540px!important;box-shadow:-8px 0 34px rgba(0,0,0,.20)!important}
+/* Source evidence panel: user-resizable (drag handle), width driven by --rp-w */
+.rp.sh{width:var(--rp-w,400px)!important;min-width:var(--rp-w,400px)!important;box-shadow:-8px 0 34px rgba(0,0,0,.20)!important}
 .rp.source-full{position:fixed!important;right:0!important;top:0!important;bottom:0!important;height:100vh!important;width:min(940px,94vw)!important;min-width:min(940px,94vw)!important;z-index:960!important;border-left:1px solid var(--border-2)!important;box-shadow:-24px 0 90px rgba(0,0,0,.55)!important}
 .src-hd{padding:16px 18px 13px!important}.src-hd-q{font-size:12px!important}.src-hd-qt{font-size:14px!important;line-height:1.6!important}
 .src-chips{padding:12px 16px!important;gap:7px!important}.src-chip{padding:7px 11px!important;border-radius:16px!important}

@@ -495,16 +495,133 @@ function simUpload(){
   const ext=n.split('.').pop();
   const ic=icons[ext]||'📄';
   const s=(Math.random()*3+.1).toFixed(1);
+  // 업로드 전에 문서 유사도(중복) 검사 → 사용자가 신규/업데이트 선택
+  checkDocSimilarity({name:n, size:s, icon:ic}, function(decision, match){
+    if(decision==='cancel') return;
+    addUploadedFile(n, ic, s, decision, match);
+  });
+}
+function addUploadedFile(n, ic, s, decision, match){
   const el=document.createElement('div');
   el.className='fl-file highlight-new';
   el.draggable=true;
   el.setAttribute('ondragstart','fDragStart(event,this)');
-  el.innerHTML=`<input type="checkbox" class="fl-chk" onclick="event.stopPropagation()"><span class="fl-file-ic">${ic}</span><div class="fl-file-info"><div class="fl-file-nm">${n}</div><div class="fl-file-meta">${s} MB · 방금</div></div>`;
+  const verBadge = decision==='update'
+    ? `<span class="fl-ver-badge">v${(match&&match.ver?match.ver+1:2)} 업데이트</span>` : '';
+  el.innerHTML=`<input type="checkbox" class="fl-chk" onclick="event.stopPropagation()"><span class="fl-file-ic">${ic}</span><div class="fl-file-info"><div class="fl-file-nm">${n}${verBadge}</div><div class="fl-file-meta">${s} MB · 방금</div></div>`;
   el.style.opacity='0';
   document.getElementById('uncategorized').appendChild(el);
   requestAnimationFrame(()=>{el.style.transition='all .25s';el.style.opacity='1'});
   updFC();
-  toast(`${n} 업로드 완료`,'☁️',2500);
+  if(decision==='update' && match)
+    toast(`${match.name} → 새 버전으로 교체했습니다. 기존 임베딩은 폐기됩니다.`,'♻️',3200);
+  else
+    toast(`${n} 신규 등록 완료`,'☁️',2500);
+}
+
+// ════════════════════════════════════════════════════════════════════
+//  문서 유사도(중복) 검증 — RAG 중복 최소화
+//  업로드 파일을 기존 지식베이스 문서와 비교해 중복 여부를 먼저 판단.
+//  ≥82%: 중복 가능성 높음(업데이트 권장) / 55~82%: 유사(확인) / <55%: 신규
+// ════════════════════════════════════════════════════════════════════
+const SIM_CORPUS = [
+  {name:'견적서_20260131.pdf',        team:'구매전략팀',     ver:3, date:'01.31', chunks:42, owner:'박성민'},
+  {name:'납품실적_요약_2025H2.xlsx',   team:'구매품질기획팀', ver:2, date:'01.20', chunks:18, owner:'정현수'},
+  {name:'표준_계약서_v2.docx',         team:'법무지원팀',     ver:2, date:'12.18', chunks:55, owner:'김도현'},
+  {name:'품질보고서_2025Q4.pdf',       team:'구매품질기획팀', ver:4, date:'12.30', chunks:37, owner:'한도윤'},
+  {name:'협력사_마스터목록.xlsx',       team:'구매전략팀',     ver:6, date:'02.01', chunks:24, owner:'박성민'},
+  {name:'발주서_표준양식.docx',         team:'PT제어부품구매팀',ver:5, date:'11.22', chunks:12, owner:'이서연'},
+  {name:'공정거래법_하도급_조항.pdf',   team:'법무지원팀',     ver:1, date:'02.05', chunks:29, owner:'정현수'}
+];
+function _tokenize(s){
+  return (s||'').toLowerCase()
+    .replace(/\.(pdf|xlsx|docx|hwp|ppt|pptx|txt)$/,'')
+    .replace(/[_\-.()[\]]/g,' ')
+    .replace(/\d{6,}/g,' ')          // 날짜·일련번호는 약하게 취급
+    .split(/\s+/).filter(t=>t.length>1);
+}
+function _docSimilarity(a, b){
+  const A=new Set(_tokenize(a)), B=new Set(_tokenize(b));
+  if(!A.size||!B.size) return 0;
+  let inter=0; A.forEach(t=>{ if(B.has(t)) inter++; });
+  const jac = inter/(A.size+B.size-inter);
+  // 확장자(문서 종류) 일치 시 약간 가산 → 실제 RAG 유사도 느낌
+  const extA=(a.match(/\.[a-z]+$/)||[''])[0], extB=(b.match(/\.[a-z]+$/)||[''])[0];
+  const extBonus = extA && extA===extB ? 0.12 : 0;
+  return Math.min(0.99, jac*0.88 + extBonus);
+}
+function computeSimilarMatches(fileName){
+  return SIM_CORPUS
+    .map(d=>Object.assign({score:Math.round(_docSimilarity(fileName, d.name)*100)}, d))
+    .filter(d=>d.score>=20)
+    .sort((a,b)=>b.score-a.score)
+    .slice(0,3);
+}
+// 모달 1회만 생성
+function _ensureSimModal(){
+  let ov=document.getElementById('simCheckOv');
+  if(ov) return ov;
+  ov=document.createElement('div');
+  ov.id='simCheckOv'; ov.className='sim-ov';
+  ov.innerHTML=`<div class="sim-box" role="dialog" aria-modal="true">
+    <div class="sim-h">
+      <div class="sim-h-l"><span class="sim-h-ic">🔍</span>
+        <div><div class="sim-h-t">문서 유사도 검증</div><div class="sim-h-s">업로드 전 기존 지식베이스와 중복 여부를 확인합니다</div></div>
+      </div>
+      <button class="sim-x" onclick="closeSimCheck()">✕</button>
+    </div>
+    <div class="sim-body" id="simCheckBody"></div>
+  </div>`;
+  document.body.appendChild(ov);
+  ov.addEventListener('click',e=>{ if(e.target===ov) closeSimCheck(); });
+  return ov;
+}
+window.closeSimCheck=function(){ const ov=document.getElementById('simCheckOv'); if(ov) ov.classList.remove('sh'); };
+function checkDocSimilarity(file, cb){
+  const ov=_ensureSimModal();
+  const body=ov.querySelector('#simCheckBody');
+  const matches=computeSimilarMatches(file.name);
+  const top=matches[0];
+  const topScore=top?top.score:0;
+  let verdict, vClass, vDesc, recommend;
+  if(topScore>=82){ verdict='중복 가능성 높음'; vClass='dup'; vDesc='거의 동일한 문서가 이미 등록되어 있습니다. 신규 등록 시 RAG 검색 품질이 저하될 수 있어 <b>기존 문서 버전 업데이트</b>를 권장합니다.'; recommend='update'; }
+  else if(topScore>=55){ verdict='유사 문서 존재'; vClass='sim'; vDesc='내용이 겹치는 문서가 있습니다. 중복 청크가 생기지 않도록 <b>기존 문서와 비교 후</b> 등록 방식을 선택하세요.'; recommend='review'; }
+  else { verdict='신규 문서'; vClass='new'; vDesc='기존 지식베이스와 중복도가 낮습니다. <b>신규 문서로 안전하게 등록</b>할 수 있습니다.'; recommend='new'; }
+
+  const ringColor = vClass==='dup'?'var(--r)':vClass==='sim'?'var(--a)':'var(--g)';
+  const matchRows = matches.length ? matches.map(m=>{
+    const sc=m.score, bar=sc, col=sc>=82?'var(--r)':sc>=55?'var(--a)':'var(--g)';
+    return `<div class="sim-match">
+      <div class="sim-match-top">
+        <span class="sim-match-nm">${escHtml(m.name)}</span>
+        <span class="sim-match-score" style="color:${col}">${sc}%</span>
+      </div>
+      <div class="sim-match-meta">${escHtml(m.team)} · v${m.ver} · ${m.owner} · ${m.date} · ${m.chunks} chunks</div>
+      <div class="sim-match-bar"><i style="width:${bar}%;background:${col}"></i></div>
+    </div>`;
+  }).join('') : `<div class="sim-empty">비교 대상 문서가 없습니다 — 신규 등록 가능</div>`;
+
+  body.innerHTML=`
+    <div class="sim-file">
+      <span class="sim-file-ic">${file.icon||'📄'}</span>
+      <div class="sim-file-info"><div class="sim-file-nm">${escHtml(file.name)}</div><div class="sim-file-meta">${file.size||'—'} MB · 업로드 대기</div></div>
+    </div>
+    <div class="sim-verdict ${vClass}">
+      <div class="sim-ring" style="--ring:${ringColor};--pct:${topScore}"><span>${topScore}<small>%</small></span></div>
+      <div class="sim-verdict-body">
+        <div class="sim-verdict-t">${verdict}</div>
+        <div class="sim-verdict-d">${vDesc}</div>
+      </div>
+    </div>
+    <div class="sim-section-t">📚 유사 문서 Top ${matches.length||0} <span class="sim-section-hint">제목·내용·문서종류 기반 유사도</span></div>
+    <div class="sim-matches">${matchRows}</div>
+    <div class="sim-actions">
+      <button class="sim-btn ghost" onclick="closeSimCheck();__simDecide('cancel')">취소</button>
+      <button class="sim-btn ${recommend==='update'?'':'soft'}" onclick="closeSimCheck();__simDecide('new')">＋ 신규로 등록${recommend==='new'?' <span class="sim-rec">권장</span>':''}</button>
+      ${top?`<button class="sim-btn ${recommend==='update'?'primary':'soft'}" onclick="closeSimCheck();__simDecide('update')">♻ 기존 문서 업데이트${recommend==='update'?' <span class="sim-rec light">권장</span>':''}</button>`:''}
+    </div>`;
+  window.__simDecide=function(decision){ cb(decision, top||null); window.__simDecide=null; };
+  ov.classList.add('sh');
 }
 
 // ─── Folder + Delete ───
@@ -1585,72 +1702,69 @@ window.addEventListener('load', function(){
 // Also try immediately in case load already fired
 setTimeout(initSourceViewer, 50);
 
-// Resize handle for right panel — improved UX
+// Resize handle for right panel — driven by --rp-w CSS var so it beats the
+// `.rp.sh{width:...!important}` rule that previously froze the panel width.
 (function(){
   const handle = document.getElementById('rpResize');
   const rp = document.getElementById('rp');
   if(!handle||!rp) return;
+  const root = document.documentElement;
+  const MIN=300, MAX=760, DEFAULT=400;
+  const SNAP_SIZES=[320,360,400,460,540,640];
   let isDragging=false, startX=0, startW=0;
-  const SNAP_SIZES=[320,380,460,560,640];
 
-  function snapWidth(w){
-    // Snap to closest preset if within 24px
-    for(const s of SNAP_SIZES){
-      if(Math.abs(w-s)<24) return s;
-    }
+  function setW(w, persist){
+    w=Math.max(MIN, Math.min(MAX, Math.round(w)));
+    root.style.setProperty('--rp-w', w+'px');
+    if(persist){ try{ localStorage.setItem('vaatz-rp-w', String(w)); }catch(e){} }
     return w;
   }
+  function snapWidth(w){
+    for(const s of SNAP_SIZES){ if(Math.abs(w-s)<22) return s; }
+    return w;
+  }
+  // Restore saved width on load
+  try{
+    const saved=parseInt(localStorage.getItem('vaatz-rp-w'),10);
+    setW(isNaN(saved)?DEFAULT:saved, false);
+  }catch(e){ setW(DEFAULT,false); }
 
-  handle.addEventListener('mousedown', function(e){
-    isDragging=true; startX=e.clientX;
+  function beginDrag(clientX){
+    isDragging=true; startX=clientX;
     startW=rp.getBoundingClientRect().width;
     handle.classList.add('dragging');
     document.body.style.cursor='col-resize';
     document.body.style.userSelect='none';
-    // Disable transition while dragging for responsiveness
     rp.style.transition='none';
-    e.preventDefault();
-  });
-
-  // Touch support
-  handle.addEventListener('touchstart', function(e){
-    isDragging=true; startX=e.touches[0].clientX;
-    startW=rp.getBoundingClientRect().width;
-    handle.classList.add('dragging');
-    rp.style.transition='none';
-    e.preventDefault();
-  },{passive:false});
-
-  document.addEventListener('mousemove', function(e){
+  }
+  function moveDrag(clientX){
     if(!isDragging) return;
-    const raw=Math.max(280, Math.min(720, startW-(e.clientX-startX)));
-    rp.style.width=raw+'px'; rp.style.minWidth=raw+'px';
-  });
-  document.addEventListener('touchmove', function(e){
-    if(!isDragging) return;
-    const raw=Math.max(280, Math.min(720, startW-(e.touches[0].clientX-startX)));
-    rp.style.width=raw+'px'; rp.style.minWidth=raw+'px';
-  },{passive:false});
-
+    // Panel is on the right → dragging left (negative delta) widens it
+    setW(startW-(clientX-startX), false);
+  }
   function endDrag(){
     if(!isDragging) return;
     isDragging=false;
     handle.classList.remove('dragging');
     document.body.style.cursor=''; document.body.style.userSelect='';
-    // Snap and restore transition
-    const snapped=snapWidth(rp.getBoundingClientRect().width);
     rp.style.transition='';
-    rp.style.width=snapped+'px'; rp.style.minWidth=snapped+'px';
+    setW(snapWidth(rp.getBoundingClientRect().width), true);
   }
+
+  handle.addEventListener('mousedown', function(e){ beginDrag(e.clientX); e.preventDefault(); });
+  handle.addEventListener('touchstart', function(e){ beginDrag(e.touches[0].clientX); e.preventDefault(); },{passive:false});
+  document.addEventListener('mousemove', function(e){ moveDrag(e.clientX); });
+  document.addEventListener('touchmove', function(e){ if(isDragging){ moveDrag(e.touches[0].clientX); e.preventDefault(); } },{passive:false});
   document.addEventListener('mouseup', endDrag);
   document.addEventListener('touchend', endDrag);
 
   // Double-click to reset to default
   handle.addEventListener('dblclick', function(){
     rp.style.transition='width .3s var(--ease),min-width .3s var(--ease)';
-    rp.style.width='360px'; rp.style.minWidth='360px';
+    setW(DEFAULT, true);
     setTimeout(()=>rp.style.transition='',350);
   });
+  handle.title='드래그하여 패널 너비 조절 · 더블클릭으로 기본값';
 })();
 
 // Make new chat responses also have citation infrastructure (basic)
@@ -1847,16 +1961,34 @@ sendMessage = function(){
 
   function buildAdminTabs(){
     const tab=$('.adm-t'); if(!tab) return;
+    // Depth별 그룹핑: 운영 홈 / 문서 승인 워크플로우(3탭=1스텝) / AI·데이터 / 시스템
     tab.innerHTML=`
-      <button class="atb on" onclick="at(this,'p-req')">🏠 운영 홈</button>
-      <button class="atb" onclick="at(this,'p-quality')">📊 AI 품질</button>
-      <button class="atb" onclick="at(this,'p-team')">📁 팀별 폴더</button>
-      <button class="atb" onclick="at(this,'p-final')">✅ 최종 승인</button>
-      <button class="atb" onclick="at(this,'p-list')">📚 최종 리스트</button>
-      <button class="atb" onclick="at(this,'p-datamart')">🔗 데이터마트</button>
-      <button class="atb" onclick="at(this,'p-mode')">🧭 AI 모드·DB</button>
-      <button class="atb" onclick="at(this,'p-sec-policy')">🔒 보안등급</button>
-      <button class="atb" onclick="at(this,'p-usr')">👥 사용자·권한</button>
+      <button class="atb atb-home on" onclick="at(this,'p-req')">🏠 운영 홈</button>
+      <span class="adm-t-grp">
+        <span class="adm-t-grp-label">📋 문서 승인 워크플로우</span>
+        <span class="adm-t-grp-tabs">
+          <button class="atb atb-wf" onclick="at(this,'p-team')"><span class="atb-step">1</span>📁 팀별 폴더</button>
+          <span class="atb-wf-arrow">›</span>
+          <button class="atb atb-wf" onclick="at(this,'p-final')"><span class="atb-step">2</span>✅ 최종 승인</button>
+          <span class="atb-wf-arrow">›</span>
+          <button class="atb atb-wf" onclick="at(this,'p-list')"><span class="atb-step">3</span>📚 최종 리스트</button>
+        </span>
+      </span>
+      <span class="adm-t-grp">
+        <span class="adm-t-grp-label">🧠 AI · 데이터</span>
+        <span class="adm-t-grp-tabs">
+          <button class="atb" onclick="at(this,'p-quality')">📊 AI 품질</button>
+          <button class="atb" onclick="at(this,'p-mode')">🧭 AI 모드·DB</button>
+          <button class="atb" onclick="at(this,'p-datamart')">🔗 데이터마트</button>
+        </span>
+      </span>
+      <span class="adm-t-grp">
+        <span class="adm-t-grp-label">⚙️ 시스템</span>
+        <span class="adm-t-grp-tabs">
+          <button class="atb" onclick="at(this,'p-sec-policy')">🔒 보안등급</button>
+          <button class="atb" onclick="at(this,'p-usr')">👥 사용자·권한</button>
+        </span>
+      </span>
     `;
   }
   window.at=function(b,id){ $$('.atb').forEach(t=>t.classList.remove('on')); if(b)b.classList.add('on'); $$('.adm-b').forEach(e=>e.style.display='none'); const sec=$('#'+id); if(sec) sec.style.display='block'; };
@@ -2688,11 +2820,11 @@ sendMessage = function(){
       all:['작성·보완중','보완 요청','등록 요청됨','AI 검색 반영완료']
     };
     var stepLabels={
-      1:{title:'📤 파일 업로드 단계', pill:'amber', action:function(d){return '<button class="v23-btn primary" style="padding:3px 9px;font-size:10px" onclick="requestAIDoc(\''+d.id+'\',this)">✈ 등록요청</button>';}},
-      2:{title:'🔍 팀 검토·보완 단계', pill:'red',   action:function(d){return '<button class="v23-btn" style="padding:3px 9px;font-size:10px" onclick="openAdminTab(\'p-team\')">팀 폴더 →</button>';}},
-      3:{title:'⏳ 시스템 승인 대기',  pill:'blue',  action:function(d){return '<button class="v23-btn primary" style="padding:3px 9px;font-size:10px" onclick="openAdminTab(\'p-final\')">검토 →</button>';}},
-      4:{title:'🧠 AI DB 반영 완료',   pill:'green', action:function(d){return '<button class="v23-btn good" style="padding:3px 9px;font-size:10px" onclick="openAdminTab(\'p-list\')">리스트 확인 →</button>';}},
-      all:{title:'🗂 전체 문서 목록',  pill:'',      action:function(d){
+      1:{title:'📤 파일 업로드 단계', pill:'amber', summary:'팀원이 업로드·작성 중인 문서입니다. <b>AI 등록요청</b>을 보내면 팀 검토 단계로 넘어갑니다.', action:function(d){return '<button class="v23-btn primary" style="padding:3px 9px;font-size:10px" onclick="requestAIDoc(\''+d.id+'\',this)">✈ 등록요청</button>';}},
+      2:{title:'🔍 팀 검토·보완 단계', pill:'red',   summary:'팀 Admin이 보완을 요청한 문서입니다. 수정 후 다시 등록요청해야 시스템 승인으로 넘어갑니다.', action:function(d){return '<button class="v23-btn" style="padding:3px 9px;font-size:10px" onclick="openAdminTab(\'p-team\')">팀 폴더 →</button>';}},
+      3:{title:'⏳ 시스템 승인 대기',  pill:'blue',  summary:'System Admin의 최종 승인·보안등급 지정을 기다리는 문서입니다. 승인 시 AI 임베딩이 시작됩니다.', action:function(d){return '<button class="v23-btn primary" style="padding:3px 9px;font-size:10px" onclick="openAdminTab(\'p-final\')">검토 →</button>';}},
+      4:{title:'🧠 AI DB 반영 완료',   pill:'green', summary:'임베딩이 끝나 AI 검색에 실시간 반영된 문서입니다. 최종 리스트에서 버전·이력을 관리합니다.', action:function(d){return '<button class="v23-btn good" style="padding:3px 9px;font-size:10px" onclick="openAdminTab(\'p-list\')">리스트 확인 →</button>';}},
+      all:{title:'🗂 전체 문서 목록',  pill:'',      summary:'4단계 파이프라인의 모든 문서입니다. 상태 배지로 각 문서의 현재 단계를 확인할 수 있습니다.', action:function(d){
         var sCls=d.status==='AI 검색 반영완료'?'green':d.status==='등록 요청됨'?'blue':d.status==='보완 요청'?'red':'amber';
         return '<span class="v23-pill '+sCls+'" style="font-size:9px">'+d.status+'</span>';
       }}
@@ -2747,6 +2879,7 @@ sendMessage = function(){
           '<button class="v23-btn" style="padding:3px 9px;font-size:10px;margin-left:4px" onclick="filterAdminHomeStep(\''+step+'\')">✕</button>'+
         '</div>'+
       '</div>'+
+      (info.summary?'<div class="v23hf-summary">💡 '+info.summary+'</div>':'')+
       '<div class="v23hf-list">'+
         (rows||'<div style="padding:20px;color:var(--text-4);text-align:center">해당 단계에 문서가 없습니다.</div>')+
         (docs.length>80?'<div style="padding:10px;text-align:center;font-size:11px;color:var(--text-3)">+ '+(docs.length-80)+'건 더 있음 — 팀 폴더 탭에서 전체 확인 가능</div>':'')+
@@ -2939,8 +3072,20 @@ sendMessage = function(){
     var catLabel=catLabels[cat]||cat;
     var subLabel=subLabels[sub]||'';
     var path=teamName+' › '+catLabel+(subLabel?' › '+subLabel:'');
-    document.getElementById('v36UploadModal')?.remove();
-    safeToast('📤 '+path+' — 등록 요청이 System Admin에게 전달됐습니다. (보안: '+sec+', 사유: '+reason+')','✅',4000);
+    // 첫 번째 선택 파일명 → RAG 중복 검증 게이트
+    var firstName=(document.querySelector('#v36FileList .v36-file-chip span')?.textContent||'').trim()||'신규_문서.pdf';
+    var firstExt=(firstName.split('.').pop()||'pdf').toLowerCase();
+    var firstIc={pdf:'📄',docx:'📝',xlsx:'📊',ppt:'📑',pptx:'📑',hwp:'📋'}[firstExt]||'📄';
+    var proceed=function(decision, match){
+      if(decision==='cancel') return;
+      document.getElementById('v36UploadModal')?.remove();
+      if(decision==='update' && match)
+        safeToast('♻ '+path+' — 기존 「'+match.name+'」 버전 업데이트로 등록 요청했습니다. 중복 임베딩 없이 교체됩니다.','✅',4200);
+      else
+        safeToast('📤 '+path+' — 신규 등록 요청이 System Admin에게 전달됐습니다. (보안: '+sec+', 사유: '+reason+')','✅',4000);
+    };
+    if(typeof checkDocSimilarity==='function') checkDocSimilarity({name:firstName, icon:firstIc, size:'—'}, proceed);
+    else proceed('new', null);
   };
 
   window.openTeamFolderModal=function(team, focus){
@@ -2957,8 +3102,8 @@ sendMessage = function(){
     body.innerHTML=rows.map(d=>`<tr><td><input type="checkbox" class="check-lg team-doc-check" data-id="${d.id}"></td><td><div class="doc-name-strong">${esc(d.name)}</div><div class="doc-subtle">${d.date} · ${d.chunks} chunks · ${esc(d.team)}</div></td><td>${d.type}</td><td>${secPill(d.sec)}</td><td>${modeBadge(d.mode)}</td><td>${d.version}</td><td>${esc(d.owner)}</td><td>${statusPill(d.status)}</td><td><div class="row-actions"><button class="v23-btn" onclick="previewTeamDoc('${d.id}')">미리보기</button><button class="v23-btn primary" onclick="requestOneTeamDoc('${d.id}',this)">등록 요청됨</button></div></td></tr>`).join('') || `<tr><td colspan="9" style="text-align:center;padding:30px;color:var(--text-4)">검색 결과가 없습니다.</td></tr>`;
   };
   window.toggleTeamDocAll=function(chk){ $$('.team-doc-check').forEach(c=>c.checked=chk.checked); };
-  window.submitSelectedTeamDocs=function(){ const checked=$$('.team-doc-check:checked'); if(!checked.length){safeToast('등록 요청됨할 문서를 선택해주세요.','⚠️');return} checked.forEach(c=>{const d=teamDocs.find(x=>x.id===c.dataset.id); if(d)d.status='등록 요청됨'}); safeToast(`${checked.length}건을 System Admin 최종 승인 대기열로 보냈습니다.`,'🚀'); renderTeamDocRows(); renderAdmin(); };
-  window.requestOneTeamDoc=function(id,btn){ const d=teamDocs.find(x=>x.id===id); if(d){d.status='등록 요청됨'; safeToast(`${d.name} 등록 요청됨 완료`,'🚀'); btn.closest('tr')?.querySelector('td:nth-child(8)') && (btn.closest('tr').querySelector('td:nth-child(8)').innerHTML=statusPill('등록 요청됨')); renderAdmin();} };
+  window.submitSelectedTeamDocs=function(){ const checked=$$('.team-doc-check:checked'); if(!checked.length){safeToast('등록 요청할 문서를 선택해주세요.','⚠️');return} checked.forEach(c=>{const d=teamDocs.find(x=>x.id===c.dataset.id); if(d)d.status='등록 요청됨'}); safeToast(`${checked.length}건을 System Admin 최종 승인 대기열로 보냈습니다.`,'🚀'); renderTeamDocRows(); renderAdmin(); };
+  window.requestOneTeamDoc=function(id,btn){ const d=teamDocs.find(x=>x.id===id); if(d){d.status='등록 요청됨'; safeToast(`${d.name} 등록 요청 완료`,'🚀'); btn.closest('tr')?.querySelector('td:nth-child(8)') && (btn.closest('tr').querySelector('td:nth-child(8)').innerHTML=statusPill('등록 요청됨')); renderAdmin();} };
   window.previewTeamDoc=function(id){ const d=teamDocs.find(x=>x.id===id); if(!d)return; safeToast(`${d.name} 미리보기: 보안 ${d.sec}, ${d.mode}, ${d.chunks} chunks`,'🔎',3200); };
   /* ─── ⚡ 스마트 최종 승인 함수 (v37) ─── */
   window.approveFinalRow=function(btn){var el=btn.closest('.approval-card')||btn.closest('.v23-final-row')||btn.closest('tr');if(el){el.style.opacity='.35';el.style.pointerEvents='none';}safeToast('최종 승인 완료: AI DB에 반영됩니다.','✅');};
@@ -3337,7 +3482,7 @@ sendMessage = function(){
  function renderAdminV25(){renderFinalList();renderMode();renderDatamart()}
  window.openTeamFolderModal=function(team){activeTeam=team||activeTeam;activeTeamFolder='all';let m=$('#teamFolderModal');if(!m)return;m.innerHTML=`<div class="large-box" style="width:min(1220px,96vw)"><div class="large-hd"><div><div class="large-title">📁 ${activeTeam} 문서함</div><div class="large-sub">폴더별로 문서를 분류하고, 선택 항목을 System Admin 최종 승인으로 요청합니다.</div></div><button class="large-close" onclick="closeTeamFolderModal()">✕</button></div><div class="large-toolbar"><label style="font-size:11px;color:var(--text-4);display:flex;gap:6px"><input type="checkbox" class="check-lg" onchange="toggleTeamDocAll(this)"> 전체 선택</label><div class="large-search"><span>🔍</span><input id="teamDocSearch" placeholder="문서명, 담당자, 모드, 보안등급 검색" oninput="renderTeamDocRows()"></div><select class="frm-i frm-sel" id="teamDocStatusFilter" style="width:135px" onchange="renderTeamDocRows()"><option value="">전체 상태</option><option>작성·보완중</option><option>등록 요청됨</option><option>보완 요청</option><option>AI 검색 반영완료</option></select><button class="v25-btn primary" onclick="submitSelectedTeamDocs()">🚀 선택 등록 요청됨</button></div><div class="large-body"><div class="v25-folder-layout"><div class="v25-folder-tree"><div class="v25-folder-head">${activeTeam} 폴더</div>${folders.map(f=>`<button class="v25-folder ${f[0]==='all'?'on':''}" onclick="selectTeamFolder('${f[0]}',this)"><span>${f[1]} ${f[2]}</span><span class="cnt">${f[0]==='all'?docs.filter(d=>d.team===activeTeam).length:docs.filter(d=>d.team===activeTeam&&d.folder===f[0]).length}</span></button>`).join('')}</div><div style="overflow:auto"><table class="large-table"><thead><tr><th></th><th>문서명</th><th>유형</th><th>보안</th><th>AI 모드</th><th>버전</th><th>담당자</th><th>상태</th><th>작업</th></tr></thead><tbody id="teamDocRows"></tbody></table></div></div></div></div>`;m.classList.add('sh');renderTeamRows()}
  function renderTeamRows(){let q=($('#teamDocSearch')?.value||'').toLowerCase(),st=$('#teamDocStatusFilter')?.value||'';let l=docs.filter(d=>d.team===activeTeam&&(activeTeamFolder==='all'||d.folder===activeTeamFolder)&&(!q||(d.name+d.owner+d.sec+d.modes.join(' ')).toLowerCase().includes(q))&&(!st||d.status===st));$('#teamDocRows')&&($('#teamDocRows').innerHTML=l.map(d=>`<tr><td><input type="checkbox" class="check-lg team-doc-check" data-id="${d.id}"></td><td><div class="v25-doc-title">${esc(d.name)}</div><div class="v25-doc-path">/${folders.find(f=>f[0]===d.folder)?.[2]} · ${d.chunks} chunks</div></td><td>${d.type}</td><td>${secPill(d.sec)}</td><td><div class="v25-mode-set">${modeBtns(d)}</div></td><td>${d.ver}</td><td>${d.owner}</td><td>${statPill(d.status)}</td><td><button class="v25-btn primary" onclick="requestOneTeamDoc('${d.id}')">등록 요청됨</button></td></tr>`).join(''))}
- window.selectTeamFolder=(id,btn)=>{activeTeamFolder=id;$$('#teamFolderModal .v25-folder').forEach(b=>b.classList.remove('on'));btn?.classList.add('on');renderTeamRows()};window.renderTeamDocRows=renderTeamRows;window.toggleTeamDocAll=chk=>$$('#teamFolderModal .team-doc-check').forEach(c=>c.checked=chk.checked);window.submitSelectedTeamDocs=()=>{let ids=$$('#teamFolderModal .team-doc-check:checked').map(c=>c.dataset.id);if(!ids.length)return say('등록 요청됨할 문서를 선택해주세요.','⚠️');ids.forEach(id=>{let d=docs.find(x=>x.id===id);if(d)d.status='등록 요청됨'});renderTeamRows();say(`${ids.length}건을 최종 승인 대기열로 보냈습니다.`,'🚀')};window.requestOneTeamDoc=id=>{let d=docs.find(x=>x.id===id);if(d)d.status='등록 요청됨';renderTeamRows();say('등록 요청됨 완료','🚀')};
+ window.selectTeamFolder=(id,btn)=>{activeTeamFolder=id;$$('#teamFolderModal .v25-folder').forEach(b=>b.classList.remove('on'));btn?.classList.add('on');renderTeamRows()};window.renderTeamDocRows=renderTeamRows;window.toggleTeamDocAll=chk=>$$('#teamFolderModal .team-doc-check').forEach(c=>c.checked=chk.checked);window.submitSelectedTeamDocs=()=>{let ids=$$('#teamFolderModal .team-doc-check:checked').map(c=>c.dataset.id);if(!ids.length)return say('등록 요청할 문서를 선택해주세요.','⚠️');ids.forEach(id=>{let d=docs.find(x=>x.id===id);if(d)d.status='등록 요청됨'});renderTeamRows();say(`${ids.length}건을 최종 승인 대기열로 보냈습니다.`,'🚀')};window.requestOneTeamDoc=id=>{let d=docs.find(x=>x.id===id);if(d)d.status='등록 요청됨';renderTeamRows();say('등록 요청 완료','🚀')};
  function memoModal(){if($('#v25MemoModal'))return;document.body.insertAdjacentHTML('beforeend',`<div class="v25-memo-modal" id="v25MemoModal" onclick="if(event.target===this)closeMemoModal()"><div class="v25-memo-box"><div class="v25-memo-list"><div class="v25-memo-h"><span>📝 내 메모</span><button class="v25-btn primary" onclick="newMemo()">＋</button></div><div class="v25-memo-items"><div class="v25-memo-item on"><div class="v25-memo-title">탄력적입찰 핵심 정리</div><div class="v25-memo-meta">오늘 · AI 답변 저장</div></div><div class="v25-memo-item"><div class="v25-memo-title">수의계약 체크리스트</div><div class="v25-memo-meta">어제 · 커뮤니티 답변</div></div></div></div><div class="v25-memo-editor"><div class="v25-memo-editor-h"><input id="v25MemoTitle" value="탄력적입찰 핵심 정리"><button class="large-close" onclick="closeMemoModal()">✕</button></div><textarea id="v25MemoBody">• 탄력적입찰: 순위만 공개\n• 경매입찰: 최저가 실시간 공개\n• 5분 전 제출 시 자동 연장\n• 3스타 이상 업체 참여 가능</textarea><div class="v25-memo-foot"><span style="font-size:11px;color:var(--text-4)">AI 답변, 원문 하이라이트, 커뮤니티 답변을 저장할 수 있습니다.</span><button class="v25-btn primary" onclick="saveMemo()">저장</button></div></div></div></div>`)} window.openMemoModal=()=>{memoModal();$('#v25MemoModal').classList.add('sh')};window.closeMemoModal=()=>$('#v25MemoModal')?.classList.remove('sh');window.newMemo=()=>{$('#v25MemoTitle').value='새 메모';$('#v25MemoBody').value=''};window.saveMemo=()=>say('메모가 저장되었습니다.','✅');window.saveAnswerToMemo=btn=>{openMemoModal();$('#v25MemoTitle').value='저장한 커뮤니티 답변';$('#v25MemoBody').value=btn.closest('.v25-answer')?.innerText||'저장한 답변';say('답변을 메모장에 불러왔습니다.','⭐')};
  function improveCompanion(){let p=$('#companionCard .companion-panel'); if(p){p.classList.add('v25-panel');p.innerHTML=`<button class="companion-action" onclick="openMemoModal()">📝 내 메모</button><button class="companion-action" onclick="say('저장한 답변함을 열었습니다.','⭐')">⭐ 저장답변</button><button class="companion-action" onclick="openComm('qa')">💡 커뮤니티</button><button class="companion-action" onclick="openMypage()">👤 마이페이지</button><button class="companion-action" onclick="openComm('char')">🧸 캐릭터</button><button class="companion-action" onclick="openHistory()">📜 기록장</button><div class="companion-admin-divider">Admin 권한 사용자 전용</div><button class="companion-action" onclick="oa();openAdminTab('p-final')">✅ 최종 승인</button><button class="companion-action" onclick="oa();openAdminTab('p-mode')">🧭 모드관리</button>`}let main=$('#companionCard .companion-main'); if(main){main.classList.add('general'); let msg=$('#companionMsg'); if(msg)msg.textContent='메모·커뮤니티·캐릭터를 빠르게 열어보세요.'}}
  const oldOpenComm=window.openComm; window.openComm=function(tab){oldOpenComm&&oldOpenComm(tab); if(tab==='qa'||!tab)renderQna()}; const oldOpenAdminTab=window.openAdminTab; window.openAdminTab=function(id){oldOpenAdminTab&&oldOpenAdminTab(id); setTimeout(()=>{renderAdminV25(); let b=[...$$('.atb')].find(x=>x.getAttribute('onclick')?.includes(id)); window.at&&window.at(b,id)},0)}; const oldSubmitQuestion=window.submitQuestion; window.submitQuestion=function(){let title=$('#qTitleInput')?.value.trim(),body=$('#qBodyInput')?.value.trim(),cat=$('#qCatSel')?.value||'일반'; if(!title||!body){oldSubmitQuestion&&oldSubmitQuestion();return}qa.unshift({id:Date.now(),cat,status:'NEW',votes:0,answers:0,title,body,author:'프로큐어히어로',time:'방금'});$('#qWriteM')?.classList.remove('sh');renderQna();say('질문이 등록되었습니다.','✅')};
