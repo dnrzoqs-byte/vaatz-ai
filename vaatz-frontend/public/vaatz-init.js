@@ -2098,6 +2098,9 @@ sendMessage = function(){
         btn=`<button class="v23-btn good tf-req-btn" style="padding:3px 9px;font-size:10px;white-space:nowrap;flex-shrink:0" onclick="event.stopPropagation();openAdminTab('p-list')">✅ 리스트 확인 ↗</button>`;
       const sCls=d.status==='AI 검색 반영완료'?'green':d.status==='등록 요청됨'?'blue':d.status==='보완 요청'?'red':'amber';
       const reasonHtml=(d.status==='보완 요청'&&d.rejectReason)?`<div class="tf-reject-reason">↩ 보완 사유: ${esc(d.rejectReason)}</div>`:'';
+      // 담당자가 직접 처리: 보완 요청·작성중 문서는 재요청 외 '삭제'도 가능
+      const delBtn=(d.status==='보완 요청'||d.status==='작성·보완중')
+        ?`<button class="v23-btn danger tf-del-btn" style="padding:3px 8px;font-size:10px;white-space:nowrap;flex-shrink:0" onclick="event.stopPropagation();deleteTeamDoc('${d.id}',this)" title="문서 삭제">🗑 삭제</button>`:'';
       return `<div class="tf-file-row" data-doc-id="${d.id}" data-status="${d.status}" data-text="${(d.name+' '+d.team+' '+d.owner).toLowerCase()}">
         <span class="tf-file-ic">${ic}</span>
         <div class="tf-file-info">
@@ -2106,7 +2109,7 @@ sendMessage = function(){
           ${reasonHtml}
         </div>
         <span class="v23-pill ${sCls} tf-file-status" style="flex-shrink:0;font-size:9px">${d.status}</span>
-        ${btn}
+        ${btn}${delBtn}
       </div>`;
     }
     function tfTeamTree(t){
@@ -2922,6 +2925,16 @@ sendMessage = function(){
     });
     safeToast((wasRework?'🔄 재확인·재업로드 완료 — ':'🚀 ')+'최종 승인 대기열에 추가됐습니다. [최종 승인] 탭에서 검토하세요.','🚀',3000);
   };
+  // ── 담당자가 보완 요청/작성중 문서를 직접 삭제 ──────────────
+  window.deleteTeamDoc = function(id, btn){
+    var d = teamDocs.find(function(x){return x.id===id;});
+    if(!d) return;
+    if(!window.confirm('["'+d.name+'"] 문서를 삭제할까요?\n삭제하면 담당자 폴더에서 제거되며 되돌릴 수 없습니다.')) return;
+    var i = teamDocs.indexOf(d); if(i>=0) teamDocs.splice(i,1);
+    var row = btn ? btn.closest('.tf-file-row') : document.querySelector('[data-doc-id="'+id+'"]');
+    if(row){ row.style.transition='opacity .2s, transform .2s'; row.style.opacity='0'; row.style.transform='translateX(-10px)'; setTimeout(function(){ row.remove(); }, 200); }
+    safeToast('🗑 ['+(d.name.length>22?d.name.slice(0,22)+'…':d.name)+'] 삭제 완료','🗑',2200);
+  };
   // ── 업로드 모달 (카테고리·소분류 combo 포함) ────────────────
   window.openUploadModal = function(teamName, preCatId, preSubId){
     var existingModal=document.getElementById('v36UploadModal');
@@ -3632,8 +3645,10 @@ sendMessage = function(){
   window.approveV25Final=function(btn){const card=btn.closest('.v25-final-card'); if(card){card.style.opacity='.38';card.style.pointerEvents='none'} window.say&&say('최종 승인 완료: 선택된 모드별 RAG Index에 독립 반영됩니다.','✅')};
   window.rejectV25Final=function(btn){const card=btn.closest('.v25-final-card'); if(card){card.style.opacity='.38';card.style.pointerEvents='none'} window.say&&say('보완 요청 처리했습니다. 팀 Admin에게 보완 요청 알림을 보냈습니다.','↩️')};
   function renderFinal(){const el=$('#p-final'); if(!el)return; el.innerHTML=`<div class="v23-admin-title"><div><div class="v23-title-main">System Admin 최종 승인</div><div class="v23-title-sub">팀 Admin이 등록 요청됨한 문서를 검토합니다. 여기서 통합 폴더, 보안등급, 그리고 여러 AI 모드 연결 여부를 독립적으로 확정합니다.</div></div><div class="v23-actions"><button class="v25-btn warn">보완 요청 사유 템플릿</button><button class="v25-btn primary" onclick="say('화면의 승인 대상을 일괄 승인했습니다.','✅')">화면 내 일괄 승인</button></div></div><div style="display:grid;grid-template-columns:1.25fr .85fr;gap:12px"><div class="v25-list">${finalDocs.map(d=>`<div class="v25-answer v25-final-card"><div style="display:flex;justify-content:space-between;gap:10px;align-items:flex-start"><div><div class="v25-doc-title" style="font-size:14px">${esc(d.name)}</div><div class="v25-doc-path">${esc(d.team)} · ${d.type} · 등록 요청됨 · 예상 214 chunks</div></div>${secPill(d.sec)}</div><div class="v25-tools" style="padding:10px 0 0;border:0;background:transparent"><select class="v25-select"><option>${d.folder}</option><option>구매규정·제도</option><option>입찰관리</option><option>VAATZ 매뉴얼</option><option>품질 5스타</option><option>원가·단가</option><option>일반자재·MRO</option></select><select class="v25-select"><option>${d.sec}</option><option>리더 전용</option><option>일반 공개</option><option>지정 사용자</option></select></div><div style="margin-top:10px"><div style="font-size:10px;color:var(--text-4);font-weight:900;text-transform:uppercase;letter-spacing:.7px;margin-bottom:6px">AI 모드 독립 반영</div><div class="v25-mode-set">${modeButtons(d)}</div></div><div style="display:flex;gap:6px;justify-content:flex-end;margin-top:12px"><button class="v25-btn" onclick="previewV25Final('${d.id}')">원문 보기</button><button class="v25-btn" onclick="rejectV25Final(this)">보완 요청</button><button class="v25-btn primary" onclick="approveV25Final(this)">최종 승인</button></div></div>`).join('')}</div><div class="v25-detail-panel"><div class="v23-panel-title" style="font-size:15px;margin-bottom:10px">🔎 승인 미리보기</div><div class="preview-doc-page" id="v25FinalPreview"><h4>문서 미리보기</h4><p>왼쪽 문서의 원문 보기를 클릭하면 요약, 하이라이트, 중복 문서 검사, 모드 반영 범위가 표시됩니다.</p><p>중요: 하나의 문서는 여러 AI 모드에 들어갈 수 있으며, 각 모드의 색인은 독립적으로 갱신됩니다.</p></div><div class="mode-note">Tip. 원가모드와 리더 전용 문서는 승인 로그와 접근 로그를 더 길게 보관하는 정책을 적용할 수 있습니다.</div></div></div>`}
-  const old=window.openAdminTab; window.openAdminTab=function(id){old&&old(id); setTimeout(()=>{if(id==='p-final')renderFinal()},20)};
-  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(renderFinal,140));else setTimeout(renderFinal,140);
+  // (v44) v25 renderFinal 이 최종 승인 탭을 옛 UI로 덮어쓰던 문제 해결:
+  //   최종 승인은 renderAdmin 의 개선 UI(처리 보드·레인·페이지네이션·반려 모달)로 렌더.
+  const old=window.openAdminTab; window.openAdminTab=function(id){old&&old(id); if(id==='p-final')setTimeout(function(){ if(window.refreshFinalApproval) window.refreshFinalApproval(); },20);};
+  // (boot 시 renderFinal 덮어쓰기 제거 — renderAdmin 이 이미 p-final 을 렌더함)
 })();
 
 
