@@ -62,9 +62,14 @@ export default function TopBar() {
           </button>
         </div>
 
-        <div className="web-tg-mini">
-          <span style={{ fontSize: 10 }}>🌐</span>
-          <div className="web-tg" id="webTg" onClick={() => window.toggleWeb?.()} />
+        <div
+          className="web-tg-mini"
+          onClick={() => window.toggleWeb?.()}
+          title="웹 검색 결과를 AI 답변에 반영합니다 (켜고 끄기)"
+        >
+          <span style={{ fontSize: 12 }}>🌐</span>
+          <span className="web-tg-label">웹 검색</span>
+          <div className="web-tg" id="webTg" />
         </div>
       </div>
 

@@ -889,12 +889,15 @@ function addNoti(icon,title,desc){
 
 // ─── v11: External Knowledge Toggle ───
 let webOn=false;
+window.webOn=false;   // §15 웹 검색 삽입 로직이 window.webOn 을 참조하므로 동기화 필수
 function toggleWeb(){
   webOn=!webOn;
-  document.getElementById('webTg').classList.toggle('on',webOn);
-  document.getElementById('webInd').classList.toggle('sh',webOn);
-  toast(webOn?'🌐 외부지식 활용 ON — 웹 검색 결과를 AI 응답에 반영합니다.':'🔒 외부지식 OFF — 내부 데이터만 사용합니다.',webOn?'🌐':'🔒',2500);
+  window.webOn=webOn;   // top-level let 은 window 에 자동 노출되지 않음 → 수동 동기화
+  var tg=document.getElementById('webTg'); if(tg) tg.classList.toggle('on',webOn);
+  var ind=document.getElementById('webInd'); if(ind) ind.classList.toggle('sh',webOn);
+  toast(webOn?'🌐 웹 검색 ON — 외부 웹 검색 결과를 AI 답변에 함께 반영합니다.':'🔒 웹 검색 OFF — 내부 지식 데이터만 사용합니다.',webOn?'🌐':'🔒',2500);
 }
+window.toggleWeb=toggleWeb;   // React TopBar 가 window.toggleWeb 로 호출
 
 // ─── v11: Mypage ───
 function openMypage(){

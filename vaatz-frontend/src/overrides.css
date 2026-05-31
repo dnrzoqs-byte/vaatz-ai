@@ -3504,9 +3504,13 @@ html:not([data-theme="light"]) #shopCharPreview {
   width: 14px;
 }
 .tf-team-tree-body {
-  padding: 4px 10px 8px;
+  padding: 4px 10px 8px 14px;
   background: var(--bg-1);
 }
+/* (#4) 폴더 계층 가독성 — 중첩 깊이를 들여쓰기 가이드선으로 표시 */
+.tf-team-tree-body { border-left: 2px solid var(--accent-bd); margin-left: 9px; }
+.tf-catfolder-body { margin-left: 12px; border-left: 2px solid var(--border-2); }
+.tf-subfolder-body { margin-left: 10px; border-left: 2px dashed var(--border-2); }
 
 /* ── 카테고리 폴더 ── */
 .tf-catfolder {
@@ -4175,50 +4179,7 @@ html:not([data-theme="light"]) #shopCharPreview {
  * Admin AI 품질 모니터링 + 개선 UI
  * ═══════════════════════════════════════════════════════════════ */
 
-/* ─── AI 품질 KPI 바 (운영 홈 Row 2) ─── */
-.v23-quality-bar {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr) auto;
-  gap: 10px;
-  margin: 12px 0 0;
-}
-.v23-qkpi {
-  background: var(--bg-2);
-  border: 1px solid var(--border-1);
-  border-radius: 12px;
-  padding: 14px 16px;
-  display: flex;
-  gap: 10px;
-  align-items: center;
-  cursor: pointer;
-  transition: .15s;
-}
-.v23-qkpi:hover { border-color: var(--accent); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(75,142,240,.15); }
-.v23-qkpi.warn { border-color: var(--a, #FFA726); background: rgba(255,167,38,.06); }
-.v23-qkpi-icon { font-size: 24px; flex-shrink: 0; }
-.v23-qkpi-val { font-size: 22px; font-weight: 900; color: var(--text-1); line-height: 1; }
-.v23-qkpi-unit { font-size: 13px; font-weight: 600; color: var(--text-3); margin-left: 2px; }
-.v23-qkpi-label { font-size: 11px; color: var(--text-3); margin-top: 3px; }
-.v23-qkpi-trend { font-size: 10px; font-weight: 600; margin-top: 3px; }
-.v23-qkpi-trend.up { color: var(--g, #26A69A); }
-.v23-qkpi-trend.down { color: #EF5350; }
-.v23-qkpi-more {
-  background: var(--accent);
-  color: #fff;
-  border-radius: 12px;
-  padding: 14px 16px;
-  font-size: 12px;
-  font-weight: 700;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  line-height: 1.5;
-  white-space: nowrap;
-  transition: .15s;
-}
-.v23-qkpi-more:hover { filter: brightness(1.08); }
+/* (운영 홈 AI 품질 KPI 바 제거됨 #1 → 관련 .v23-quality-bar/.v23-qkpi CSS 정리 #7) */
 
 /* ─── 최종 승인 개선 ─── */
 .v23-final-summary-bar {
@@ -4353,7 +4314,6 @@ html:not([data-theme="light"]) #shopCharPreview {
 .v23-ua-meta { font-size: 10.5px; color: var(--text-3); }
 
 @media (max-width: 900px) {
-  .v23-quality-bar { grid-template-columns: repeat(2, 1fr); }
   .v23-quality-grid { grid-template-columns: 1fr; }
 }
 
@@ -4539,3 +4499,27 @@ html:not([data-theme="light"]) #shopCharPreview {
 .sim-rec.light{background:rgba(255,255,255,.25)}
 .fl-ver-badge{display:inline-block;margin-left:6px;font-size:8px;font-weight:900;vertical-align:middle;
   background:var(--g-dim);color:var(--g);padding:1px 5px;border-radius:5px}
+
+/* ════════════════════════════════════════════════════════════
+   웹 검색 토글 노출 (요청: 켜고 끌 수 있게)
+   - index.css 의 .web-tg-mini{display:none!important} 를 덮어써 상단바에 노출
+   - 클릭하면 toggleWeb() 호출 → 🌐 외부지식(웹 검색) ON/OFF + 채팅 입력창 표시기
+   ════════════════════════════════════════════════════════════ */
+.tb-l .web-tg-mini{
+  display: inline-flex !important;
+  align-items: center;
+  gap: 7px;
+  padding: 5px 11px;
+  margin-left: 6px;
+  background: var(--bg-3);
+  border: 1px solid var(--border-1);
+  border-radius: 999px;
+  cursor: pointer;
+  user-select: none;
+  transition: border-color .15s, background .15s;
+}
+.tb-l .web-tg-mini:hover{ border-color: var(--accent-bd); background: var(--bg-4); }
+.web-tg-label{ font-size: 12px; font-weight: 700; color: var(--text-2); white-space: nowrap; }
+/* 켜진 상태 강조 */
+.web-tg-mini:has(.web-tg.on){ border-color: var(--accent-bd); background: var(--accent-dim); }
+.web-tg-mini:has(.web-tg.on) .web-tg-label{ color: var(--accent); }
