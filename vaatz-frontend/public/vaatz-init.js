@@ -7367,13 +7367,13 @@ window.vaatzClaimQuest = function(id){
 
   /* 5개 영역 정의 */
   var AREAS = [
-    { id:'purchase', name:'구매',     icon:'🛒' },
-    { id:'dev',      name:'개발',     icon:'💻' },
-    { id:'quality',  name:'품질',     icon:'✅' },
-    { id:'manage',   name:'관리',     icon:'📋' },
-    { id:'common',   name:'구매공통', icon:'🔗' }
+    { id:'purchase', name:'구매',     icon:'🛒', c:'#4b8ef0' },
+    { id:'dev',      name:'개발',     icon:'💻', c:'#8b7cf0' },
+    { id:'quality',  name:'품질',     icon:'✅', c:'#2bb673' },
+    { id:'manage',   name:'관리',     icon:'📋', c:'#e0a13a' },
+    { id:'common',   name:'구매공통', icon:'🔗', c:'#1fb6b6' }
   ];
-  function areaInfo(id){ for(var i=0;i<AREAS.length;i++){ if(AREAS[i].id===id) return AREAS[i]; } return {id:id,name:id,icon:'🤖'}; }
+  function areaInfo(id){ for(var i=0;i<AREAS.length;i++){ if(AREAS[i].id===id) return AREAS[i]; } return {id:id,name:id,icon:'🤖',c:'#4b8ef0'}; }
 
   /* 데모 에이전트 데이터 (세션 유지) */
   function seedAgents(){
@@ -7385,6 +7385,7 @@ window.vaatzClaimQuest = function(id){
       { id:4,  area:'dev', icon:'🔧', name:'BOM 변경점 추적 Agent',     ver:'3.0', desc:'설계 BOM 두 버전을 비교해 추가·삭제·사양변경 항목을 색상으로 표시하고 영향 협력사를 매핑합니다.', author:'설계지원봇', lv:5, size:'31.2 MB', dl:276, updated:'3일 전', tags:['BOM','설계변경','영향분석'] },
       { id:5,  area:'dev', icon:'📐', name:'도면 사양 추출 Agent',      ver:'1.6', desc:'도면 PDF에서 치수·재질·공차 사양을 OCR로 추출해 구매 사양서 양식으로 정리합니다.', author:'도면덕후', lv:3, size:'45.8 MB', dl:154, updated:'1주 전', tags:['도면','OCR','사양서'] },
       { id:6,  area:'dev', icon:'⏱️', name:'개발일정 리스크 Agent',     ver:'1.2', desc:'개발 마일스톤과 부품 입고 일정을 대조해 지연 리스크가 있는 부품을 사전 경보합니다.', author:'일정관리자', lv:4, size:'15.9 MB', dl:112, updated:'4일 전', tags:['일정','리스크','경보'] },
+      { id:16, area:'dev', icon:'🗃️', name:'RO 프로파키 — RO 데이터 관리', ver:'2.0', desc:'RO 데이터를 수집·정합성 검증하고 변경 이력을 추적·관리하는 에이전트입니다. 대량 RO를 표준 양식으로 정리하고 누락·중복을 자동 점검하며, 항목별 변경점을 리포트로 제공합니다.', author:'RO관리팀', lv:5, size:'28.3 MB', dl:264, updated:'2일 전', tags:['RO','데이터관리','정합성검증'] },
 
       { id:7,  area:'quality', icon:'🛠️', name:'품질 부적합 8D 보고서 Agent', ver:'2.3', desc:'부적합 현상·원인을 입력하면 8D 보고서(D1~D8) 초안과 5Why 분석 트리를 자동 생성합니다.', author:'품질지킴이', lv:4, size:'19.6 MB', dl:301, updated:'2일 전', tags:['8D','부적합','5Why'] },
       { id:8,  area:'quality', icon:'📋', name:'IATF 심사 체크리스트 Agent',  ver:'1.1', desc:'IATF 16949 조항별 심사 질문과 증빙 요구사항을 체크리스트로 만들어 줍니다.', author:'심사대비반', lv:3, size:'9.8 MB', dl:96, updated:'6일 전', tags:['IATF','심사','체크리스트'] },
@@ -7420,12 +7421,21 @@ window.vaatzClaimQuest = function(id){
       '#ct-agent .agent-chip:hover{border-color:var(--accent);color:var(--accent)}',
       '#ct-agent .agent-chip.on{background:var(--accent);color:#fff;border-color:var(--accent)}',
       '#ct-agent .agent-chip .agent-chip-n{font-size:9.5px;opacity:.75}',
-      '#ct-agent .agent-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(248px,1fr));gap:12px}',
-      '#ct-agent .agent-card{background:linear-gradient(180deg,var(--bg-3),var(--bg-2));border:1px solid var(--border-2);border-radius:14px;padding:14px;display:flex;flex-direction:column;gap:9px;transition:.15s}',
-      '#ct-agent .agent-card:hover{border-color:var(--accent);transform:translateY(-2px);box-shadow:0 6px 18px rgba(0,0,0,.18)}',
-      '#ct-agent .agent-card-top{display:flex;align-items:center;justify-content:space-between;gap:8px}',
-      '#ct-agent .agent-ic{font-size:30px;line-height:1;filter:drop-shadow(0 3px 8px rgba(75,142,240,.22))}',
-      '#ct-agent .agent-area-badge{font-size:9.5px;font-weight:700;padding:3px 9px;border-radius:999px;background:var(--accent-dim,rgba(75,142,240,.16));color:var(--accent);white-space:nowrap}',
+      '#ct-agent .agent-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(252px,1fr));gap:12px}',
+      '#ct-agent .agent-card{position:relative;overflow:hidden;background:var(--bg-2);border:1px solid var(--border-2);border-radius:15px;padding:15px 15px 14px;display:flex;flex-direction:column;gap:9px;transition:transform .15s,box-shadow .15s,border-color .15s}',
+      '#ct-agent .agent-card::before{content:"";position:absolute;top:0;left:0;right:0;height:3px;background:var(--ag-c,var(--accent));opacity:.9}',
+      '#ct-agent .agent-card:hover{border-color:var(--ag-c,var(--accent));transform:translateY(-3px);box-shadow:0 10px 24px -6px rgba(0,0,0,.28)}',
+      '#ct-agent .agent-card-top{display:flex;align-items:flex-start;justify-content:space-between;gap:8px}',
+      '#ct-agent .agent-ic{flex-shrink:0;width:46px;height:46px;border-radius:13px;display:flex;align-items:center;justify-content:center;font-size:24px;line-height:1;border:1px solid var(--border-2)}',
+      '#ct-agent .agent-badges{display:flex;flex-direction:column;align-items:flex-end;gap:5px}',
+      '#ct-agent .agent-area-badge{font-size:9.5px;font-weight:800;padding:3px 9px;border-radius:999px;white-space:nowrap;letter-spacing:.2px}',
+      '#ct-agent .agent-hot{font-size:9px;font-weight:800;padding:2px 7px;border-radius:999px;background:rgba(240,90,70,.14);color:#f0603e;white-space:nowrap}',
+      '#ct-agent .agent-meta .dot{color:var(--text-4);opacity:.6;margin:0 -1px}',
+      '#ct-agent .agent-dl-btn .ext{font-size:9.5px;font-weight:700;opacity:.85;background:rgba(255,255,255,.18);padding:1px 5px;border-radius:5px;margin-left:3px}',
+      '#ct-agent .agent-chip-dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--ag-c,var(--accent));margin-right:2px;vertical-align:middle}',
+      '#ct-agent .agent-chip.on .agent-chip-dot{background:#fff}',
+      '#ct-agent .agent-stats{display:flex;gap:14px;font-size:10.5px;color:var(--text-4);margin:-4px 0 12px;padding-bottom:12px;border-bottom:1px solid var(--border-1)}',
+      '#ct-agent .agent-stats b{color:var(--text-2);font-weight:800;font-family:Outfit,sans-serif}',
       '#ct-agent .agent-name{font-size:13px;font-weight:800;line-height:1.35;color:var(--text-1)}',
       '#ct-agent .agent-ver{font-size:9.5px;font-weight:700;color:var(--text-4);margin-left:4px;font-family:Outfit,sans-serif}',
       '#ct-agent .agent-desc{font-size:11px;color:var(--text-3);line-height:1.6;flex:1}',
@@ -7492,22 +7502,25 @@ window.vaatzClaimQuest = function(id){
     var html = '<button class="agent-chip'+(st.area==='all'?' on':'')+'" onclick="agentFilter(\'all\',this)">전체 <span class="agent-chip-n">'+total+'</span></button>';
     AREAS.forEach(function(ar){
       var n = st.list.filter(function(a){return a.area===ar.id;}).length;
-      html += '<button class="agent-chip'+(st.area===ar.id?' on':'')+'" onclick="agentFilter(\''+ar.id+'\',this)">'+ar.icon+' '+ar.name+' <span class="agent-chip-n">'+n+'</span></button>';
+      html += '<button class="agent-chip'+(st.area===ar.id?' on':'')+'" style="--ag-c:'+(ar.c||'#4b8ef0')+'" onclick="agentFilter(\''+ar.id+'\',this)"><span class="agent-chip-dot"></span>'+ar.icon+' '+ar.name+' <span class="agent-chip-n">'+n+'</span></button>';
     });
     return html;
   }
 
   function cardHtml(a){
-    var ar = areaInfo(a.area);
-    var tags = (a.tags||[]).map(function(t){return '<span class="agent-tag">#'+esc(t)+'</span>';}).join('');
-    return '<div class="agent-card">'
-      + '<div class="agent-card-top"><div class="agent-ic">'+esc(a.icon||'🤖')+'</div>'
-      + '<div class="agent-area-badge">'+ar.icon+' '+esc(ar.name)+'</div></div>'
-      + '<div class="agent-name">'+esc(a.name)+'<span class="agent-ver">v'+esc(a.ver||'1.0')+'</span></div>'
+    var ar = areaInfo(a.area), c = ar.c||'#4b8ef0';
+    var tags = (a.tags||[]).slice(0,3).map(function(t){return '<span class="agent-tag">#'+esc(t)+'</span>';}).join('');
+    var hot = (a.dl||0) >= 250 ? '<span class="agent-hot">🔥 인기</span>' : '';
+    return '<div class="agent-card" style="--ag-c:'+c+'">'
+      + '<div class="agent-card-top">'
+        + '<div class="agent-ic" style="background:'+c+'1f;border-color:'+c+'40">'+esc(a.icon||'🤖')+'</div>'
+        + '<div class="agent-badges"><span class="agent-area-badge" style="background:'+c+'1f;color:'+c+'">'+ar.icon+' '+esc(ar.name)+'</span>'+hot+'</div>'
+      + '</div>'
+      + '<div class="agent-name">'+esc(a.name)+' <span class="agent-ver">v'+esc(a.ver||'1.0')+'</span></div>'
       + '<div class="agent-desc">'+esc(a.desc)+'</div>'
       + '<div class="agent-tags">'+tags+'</div>'
-      + '<div class="agent-meta"><span>👤 '+esc(a.author)+' · Lv.'+(a.lv||1)+'</span><span>💾 '+esc(a.size||'—')+'</span><span>⬇️ '+(a.dl||0)+'</span><span>🕒 '+esc(a.updated||'')+'</span></div>'
-      + '<div class="agent-acts"><button class="agent-dl-btn" onclick="agentDownload('+a.id+')">⬇️ 다운로드 (.exe)</button>'
+      + '<div class="agent-meta"><span>👤 '+esc(a.author)+'</span><span class="dot">·</span><span>Lv.'+(a.lv||1)+'</span><span class="dot">·</span><span>💾 '+esc(a.size||'—')+'</span><span class="dot">·</span><span>⬇ '+(a.dl||0).toLocaleString()+'</span></div>'
+      + '<div class="agent-acts"><button class="agent-dl-btn" onclick="agentDownload('+a.id+')">⬇ 다운로드 <span class="ext">.exe</span></button>'
       + '<button class="agent-info-btn" title="상세 정보" onclick="agentDetail('+a.id+')">ℹ️</button></div>'
       + '</div>';
   }
@@ -7542,6 +7555,7 @@ window.vaatzClaimQuest = function(id){
       + '</div>'
       + uploadHtml()
       + '<div class="agent-toolbar"><div class="agent-search"><span style="font-size:11px;color:var(--text-4)">🔍</span><input id="agentSearchInput" placeholder="에이전트 검색 (이름·설명·태그)..." oninput="agentSearch(this.value)" value="'+esc(st.q)+'"></div></div>'
+      + '<div class="agent-stats"><span>🤖 등록 <b>'+st.list.length+'</b></span><span>⬇ 총 다운로드 <b>'+st.list.reduce(function(s,a){return s+(a.dl||0);},0).toLocaleString()+'</b></span><span>🗂 영역 <b>'+AREAS.length+'</b></span></div>'
       + '<div class="agent-chips">'+chipsHtml()+'</div>'
       + grid;
     /* 검색어 유지 시 커서 위치 복원 */
@@ -8253,5 +8267,210 @@ window.vaatzClaimQuest = function(id){
   }
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', function(){ setTimeout(boot, 350); });
   else setTimeout(boot, 350);
+
+})();
+
+
+/* ═══════════════════════════════════════════════════════════════
+ * §18  저장답변 — 좋은 답변/질문 보관함 (메모·기록장 대체)
+ *      · VAATZ Buddy의 "내 메모", "기록장" 버튼 제거
+ *      · "⭐ 저장답변" = 답변/질문을 모아 보고 복사·삭제하는 실기능
+ *      · localStorage 보관, 답변/커뮤니티의 ⭐ 저장 버튼과 연동
+ *      ※ 레이어 덮어쓰기 함정 회피: 최종 레이어에서 정규화/오버라이드
+ * ═══════════════════════════════════════════════════════════════ */
+(function(){
+  'use strict';
+  var $  = function(s,r){ return (r||document).querySelector(s); };
+  var $$ = function(s,r){ return Array.prototype.slice.call((r||document).querySelectorAll(s)); };
+  var esc = function(s){ return String(s==null?'':s).replace(/[&<>"']/g,function(m){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]; }); };
+  var say = function(m,i,d){ try{ (window.toast||window.say||console.log)(m,i||'✅',d||2200); }catch(e){} };
+  var KEY = 'vaatz-saved-answers-v1';
+
+  function seed(){ return [
+    { id:1, type:'answer',   title:'탄력적입찰 1회차 유찰 처리 절차', body:'유찰 시 재공고 또는 참여업체 확대를 우선 검토하고, 긴급성·적격업체 부족이 명확할 때 수의계약 전환을 검토합니다. 금액 기준에 따라 팀장 전결 또는 구매위원회 승인이 필요합니다.', cat:'입찰', source:'커뮤니티 채택 답변', ts:Date.now()-86400000 },
+    { id:2, type:'question', title:'5스타 4→5등급 승급 시 IATF 16949 필수 여부', body:'2026년 기준 신규 평가에서 IATF 16949가 필수 항목으로 추가되었는지, 기존 업체 유예기간이 있는지 확인이 필요합니다.', cat:'5스타', source:'커뮤니티 질문', ts:Date.now()-3600000 }
+  ]; }
+  function load(){ try{ var s=localStorage.getItem(KEY); return s?JSON.parse(s):seed(); }catch(e){ return seed(); } }
+  function persist(){ try{ localStorage.setItem(KEY, JSON.stringify(items)); }catch(e){} }
+
+  var items = load();
+  var state = { q:'', open:[] };
+
+  function timeAgo(ts){ var s=(Date.now()-ts)/1000; if(s<60)return '방금'; if(s<3600)return Math.floor(s/60)+'분 전'; if(s<86400)return Math.floor(s/3600)+'시간 전'; return Math.floor(s/86400)+'일 전'; }
+
+  function addItem(o){
+    if(!o) return;
+    var title=(o.title||'').trim()||'저장한 항목';
+    var body=(o.body||'').trim();
+    if(items.some(function(x){ return x.title===title && x.body===body; })){ say('이미 저장된 항목이에요.','ℹ️',1700); window.openSavedAnswers(); return; }
+    items.unshift({ id:Date.now(), type:o.type||'answer', title:title, body:body, cat:o.cat||'', source:o.source||'', ts:Date.now() });
+    persist();
+    say('⭐ 저장답변에 보관했어요.','⭐',2000);
+    var ov=$('#vsaOv'); if(ov && ov.classList.contains('sh')) renderSaved();
+  }
+
+  /* ── 스타일 ── */
+  function injectStyle(){
+    if(document.getElementById('vsaStyle')) return;
+    var css=[
+      '.vsa-ov{position:fixed;inset:0;background:rgba(0,0,0,.5);backdrop-filter:blur(4px);z-index:100001;display:none;align-items:center;justify-content:center;padding:24px}',
+      '.vsa-ov.sh{display:flex}',
+      '.vsa-box{width:min(680px,96vw);height:min(82vh,780px);background:var(--bg-1);border:1px solid var(--border-2);border-radius:16px;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 24px 70px rgba(0,0,0,.5)}',
+      '.vsa-hd{display:flex;align-items:center;gap:8px;padding:15px 18px;border-bottom:1px solid var(--border-1);background:var(--bg-2)}',
+      '.vsa-hd h3{font-size:15px;font-weight:800;flex:1;display:flex;align-items:center;gap:7px;margin:0}',
+      '.vsa-hd .cnt{font-size:11px;font-weight:700;color:var(--text-4)}',
+      '.vsa-tool{font-size:11.5px;font-weight:700;padding:7px 12px;border-radius:8px;border:1px solid var(--border-2);background:var(--bg-3);color:var(--text-2);cursor:pointer;font-family:inherit;transition:.13s}',
+      '.vsa-tool:hover{border-color:var(--accent);color:var(--accent)}',
+      '.vsa-tool.accent{background:var(--accent);color:#fff;border-color:var(--accent)}',
+      '.vsa-tool.accent:hover{filter:brightness(1.08);color:#fff}',
+      '.vsa-x{font-size:17px;background:none;border:none;color:var(--text-3);cursor:pointer;padding:2px 6px;line-height:1}',
+      '.vsa-x:hover{color:var(--text-1)}',
+      '.vsa-sub{padding:13px 18px 0}',
+      '.vsa-search{display:flex;align-items:center;gap:7px;background:var(--bg-3);border:1px solid var(--border-1);border-radius:9px;padding:9px 12px}',
+      '.vsa-search input{flex:1;background:none;border:none;outline:none;color:var(--text-1);font-size:13px;font-family:inherit}',
+      '.vsa-add{margin:12px 18px 0;background:var(--bg-2);border:1px dashed var(--border-2);border-radius:12px;padding:14px}',
+      '.vsa-add input,.vsa-add textarea{width:100%;background:var(--bg-3);border:1px solid var(--border-1);border-radius:8px;padding:8px 10px;color:var(--text-1);font-size:12px;font-family:inherit;outline:none;margin-bottom:8px}',
+      '.vsa-add textarea{resize:vertical;min-height:62px;line-height:1.6}',
+      '.vsa-add-acts{display:flex;justify-content:flex-end;gap:8px}',
+      '.vsa-body{flex:1;overflow-y:auto;padding:12px 18px 18px}',
+      '.vsa-item{background:var(--bg-2);border:1px solid var(--border-1);border-radius:12px;padding:13px 14px;margin-bottom:9px;transition:.13s}',
+      '.vsa-item:hover{border-color:var(--border-2)}',
+      '.vsa-item-top{display:flex;align-items:center;gap:8px;margin-bottom:6px}',
+      '.vsa-type{font-size:9.5px;font-weight:800;padding:2px 8px;border-radius:999px;white-space:nowrap}',
+      '.vsa-type.answer{background:rgba(75,142,240,.16);color:#4b8ef0}',
+      '.vsa-type.question{background:rgba(43,182,115,.16);color:#2bb673}',
+      '.vsa-item-title{font-size:13px;font-weight:700;color:var(--text-1);flex:1;min-width:0;line-height:1.4}',
+      '.vsa-item-meta{font-size:10px;color:var(--text-4);margin-bottom:7px}',
+      '.vsa-item-body{font-size:12px;color:var(--text-3);line-height:1.75;white-space:pre-wrap}',
+      '.vsa-item-body.clamp{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}',
+      '.vsa-item-acts{display:flex;gap:7px;margin-top:10px}',
+      '.vsa-item-acts button{font-size:11px;font-weight:600;padding:5px 11px;border-radius:7px;border:1px solid var(--border-2);background:var(--bg-3);color:var(--text-2);cursor:pointer;font-family:inherit;transition:.12s}',
+      '.vsa-item-acts button:hover{border-color:var(--accent);color:var(--accent)}',
+      '.vsa-item-acts .del:hover{border-color:#e0604e;color:#e0604e}',
+      '.vsa-empty{text-align:center;color:var(--text-4);font-size:12.5px;padding:54px 16px;line-height:1.9}',
+      '.vsa-foot{font-size:10.5px;color:var(--text-4);text-align:center;padding:9px 14px;border-top:1px solid var(--border-1)}',
+      '.vsa-foot b{color:var(--text-3)}'
+    ].join('');
+    var s=document.createElement('style'); s.id='vsaStyle'; s.textContent=css; document.head.appendChild(s);
+  }
+
+  /* ── 모달 ── */
+  function buildSaved(){
+    if(document.getElementById('vsaOv')) return;
+    injectStyle();
+    var ov=document.createElement('div'); ov.className='vsa-ov'; ov.id='vsaOv';
+    ov.addEventListener('click', function(e){ if(e.target===ov) window.closeSavedAnswers(); });
+    ov.innerHTML='<div class="vsa-box">'
+      +'<div class="vsa-hd"><h3>⭐ 저장답변 <span class="cnt" id="vsaCount"></span></h3>'
+        +'<button class="vsa-tool accent" onclick="vsaAddToggle(true)">➕ 직접 추가</button>'
+        +'<button class="vsa-x" onclick="closeSavedAnswers()" title="닫기">✕</button></div>'
+      +'<div class="vsa-sub"><div class="vsa-search"><span style="font-size:13px;color:var(--text-4)">🔍</span><input id="vsaSearchInput" placeholder="저장한 답변·질문 검색" oninput="vsaSearch(this.value)"></div></div>'
+      +'<div class="vsa-add" id="vsaAddForm" style="display:none"><input id="vsaAddTitle" placeholder="제목 (예: 수의계약 긴급 승인 기준)"><textarea id="vsaAddBody" placeholder="내용을 붙여넣거나 메모하세요."></textarea><div class="vsa-add-acts"><button class="vsa-tool" onclick="vsaAddToggle(false)">취소</button><button class="vsa-tool accent" onclick="vsaAddSubmit()">저장</button></div></div>'
+      +'<div class="vsa-body" id="vsaBody"></div>'
+      +'<div class="vsa-foot">💡 답변·커뮤니티의 <b>⭐ 저장</b> 버튼으로도 모을 수 있어요 · 이 기기에 안전하게 보관됩니다.</div>'
+      +'</div>';
+    document.body.appendChild(ov);
+  }
+
+  function renderSaved(){
+    buildSaved();
+    var body=$('#vsaBody'), cnt=$('#vsaCount'); if(!body) return;
+    if(cnt) cnt.textContent=items.length+'건';
+    var q=(state.q||'').trim().toLowerCase();
+    var list=items.filter(function(it){ if(!q)return true; return (it.title+' '+it.body+' '+(it.cat||'')+' '+(it.source||'')).toLowerCase().indexOf(q)>=0; });
+    if(!list.length){
+      body.innerHTML='<div class="vsa-empty">'+(items.length
+        ? '🔍 검색 결과가 없습니다.'
+        : '⭐ 아직 저장한 답변/질문이 없어요.<br>커뮤니티 답변이나 AI 답변에서 <b style="color:var(--text-2)">⭐ 저장</b>을 누르면 여기에 모여요.')+'</div>';
+      return;
+    }
+    body.innerHTML=list.map(function(it){
+      var open=state.open.indexOf(it.id)>=0;
+      return '<div class="vsa-item">'
+        +'<div class="vsa-item-top"><span class="vsa-type '+(it.type==='question'?'question':'answer')+'">'+(it.type==='question'?'❓ 질문':'⭐ 답변')+'</span><span class="vsa-item-title">'+esc(it.title)+'</span></div>'
+        +'<div class="vsa-item-meta">'+(it.cat?esc(it.cat)+' · ':'')+(it.source?esc(it.source)+' · ':'')+timeAgo(it.ts)+'</div>'
+        +'<div class="vsa-item-body'+(open?'':' clamp')+'">'+esc(it.body||'(내용 없음)')+'</div>'
+        +'<div class="vsa-item-acts"><button onclick="vsaToggle('+it.id+')">'+(open?'접기':'펼쳐 보기')+'</button>'
+          +'<button onclick="vsaCopy('+it.id+')">📋 복사</button>'
+          +'<button class="del" onclick="vsaDelete('+it.id+')">🗑 삭제</button></div>'
+        +'</div>';
+    }).join('');
+  }
+
+  window.openSavedAnswers=function(){ buildSaved(); state.q=''; var ov=$('#vsaOv'); if(ov) ov.classList.add('sh'); var si=$('#vsaSearchInput'); if(si){ si.value=''; setTimeout(function(){ try{ si.focus(); }catch(e){} },60); } var f=$('#vsaAddForm'); if(f) f.style.display='none'; renderSaved(); };
+  window.closeSavedAnswers=function(){ var ov=$('#vsaOv'); if(ov) ov.classList.remove('sh'); };
+  window.vsaSearch=function(v){ state.q=v||''; renderSaved(); };
+  window.vsaToggle=function(id){ var i=state.open.indexOf(id); if(i>=0) state.open.splice(i,1); else state.open.push(id); renderSaved(); };
+  window.vsaDelete=function(id){ items=items.filter(function(x){return x.id!==id;}); persist(); renderSaved(); say('삭제했어요.','🗑',1400); };
+  window.vsaCopy=function(id){ var it=null; for(var i=0;i<items.length;i++){ if(items[i].id===id){ it=items[i]; break; } } if(!it)return; var txt=it.title+'\n\n'+it.body; try{ navigator.clipboard.writeText(txt); say('클립보드에 복사했어요.','📋',1400); }catch(e){ say('복사를 지원하지 않는 환경이에요.','⚠️',1600); } };
+  window.vsaAddToggle=function(show){ var f=$('#vsaAddForm'); if(f) f.style.display=show?'block':'none'; if(show){ var t=$('#vsaAddTitle'); if(t) setTimeout(function(){ try{ t.focus(); }catch(e){} },50); } };
+  window.vsaAddSubmit=function(){ var t=$('#vsaAddTitle'), b=$('#vsaAddBody'); var title=t&&t.value.trim(); if(!title){ say('제목을 입력해주세요.','⚠️',1500); return; } addItem({type:'answer', title:title, body:(b&&b.value)||'', source:'직접 작성'}); if(t)t.value=''; if(b)b.value=''; window.vsaAddToggle(false); };
+
+  /* ── 답변/질문에서 저장 ── */
+  function saveAnswerFromEl(btn){
+    var c = btn && btn.closest && btn.closest('.v29-answer,.v27-answer,.v25-answer,.msg-a,.ab,.ai-tx');
+    var text = c ? (c.innerText||'').replace(/[ \t]+/g,' ').trim() : '';
+    var first = (text.split('\n').find(function(l){ return l.trim().length>4; })||'저장한 답변').trim().slice(0,46);
+    addItem({ type:'answer', title:first||'저장한 답변', body:text||'저장한 답변', source:'답변 저장' });
+  }
+  function saveVisibleQuestion(){
+    var scope=$('#ct-qa')||document;
+    var t=$('.v29-detail-title,.v27-detail-title,.v25-detail-title',scope);
+    var b=$('.v29-detail-body,.v27-detail-body,.v25-detail-body',scope);
+    addItem({ type:'question', title:(t?t.textContent.trim():'저장한 질문'), body:(b?b.textContent.trim():''), source:'커뮤니티 질문' });
+  }
+
+  /* ── 기존 메모 진입점을 저장답변으로 오버라이드 ── */
+  window.openMemoModal     = function(){ window.openSavedAnswers(); };
+  window.closeMemoModal    = function(){ window.closeSavedAnswers(); };
+  window.saveMemo          = function(){ say('저장답변에 보관됩니다.','⭐',1500); };
+  window.newMemo           = function(){ window.vsaAddToggle(true); };
+  window.saveAnswerToMemo  = function(btn){ saveAnswerFromEl(btn); };
+  window.saveCommunityNoteV26 = function(){ saveVisibleQuestion(); };
+  window.v27SaveNote       = function(){ saveVisibleQuestion(); };
+  window.v29SaveNote       = function(){ saveVisibleQuestion(); };
+
+  /* ── VAATZ Buddy 패널 정규화: 내 메모/기록장 제거 + 저장답변 추가 ── */
+  var busy=false;
+  function normalizeCompanion(){
+    var panel=$('.companion-panel'); if(!panel) return;
+    busy=true;
+    $$('.companion-action',panel).forEach(function(b){ var t=b.textContent||''; if(t.indexOf('내 메모')>=0 || t.indexOf('기록장')>=0) b.remove(); });
+    var hasSaved=$$('.companion-action',panel).some(function(b){ return (b.textContent||'').indexOf('저장답변')>=0; });
+    if(!hasSaved){
+      var nb=document.createElement('button');
+      nb.className='companion-action'; nb.textContent='⭐ 저장답변';
+      nb.setAttribute('onclick','openSavedAnswers()');
+      panel.insertBefore(nb, panel.firstChild);
+    }
+    var m=$('#v25MemoModal'); if(m) m.remove();
+    setTimeout(function(){ busy=false; }, 60);
+  }
+  function relabelSaveButtons(){
+    $$('.saved-answer-btn').forEach(function(b){ if(b.dataset.vsa) return; b.dataset.vsa='1'; b.textContent='⭐ 저장'; b.onclick=function(e){ if(e&&e.stopPropagation)e.stopPropagation(); saveAnswerFromEl(b); }; });
+  }
+  function purgeStrayMemo(){
+    $$('button').forEach(function(b){
+      var t=(b.textContent||'').trim();
+      if((t==='📝 내 메모'||t==='내 메모'||t.indexOf('기록장')>=0) && (b.closest('.companion-panel')||b.closest('.v25-qwrap')||b.closest('.comm-body'))) b.remove();
+    });
+  }
+  function runNormalize(){ normalizeCompanion(); relabelSaveButtons(); }
+
+  function observe(){
+    var card=$('#companionCard')||$('#companionHub');
+    if(!card){ setTimeout(observe, 500); return; }
+    try{
+      var mo=new MutationObserver(function(){ if(busy) return; requestAnimationFrame(runNormalize); });
+      mo.observe(card,{childList:true,subtree:true});
+    }catch(e){}
+  }
+
+  /* ESC로 저장답변 닫기 */
+  document.addEventListener('keydown', function(e){ if(e.key==='Escape'){ var ov=$('#vsaOv'); if(ov && ov.classList.contains('sh')) window.closeSavedAnswers(); } });
+
+  function boot(){ runNormalize(); purgeStrayMemo(); observe(); [800,1800,3200].forEach(function(d){ setTimeout(function(){ runNormalize(); purgeStrayMemo(); }, d); }); }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', function(){ setTimeout(boot, 300); });
+  else setTimeout(boot, 300);
 
 })();
