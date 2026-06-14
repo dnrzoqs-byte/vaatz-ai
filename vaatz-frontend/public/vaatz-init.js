@@ -7677,58 +7677,97 @@ window.vaatzClaimQuest = function(id){
    * 1) 설명서 콘텐츠 (Help Center · PDF · MD 공용)
    * ───────────────────────────────────────────── */
   var DOCS = [
-    { id:'quickstart', icon:'🚀', name:'빠른 시작', articles:[
-      { t:'VAATZ AI는 무엇인가요?', b:'현대·기아 <b>구매본부 RAG 지식 플랫폼</b>입니다. 구매업무규정·업무표준·VAATZ 매뉴얼·품질 5스타 기준 등 사내 지식을 검색해 <b>근거(출처)와 함께</b> 답변합니다.' },
+    { id:'quickstart', icon:'🚀', name:'빠른 시작', desc:'처음이라면 여기부터 5분', articles:[
+      { t:'VAATZ AI는 무엇인가요?', b:'현대·기아 <b>구매본부 RAG 지식 플랫폼</b>입니다. 구매업무규정·업무표준·VAATZ 매뉴얼·품질 5스타 기준 등 사내 지식을 검색해 <b>근거(출처)와 함께</b> 답변합니다. 단순 챗봇이 아니라 <b>출처를 제시하는 검색형 AI</b>라는 점이 핵심이에요.' },
       { t:'3단계로 시작하기', b:'<ul><li>① 화면 하단 <b>입력창</b>에 구매 업무 질문을 입력합니다.</li><li>② 답변의 <b>답변 근거</b>(우측 패널)에서 인용된 문서·조항을 확인합니다.</li><li>③ 필요한 문서는 <b>내 파일</b>에 올리거나 <b>데이터 업로드 요청</b>으로 지식 베이스에 반영 요청합니다.</li></ul>' },
-      { t:'화면 구성 한눈에 보기', b:'<ul><li><b>좌측 사이드바</b> — 새 대화, 구매 DB, 요청, 최근 대화, Admin</li><li><b>가운데</b> — AI 채팅(질문·답변)</li><li><b>우측 작업 패널</b> — 내 파일 / 답변 근거</li><li><b>우하단 Buddy</b> — 커뮤니티·캐릭터·관리 바로가기</li></ul>' }
+      { t:'화면 구성 한눈에 보기', b:'<ul><li><b>좌측 사이드바</b> — 새 대화, 구매 DB, 요청, 최근 대화, Admin</li><li><b>가운데</b> — AI 채팅(질문·답변)</li><li><b>우측 작업 패널</b> — 내 파일 / 답변 근거</li><li><b>우하단 Buddy</b> — 커뮤니티·캐릭터·관리 바로가기</li></ul>' },
+      { t:'바로 따라 하는 첫 질문 예시', b:'아래 질문을 입력창에 그대로 넣어 보세요. 답변과 함께 <b>출처 문서</b>가 표시됩니다.<ul><li>탄력적입찰과 경매입찰의 차이</li><li>품질 5스타 4→5등급 승급 기준</li><li>VAATZ에서 발주서 생성하는 법</li><li>수의계약 긴급 사유서 승인 기준</li></ul>' }
     ]},
-    { id:'chat', icon:'💬', name:'AI 채팅 & RAG', articles:[
+    { id:'chat', icon:'💬', name:'AI 채팅 & RAG', desc:'질문하고 근거 확인하기', articles:[
       { t:'질문하기', b:'하단 입력창에 자연어로 질문하세요. <b>Enter</b>로 전송, <b>Ctrl+K</b>로 빠른 입력이 가능합니다. 📎 파일첨부·📷 이미지도 함께 보낼 수 있습니다.' },
+      { t:'좋은 질문 작성 팁', b:'<ul><li><b>구체적으로</b> — 품목·금액·상황을 함께 적으면 정확도가 올라갑니다.</li><li><b>한 번에 하나</b> — 여러 질문은 나눠서 물어보세요.</li><li><b>후속 질문 활용</b> — 답변 아래 추천 후속 버튼으로 더 깊이 파고들 수 있어요.</li></ul>' },
+      { t:'RAG는 어떻게 동작하나요?', b:'질문을 받으면 ① 질의 임베딩 → ② <b>권한 필터링</b>(열람 가능한 문서만) → ③ 벡터 검색으로 관련 청크 추출 → ④ 재정렬(Re-ranking) 후 상위 근거로 답변을 생성합니다. 그래서 답변마다 <b>인용 문서</b>가 따라붙습니다.' },
       { t:'답변 근거(출처) 확인', b:'답변 상단의 <b>RAG 파이프라인</b>에 인용된 문서 청크 칩(예: 규정 §23)이 표시됩니다. 칩을 클릭하면 우측 <b>답변 근거</b> 탭에서 원문 위치를 확인할 수 있습니다.' },
-      { t:'검색 범위 전환', b:'상단의 <b>구매지식 ↔ 내 파일</b> 스위치로 검색 대상을 바꿉니다. 사내 공식 지식만 볼지, 내가 올린 개인 문서를 대상으로 할지 선택하세요.' },
-      { t:'웹 검색 활용', b:'상단 <b>🌐 웹 검색</b> 토글을 켜면 외부 웹 결과를 답변에 함께 반영합니다. 사내 지식만으로 부족할 때 사용하세요.' },
-      { t:'신뢰도 표시 보는 법', b:'답변마다 <b>신뢰도(%)</b>와 인용 문서 수가 표기됩니다. 신뢰도가 낮으면 규정 원문을 한 번 더 확인하고, 👍/👎 피드백으로 품질 개선에 기여하세요.' }
+      { t:'검색 범위 전환 (구매지식 / 내 파일)', b:'상단의 <b>구매지식 ↔ 내 파일</b> 스위치로 검색 대상을 바꿉니다. 사내 공식 지식만 볼지, 내가 올린 개인 문서를 대상으로 할지 선택하세요.' },
+      { t:'웹 검색 활용', b:'상단 <b>🌐 웹 검색</b> 토글을 켜면 외부 웹 결과를 답변에 함께 반영합니다. 사내 지식만으로 부족한 최신 정보가 필요할 때 사용하세요.' },
+      { t:'신뢰도 표시 보는 법', b:'답변마다 <b>신뢰도(%)</b>와 인용 문서 수가 표기됩니다. 신뢰도가 낮으면 규정 원문을 한 번 더 확인하고, 👍/👎 피드백으로 품질 개선에 기여하세요.' },
+      { t:'파일·이미지 첨부', b:'입력창의 <b>📎 파일첨부</b>·<b>📷 이미지</b>로 문서나 캡처를 함께 보내 질문할 수 있습니다.' }
     ]},
-    { id:'panel', icon:'📂', name:'작업 패널', articles:[
-      { t:'내 파일', b:'개인 문서를 업로드하고 폴더로 관리합니다. <b>드래그앤드롭</b> 업로드를 지원하며, 검색 범위를 <b>내 파일</b>로 두면 이 문서들을 대상으로 답변합니다.' },
+    { id:'panel', icon:'📂', name:'작업 패널', desc:'내 파일 · 답변 근거', articles:[
+      { t:'내 파일', b:'개인 문서를 업로드하고 폴더로 관리합니다. 검색 범위를 <b>내 파일</b>로 두면 이 문서들을 대상으로 답변합니다.' },
+      { t:'폴더 만들기 & 정리', b:'작업 패널 <b>내 파일</b> 탭에서 폴더를 생성하고 파일을 분류하세요. 선택 삭제로 정리할 수 있습니다.' },
+      { t:'드래그앤드롭 업로드', b:'파일을 작업 패널 위로 <b>끌어다 놓으면</b> 바로 업로드됩니다.' },
       { t:'답변 근거', b:'방금 받은 답변이 인용한 문서·청크를 출처로 보여줍니다. 어떤 규정/매뉴얼에 근거했는지 추적할 수 있습니다.' },
       { t:'패널 열고 닫기 / 크기 조절', b:'우측 상단 <b>✕</b>로 패널을 닫고, 좌측 경계를 드래그해 <b>폭</b>을 조절할 수 있습니다.' }
     ]},
-    { id:'db', icon:'🗄️', name:'구매 DB', articles:[
-      { t:'구매 DB 둘러보기', b:'사이드바 <b>구매 DB</b>에서 표준 지식을 카테고리별로 열람합니다.<ul><li><b>용어사전</b> — 구매 용어 정의</li><li><b>업무표준</b> — 표준 프로세스(STD)</li><li><b>품질 5스타</b> — 등급/평가 기준</li><li><b>입찰관리</b> — 입찰 방식·절차</li></ul>' }
+    { id:'db', icon:'🗄️', name:'구매 DB', desc:'표준 지식 열람', articles:[
+      { t:'구매 DB 둘러보기', b:'사이드바 <b>구매 DB</b>에서 표준 지식을 카테고리별로 열람합니다.' },
+      { t:'용어사전', b:'구매 업무 <b>용어 정의</b>를 검색합니다. 모르는 용어가 나오면 가장 먼저 확인하세요.' },
+      { t:'업무표준 (STD)', b:'표준 업무 프로세스 문서(STD)를 열람합니다. 절차의 기준이 되는 공식 문서입니다.' },
+      { t:'품질 5스타', b:'협력사 품질 <b>5스타 등급·평가 항목·승급 기준</b>을 확인합니다.' },
+      { t:'입찰관리', b:'탄력적입찰·경매입찰 등 <b>입찰 방식과 절차</b>를 확인합니다.' }
     ]},
-    { id:'request', icon:'📤', name:'요청 & 이력', articles:[
+    { id:'request', icon:'📤', name:'요청 & 이력', desc:'지식 반영 요청과 추적', articles:[
       { t:'데이터 업로드 요청', b:'사이드바 <b>데이터 업로드 요청</b>으로 새 문서를 지식 베이스에 반영 요청합니다. 관리자 승인 후 AI가 학습해 검색에 반영됩니다.' },
+      { t:'요청 승인 흐름', b:'<ul><li>① 요청 등록 → ② 관리자 검토 → ③ 승인/보완 요청 → ④ 승인 시 <b>AI 학습 DB 반영</b></li></ul>보완 요청을 받으면 사유를 확인해 보완 후 재요청하세요.' },
       { t:'이력 관리', b:'질의·업로드·승인·AI 반영 이력을 한곳에서 확인합니다. 진행 상태와 처리 내역을 추적할 수 있습니다.' }
     ]},
-    { id:'community', icon:'👥', name:'지식 커뮤니티', articles:[
+    { id:'community', icon:'👥', name:'지식 커뮤니티', desc:'Q&A · 명예의 전당', articles:[
       { t:'커뮤니티 열기', b:'우하단 <b>VAATZ Buddy</b> 또는 메뉴에서 커뮤니티를 엽니다. Q&A · 명예의 전당 · 내 레벨 · 내 캐릭터 · 상점 · 칭호·퀘스트 · <b>AI 에이전트</b> 탭으로 구성됩니다.' },
-      { t:'Q&A 참여', b:'<b>✏️ 질문하기</b>로 질문을 등록하고 동료의 질문에 답변하세요. 추천 10회 이상 + 채택된 답변은 관리자 검증 후 <b>AI 학습 DB에 반영</b>되며 작성자에게 <b>+100pt</b>가 지급됩니다.' },
-      { t:'명예의 전당', b:'주간/월간/연간 단위로 기여도가 높은 멤버 랭킹을 확인할 수 있습니다.' }
+      { t:'Q&A 참여', b:'<b>✏️ 질문하기</b>로 질문을 등록하고 동료의 질문에 답변하세요. 영역·태그를 붙이면 검색이 쉬워집니다.' },
+      { t:'답변 채택 & AI 학습 반영', b:'추천 10회 이상 + 채택된 답변은 관리자 검증 후 <b>AI 학습 DB에 반영</b>되며 작성자에게 <b>+100pt</b>가 지급됩니다. 좋은 답변이 곧 회사 지식이 됩니다.' },
+      { t:'명예의 전당', b:'주간/월간/연간 단위로 기여도가 높은 멤버 랭킹을 확인할 수 있습니다.' },
+      { t:'닉네임 & 매너', b:'커뮤니티 활동에는 닉네임이 표시됩니다. 서로 존중하는 표현으로 지식을 나눠 주세요.' }
     ]},
-    { id:'agent', icon:'🤖', name:'AI 에이전트 마켓', articles:[
+    { id:'agent', icon:'🤖', name:'AI 에이전트 마켓', desc:'업무 자동화 Agent 공유', articles:[
       { t:'AI 에이전트 마켓이란?', b:'<b>클로드 코드</b>로 만든 업무 자동화 Agent(.exe)를 <b>구매·개발·품질·관리·구매공통</b> 5개 영역별로 공유하고 다운로드하는 공간입니다. (커뮤니티 → <b>🤖 AI 에이전트</b> 탭)' },
+      { t:'5개 영역 안내', b:'<ul><li>🛒 <b>구매</b> — 입찰·견적·계약 자동화</li><li>💻 <b>개발</b> — BOM·도면·일정 분석</li><li>✅ <b>품질</b> — 8D·심사·5스타 집계</li><li>📋 <b>관리</b> — KPI·계약·예산 모니터링</li><li>🔗 <b>구매공통</b> — 규정 Q&A·회의록·이메일</li></ul>' },
       { t:'에이전트 다운로드', b:'영역 칩으로 분야를 고르거나 검색한 뒤, 카드의 <b>⬇️ 다운로드 (.exe)</b> 버튼을 누릅니다. (현재 데모 환경에서는 안내용 README 파일이 내려받아집니다.)' },
-      { t:'내 에이전트 공유', b:'<b>➕ 내 에이전트 공유</b> → 이름·영역·설명·실행 파일(.exe)을 입력해 등록합니다. 공유하면 <b>+50pt</b>, 다운로드가 많은 에이전트는 명예의 전당에 노출됩니다.' }
+      { t:'내 에이전트 공유', b:'<b>➕ 내 에이전트 공유</b> → 이름·영역·설명·실행 파일(.exe)을 입력해 등록합니다. 공유하면 <b>+50pt</b>, 다운로드가 많은 에이전트는 명예의 전당에 노출됩니다.' },
+      { t:'좋은 에이전트 등록 팁', b:'<ul><li>이름은 <b>무엇을 자동화하는지</b> 드러나게 (예: 입찰공고 자동생성)</li><li>설명에 <b>입력/출력</b>과 활용 팁을 적기</li><li>버전·영역을 정확히 분류하기</li></ul>' }
     ]},
-    { id:'character', icon:'🎮', name:'캐릭터 & 포인트', articles:[
-      { t:'포인트 적립 & 레벨', b:'Q&A 채택, 에이전트 공유 등 커뮤니티 기여로 포인트(pt)를 모으면 캐릭터 레벨이 오릅니다. (최대 <b>Lv.100</b>, 등급별 칭호 부여)' },
-      { t:'캐릭터 꾸미기 / 상점', b:'모은 pt로 <b>상점</b>에서 모자·악세서리·펫·배경·이펙트·마이카 뱃지를 구매하고, <b>내 캐릭터</b> 탭에서 장착해 나만의 캐릭터를 꾸밉니다.' }
+    { id:'character', icon:'🎮', name:'캐릭터 & 포인트', desc:'레벨 · 상점 · 칭호', articles:[
+      { t:'포인트 적립 & 레벨', b:'커뮤니티 기여로 포인트(pt)를 모으면 캐릭터 레벨이 오릅니다. (최대 <b>Lv.100</b>, 등급별 칭호 부여)' },
+      { t:'포인트 얻는 법 총정리', b:'<ul><li>Q&A 답변 <b>채택</b> +30pt</li><li>답변 <b>AI 학습 반영</b> +100pt</li><li>AI <b>에이전트 공유</b> +50pt</li><li>꾸준한 질문·추천 활동 +α</li></ul>' },
+      { t:'캐릭터 꾸미기 / 상점', b:'모은 pt로 <b>상점</b>에서 모자·악세서리·펫·배경·이펙트·마이카 뱃지를 구매하고, <b>내 캐릭터</b> 탭에서 장착해 나만의 캐릭터를 꾸밉니다.' },
+      { t:'칭호 & 퀘스트', b:'활동 목표를 달성하면 <b>칭호</b>와 보상을 받습니다. 커뮤니티 <b>칭호·퀘스트</b> 탭에서 진행 상황을 확인하세요.' }
     ]},
-    { id:'admin', icon:'🛠️', name:'관리자', articles:[
+    { id:'admin', icon:'🛠️', name:'관리자', desc:'문서 승인 · AI 모드 (권한 필요)', articles:[
       { t:'관리자 패널 열기', b:'사이드바 하단의 <b>Admin</b> 버튼 또는 Buddy 허브에서 관리자 패널을 엽니다. (권한이 있는 담당자만)' },
-      { t:'주요 관리 기능', b:'<ul><li><b>팀 폴더</b> — 팀 문서 전체 관리/등록 요청</li><li><b>최종 승인</b> — 검토 완료 문서의 최종 승인·반려</li><li><b>데이터마트</b> — 외부 데이터 소스 연계</li><li><b>AI 모드</b> — 폴더팩 연결 정책 관리</li><li><b>권한 관리</b> — 사용자 열람 권한 설정</li></ul>' }
+      { t:'팀 폴더', b:'팀 문서 전체를 크게 확인하고 <b>등록 요청</b>을 일괄 처리합니다. 상태·보안등급·담당자로 검색·필터할 수 있습니다.' },
+      { t:'최종 승인', b:'검토 완료 문서를 <b>최종 승인</b>하거나 <b>이전 단계로 반려</b>합니다. 팀 필터로 대상 문서만 볼 수 있습니다.' },
+      { t:'데이터마트 / AI 모드', b:'<b>데이터마트</b>로 외부 데이터 소스를 연계하고, <b>AI 모드</b>에서 폴더팩 연결 정책을 관리합니다.' },
+      { t:'권한 관리', b:'사용자별 문서 <b>열람 권한(높음·중간·낮음)</b>을 설정합니다. RAG 검색은 이 권한을 자동 반영합니다.' }
     ]},
-    { id:'settings', icon:'👤', name:'마이페이지 & 설정', articles:[
+    { id:'settings', icon:'👤', name:'마이페이지 & 설정', desc:'프로필 · 테마 · 알림', articles:[
       { t:'마이페이지', b:'사이드바 하단의 <b>프로필</b>(이름/부서)을 클릭하면 마이페이지가 열립니다.' },
-      { t:'테마 전환', b:'프로필 옆 <b>🌙</b> 버튼으로 다크/라이트 테마를 전환합니다. 설정은 기기에 저장됩니다.' },
-      { t:'닉네임', b:'커뮤니티 활동에 표시되는 닉네임을 확인·사용합니다.' }
+      { t:'테마 전환 (다크/라이트)', b:'프로필 옆 <b>🌙</b> 버튼으로 다크/라이트 테마를 전환합니다. 설정은 기기에 저장됩니다.' },
+      { t:'닉네임', b:'커뮤니티 활동에 표시되는 닉네임을 확인·사용합니다.' },
+      { t:'알림', b:'상단 <b>🔔</b>에서 업로드 요청·승인·시스템 공지 알림을 확인합니다. <b>모두 읽음</b>으로 한 번에 정리할 수 있어요.' }
     ]},
-    { id:'faq', icon:'❓', name:'자주 묻는 질문', articles:[
+    { id:'shortcuts', icon:'⌨️', name:'단축키 & 팁', desc:'더 빠르게 쓰는 법', articles:[
+      { t:'단축키 모음', b:'<ul><li><b>Enter</b> — 메시지 전송</li><li><b>Ctrl+K</b> — 빠른 입력</li><li><b>Esc</b> — 열린 설명서/투어 닫기</li><li>가이드 투어 중 <b>← →</b> — 이전/다음 단계</li></ul>' },
+      { t:'생산성 팁', b:'<ul><li>자주 쓰는 질문은 <b>최근 대화</b>에서 다시 열기</li><li>근거가 중요한 답변은 <b>답변 근거</b> 칩을 눌러 원문 확인</li><li>반복 업무는 <b>AI 에이전트 마켓</b>에서 자동화 도구 찾기</li></ul>' }
+    ]},
+    { id:'troubleshoot', icon:'🩺', name:'문제 해결', desc:'안 될 때 먼저 확인', articles:[
       { t:'답변이 부정확해요', b:'검색 범위(구매지식/내 파일)와 웹 검색 설정을 먼저 확인하세요. 신뢰도가 낮으면 규정 원문을 확인하고, 답변 하단 <b>👎 부정확</b>으로 피드백하면 품질 개선에 반영됩니다.' },
       { t:'내 문서를 AI가 참고하게 하려면?', b:'우측 <b>내 파일</b>에 업로드한 뒤 검색 범위를 <b>내 파일</b>로 바꾸세요. 사내 공식 지식으로 만들려면 <b>데이터 업로드 요청</b>으로 반영 요청합니다.' },
-      { t:'단축키', b:'<ul><li><b>Enter</b> — 메시지 전송</li><li><b>Ctrl+K</b> — 빠른 입력</li></ul>' },
-      { t:'가이드 투어를 다시 보고 싶어요', b:'설명서 상단의 <b>🚀 가이드 투어</b> 버튼을 누르면 화면 안내를 다시 볼 수 있습니다.' }
+      { t:'찾는 문서가 검색이 안 돼요', b:'해당 문서의 <b>열람 권한</b>이 없거나 아직 지식 베이스에 반영되지 않았을 수 있습니다. 업로드 요청 상태를 <b>이력 관리</b>에서 확인하세요.' },
+      { t:'화면이 깨지거나 멈춰요', b:'브라우저 <b>새로고침(F5)</b>을 먼저 시도하세요. 그래도 이상하면 캐시를 비우고 다시 접속해 주세요.' }
+    ]},
+    { id:'glossary', icon:'📚', name:'용어 사전', desc:'헷갈리는 용어 정리', articles:[
+      { t:'RAG', b:'Retrieval-Augmented Generation. 관련 <b>문서를 먼저 검색</b>해 그 근거로 답변을 생성하는 방식. VAATZ AI의 핵심 구조입니다.' },
+      { t:'청크(Chunk) / 임베딩', b:'<b>청크</b>는 문서를 의미 단위로 잘게 나눈 조각, <b>임베딩</b>은 텍스트를 검색용 숫자 벡터로 바꾼 것입니다.' },
+      { t:'재정렬(Re-ranking)', b:'검색된 여러 청크 중 질문에 가장 잘 맞는 <b>상위 근거를 다시 정렬</b>해 답변 품질을 높이는 단계입니다.' },
+      { t:'신뢰도', b:'답변이 근거 문서와 얼마나 잘 부합하는지를 나타내는 지표(%). 낮으면 원문 확인을 권장합니다.' },
+      { t:'폴더팩 / 데이터마트', b:'<b>폴더팩</b>은 AI 모드에 연결하는 문서 묶음, <b>데이터마트</b>는 연계된 외부 데이터 소스를 뜻합니다.' },
+      { t:'품질 5스타', b:'협력사 품질 수준을 1~5등급으로 평가하는 제도. 등급별 평가 항목과 승급 기준이 있습니다.' }
+    ]},
+    { id:'faq', icon:'❓', name:'자주 묻는 질문', desc:'가장 많이 묻는 것들', articles:[
+      { t:'가이드 투어를 다시 보고 싶어요', b:'설명서 상단의 <b>🚀 가이드 투어</b> 버튼을 누르면 화면 안내를 다시 볼 수 있습니다.' },
+      { t:'내 데이터는 안전한가요?', b:'RAG 검색은 사용자 <b>열람 권한</b>을 자동 반영하므로 권한 밖 문서는 답변에 사용되지 않습니다. 민감 문서는 보안등급에 맞게 업로드하세요.' },
+      { t:'모바일에서도 쓸 수 있나요?', b:'웹 브라우저로 접속하면 사용할 수 있으나, 작업 패널 등 일부 기능은 <b>넓은 화면(PC)</b>에 최적화되어 있습니다.' },
+      { t:'사용설명서/매뉴얼을 내려받고 싶어요', b:'설명서 상단 <b>🖨 PDF</b>로 인쇄(저장)하거나 <b>⬇️ .md</b>로 마크다운 매뉴얼을 내려받을 수 있습니다.' }
     ]}
   ];
 
@@ -7778,6 +7817,51 @@ window.vaatzClaimQuest = function(id){
       '.vh-art-b li{margin:3px 0}',
       '.vh-art-b b{color:var(--text-2);font-weight:700}',
       '.vh-empty{text-align:center;color:var(--text-4);font-size:12px;padding:48px 12px}',
+      /* 모던 홈: hero + 인기검색 + 카테고리 카드 */
+      '.vh-hero{background:linear-gradient(135deg,rgba(75,142,240,.16),rgba(75,142,240,.03));border:1px solid var(--border-1);border-radius:16px;padding:22px 22px 18px;margin:4px 0 18px}',
+      '.vh-hero-h{font-size:19px;font-weight:800;color:var(--text-1);margin-bottom:6px}',
+      '.vh-hero-sub{font-size:12.5px;color:var(--text-3);line-height:1.65;max-width:640px}',
+      '.vh-pop{display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin-top:14px}',
+      '.vh-pop-lb{font-size:11px;font-weight:700;color:var(--text-4)}',
+      '.vh-pop-chip{font-size:11.5px;font-weight:600;padding:5px 12px;border-radius:999px;border:1px solid var(--border-2);background:var(--bg-1);color:var(--text-2);cursor:pointer;font-family:inherit;transition:.12s}',
+      '.vh-pop-chip:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-dim,rgba(75,142,240,.12))}',
+      '.vh-sec-t{font-size:12.5px;font-weight:800;color:var(--text-2);margin:0 0 10px}',
+      '.vh-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(214px,1fr));gap:11px}',
+      '.vh-card{text-align:left;background:var(--bg-2);border:1px solid var(--border-1);border-radius:14px;padding:15px;cursor:pointer;font-family:inherit;transition:.15s;display:flex;flex-direction:column}',
+      '.vh-card:hover{border-color:var(--accent);transform:translateY(-2px);box-shadow:0 8px 22px rgba(0,0,0,.16)}',
+      '.vh-card-ic{font-size:26px;line-height:1;margin-bottom:7px}',
+      '.vh-card-nm{font-size:13.5px;font-weight:800;color:var(--text-1)}',
+      '.vh-card-desc{font-size:11px;color:var(--text-4);line-height:1.5;margin-top:3px;flex:1}',
+      '.vh-card-cnt{font-size:10.5px;font-weight:700;color:var(--accent);margin-top:9px}',
+      '.vh-back{font-size:12px;font-weight:600;color:var(--accent);background:none;border:none;cursor:pointer;font-family:inherit;padding:2px 0;margin-bottom:12px}',
+      '.vh-back:hover{text-decoration:underline}',
+      '.vh-cat-head{display:flex;align-items:center;gap:12px;margin-bottom:14px;padding-bottom:13px;border-bottom:1px solid var(--border-1)}',
+      '.vh-cat-ic{font-size:30px;line-height:1}',
+      '.vh-cat-t{font-size:16px;font-weight:800;color:var(--text-1)}',
+      '.vh-cat-desc{font-size:11.5px;color:var(--text-4);margin-top:2px}',
+      /* 첫 실행 환영 모달 (튜토리얼 실행 안내) */
+      '.vh-wel-ov{position:fixed;inset:0;background:rgba(0,0,0,.55);backdrop-filter:blur(5px);z-index:100002;display:none;align-items:center;justify-content:center;padding:24px}',
+      '.vh-wel-ov.sh{display:flex;animation:vhFade .25s ease}',
+      '@keyframes vhFade{from{opacity:0}to{opacity:1}}',
+      '.vh-wel-card{position:relative;width:min(440px,94vw);background:var(--bg-1);border:1px solid var(--border-2);border-radius:20px;padding:30px 28px 22px;text-align:center;box-shadow:0 26px 80px rgba(0,0,0,.5);animation:vhPop .3s cubic-bezier(.2,.8,.3,1.2)}',
+      '@keyframes vhPop{from{opacity:0;transform:translateY(14px) scale(.96)}to{opacity:1;transform:none}}',
+      '.vh-wel-x{position:absolute;top:13px;right:15px;font-size:15px;background:none;border:none;color:var(--text-4);cursor:pointer;line-height:1}',
+      '.vh-wel-x:hover{color:var(--text-1)}',
+      '.vh-wel-emoji{font-size:46px;line-height:1;margin-bottom:8px}',
+      '.vh-wel-h{font-size:20px;font-weight:800;color:var(--text-1);margin-bottom:8px}',
+      '.vh-wel-sub{font-size:12.5px;color:var(--text-3);line-height:1.7;margin-bottom:20px}',
+      '.vh-wel-sub b{color:var(--text-2)}',
+      '.vh-wel-feats{display:flex;gap:9px;margin-bottom:22px}',
+      '.vh-wel-feat{flex:1;background:var(--bg-2);border:1px solid var(--border-1);border-radius:13px;padding:13px 6px}',
+      '.vh-wel-feat-ic{font-size:23px;line-height:1;margin-bottom:7px}',
+      '.vh-wel-feat-t{font-size:10.5px;font-weight:700;color:var(--text-2);line-height:1.4}',
+      '.vh-wel-acts{display:flex;flex-direction:column;gap:8px}',
+      '.vh-wel-primary{font-size:13.5px;font-weight:800;padding:13px;background:var(--accent);color:#fff;border:none;border-radius:11px;cursor:pointer;font-family:inherit;box-shadow:0 4px 14px rgba(75,142,240,.4);transition:.15s}',
+      '.vh-wel-primary:hover{filter:brightness(1.08);transform:translateY(-1px)}',
+      '.vh-wel-skip{font-size:12px;background:none;border:none;color:var(--text-4);cursor:pointer;font-family:inherit;padding:4px}',
+      '.vh-wel-skip:hover{color:var(--text-2)}',
+      '.vh-wel-foot{font-size:10.5px;color:var(--text-4);margin-top:15px}',
+      '.vh-wel-foot b{color:var(--text-3)}',
       /* 사이드바 도움말 버튼 강조 */
       '#vhHelpBtn{position:relative}',
       /* 가이드 투어 */
@@ -7803,7 +7887,8 @@ window.vaatzClaimQuest = function(id){
   /* ─────────────────────────────────────────────
    * 3) Help Center 모달
    * ───────────────────────────────────────────── */
-  var hstate = { cat:'quickstart', q:'' };
+  var hstate = { view:'home', cat:'quickstart', q:'' };
+  var POPULAR = ['답변 근거','에이전트 공유','단축키','포인트 적립','업로드 요청','웹 검색'];
 
   function buildModal(){
     if(document.getElementById('vaatzHelpOv')) return;
@@ -7814,75 +7899,93 @@ window.vaatzClaimQuest = function(id){
     ov.innerHTML =
       '<div class="vh-box">'
       + '<div class="vh-hd">'
-        + '<h3>📖 VAATZ AI 사용설명서</h3>'
+        + '<h3>📖 사용설명서</h3>'
         + '<button class="vh-tool accent" onclick="vhStartTour()">🚀 가이드 투어</button>'
-        + '<button class="vh-tool" onclick="vhPrintManual()">🖨 PDF/인쇄</button>'
-        + '<button class="vh-tool" onclick="vhDownloadMd()">⬇️ 매뉴얼(.md)</button>'
+        + '<button class="vh-tool" onclick="vhPrintManual()">🖨 PDF</button>'
+        + '<button class="vh-tool" onclick="vhDownloadMd()">⬇️ .md</button>'
         + '<button class="vh-x" onclick="vhCloseHelp()" title="닫기">✕</button>'
       + '</div>'
-      + '<div class="vh-sub"><div class="vh-search"><span style="font-size:12px;color:var(--text-4)">🔍</span>'
-        + '<input id="vhSearchInput" placeholder="설명서 검색 (기능·키워드)..." oninput="vhSearch(this.value)"></div></div>'
-      + '<div class="vh-chips" id="vhChips"></div>'
+      + '<div class="vh-sub"><div class="vh-search"><span style="font-size:13px;color:var(--text-4)">🔍</span>'
+        + '<input id="vhSearchInput" placeholder="무엇을 찾으세요? (예: 답변 근거, 에이전트 공유)" oninput="vhSearch(this.value,true)"></div></div>'
       + '<div class="vh-body" id="vhBody"></div>'
       + '</div>';
     document.body.appendChild(ov);
   }
 
-  function renderHelp(){
-    buildModal();
-    var chips = document.getElementById('vhChips');
-    var body  = document.getElementById('vhBody');
-    if(!chips || !body) return;
+  function artCard(a){ return '<div class="vh-art"><div class="vh-art-t">'+a.t+'</div><div class="vh-art-b">'+a.b+'</div></div>'; }
 
-    var q = (hstate.q||'').trim().toLowerCase();
+  function renderHome(body){
+    var hero = '<div class="vh-hero"><div class="vh-hero-h">👋 무엇을 도와드릴까요?</div>'
+      + '<div class="vh-hero-sub">VAATZ AI 사용법을 카테고리별로 정리했어요. 위 검색창에 키워드를 넣어 바로 찾을 수도 있어요.</div>'
+      + '<div class="vh-pop"><span class="vh-pop-lb">인기 검색</span>'
+      + POPULAR.map(function(p){ return '<button class="vh-pop-chip" onclick="vhSearch(\''+p+'\')">'+p+'</button>'; }).join('')
+      + '</div></div>';
+    var cards = '<div class="vh-sec-t">📂 도움말 카테고리</div><div class="vh-cards">'
+      + DOCS.map(function(c){
+          return '<button class="vh-card" onclick="vhGo(\''+c.id+'\')">'
+            + '<div class="vh-card-ic">'+c.icon+'</div>'
+            + '<div class="vh-card-nm">'+c.name+'</div>'
+            + '<div class="vh-card-desc">'+(c.desc||'')+'</div>'
+            + '<div class="vh-card-cnt">'+c.articles.length+'개 도움말 →</div>'
+            + '</button>';
+        }).join('')
+      + '</div>';
+    body.innerHTML = hero + cards;
+    body.scrollTop = 0;
+  }
 
-    /* 칩 */
-    chips.style.display = q ? 'none' : 'flex';
-    if(!q){
-      chips.innerHTML = DOCS.map(function(c){
-        return '<button class="vh-chip'+(hstate.cat===c.id?' on':'')+'" onclick="vhGo(\''+c.id+'\')">'+c.icon+' '+c.name+'</button>';
-      }).join('');
-    }
+  function renderCategory(body){
+    var cat = catById(hstate.cat);
+    body.innerHTML = '<button class="vh-back" onclick="vhHome()">← 전체 카테고리</button>'
+      + '<div class="vh-cat-head"><div class="vh-cat-ic">'+cat.icon+'</div>'
+      + '<div><div class="vh-cat-t">'+cat.name+'</div><div class="vh-cat-desc">'+(cat.desc||'')+'</div></div></div>'
+      + cat.articles.map(artCard).join('');
+    body.scrollTop = 0;
+  }
 
-    /* 본문 */
-    if(q){
-      var hits = [];
-      DOCS.forEach(function(c){
-        c.articles.forEach(function(a){
-          var hay = (a.t+' '+htmlToText(a.b)+' '+c.name).toLowerCase();
-          if(hay.indexOf(q)!==-1) hits.push({c:c, a:a});
-        });
-      });
-      body.innerHTML = hits.length
-        ? '<div class="vh-cat-h">🔍 검색 결과 '+hits.length+'건</div>'
+  function renderSearch(body, q){
+    var hits = [];
+    DOCS.forEach(function(c){ c.articles.forEach(function(a){
+      var hay = (a.t+' '+htmlToText(a.b)+' '+c.name).toLowerCase();
+      if(hay.indexOf(q)!==-1) hits.push({c:c, a:a});
+    }); });
+    body.innerHTML = '<button class="vh-back" onclick="vhHome()">← 홈으로</button>'
+      + (hits.length
+        ? '<div class="vh-cat-h">🔍 ‘'+escapeHtml(hstate.q)+'’ 검색 결과 '+hits.length+'건</div>'
           + hits.map(function(h){
               return '<div class="vh-art"><div class="vh-art-cat">'+h.c.icon+' '+h.c.name+'</div>'
                 + '<div class="vh-art-t">'+h.a.t+'</div><div class="vh-art-b">'+h.a.b+'</div></div>';
             }).join('')
-        : '<div class="vh-empty">😶 "'+escapeHtml(hstate.q)+'"에 대한 결과가 없습니다.<br>다른 키워드로 검색해 보세요.</div>';
-    } else {
-      var cat = catById(hstate.cat);
-      body.innerHTML = '<div class="vh-cat-h">'+cat.icon+' '+cat.name+'</div>'
-        + cat.articles.map(function(a){
-            return '<div class="vh-art"><div class="vh-art-t">'+a.t+'</div><div class="vh-art-b">'+a.b+'</div></div>';
-          }).join('');
-      body.scrollTop = 0;
-    }
+        : '<div class="vh-empty">😶 ‘'+escapeHtml(hstate.q)+'’에 대한 결과가 없습니다.<br>다른 키워드로 검색하거나 카테고리를 둘러보세요.</div>');
+    body.scrollTop = 0;
+  }
+
+  function renderHelp(){
+    buildModal();
+    var body = document.getElementById('vhBody');
+    if(!body) return;
+    var q = (hstate.q||'').trim().toLowerCase();
+    if(q) renderSearch(body, q);
+    else if(hstate.view==='cat') renderCategory(body);
+    else renderHome(body);
   }
   function escapeHtml(s){ return String(s==null?'':s).replace(/[&<>"']/g,function(m){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m];}); }
+  function setSearchInput(v){ var si=document.getElementById('vhSearchInput'); if(si) si.value=(v||''); }
 
   window.vhOpenHelp = function(cat){
     buildModal();
-    if(cat) hstate.cat = cat;
     hstate.q = '';
+    if(cat){ hstate.view='cat'; hstate.cat=cat; } else { hstate.view='home'; }
+    setSearchInput('');
     var ov = document.getElementById('vaatzHelpOv');
     if(ov) ov.classList.add('sh');
     renderHelp();
-    var si = document.getElementById('vhSearchInput'); if(si){ si.value=''; setTimeout(function(){ try{ si.focus(); }catch(e){} }, 50); }
+    var si = document.getElementById('vhSearchInput'); if(si) setTimeout(function(){ try{ si.focus(); }catch(e){} }, 60);
   };
   window.vhCloseHelp = function(){ var ov=document.getElementById('vaatzHelpOv'); if(ov) ov.classList.remove('sh'); };
-  window.vhGo = function(id){ hstate.cat=id; hstate.q=''; var si=document.getElementById('vhSearchInput'); if(si) si.value=''; renderHelp(); };
-  window.vhSearch = function(v){ hstate.q=v||''; renderHelp(); };
+  window.vhGo = function(id){ hstate.view='cat'; hstate.cat=id; hstate.q=''; setSearchInput(''); renderHelp(); };
+  window.vhHome = function(){ hstate.view='home'; hstate.q=''; setSearchInput(''); renderHelp(); };
+  window.vhSearch = function(v, fromInput){ hstate.q=v||''; if(!fromInput) setSearchInput(v); renderHelp(); };
 
   /* ─────────────────────────────────────────────
    * 4) 첫 방문 가이드 투어 (스포트라이트)
@@ -8101,17 +8204,52 @@ window.vaatzClaimQuest = function(id){
     return true;
   }
 
-  /* ESC로 Help Center 닫기 */
+  /* ESC로 환영 모달 / Help Center 닫기 */
   document.addEventListener('keydown', function(e){
-    if(e.key==='Escape'){ var ov=document.getElementById('vaatzHelpOv'); if(ov && ov.classList.contains('sh')) window.vhCloseHelp(); }
+    if(e.key!=='Escape') return;
+    var wel=document.getElementById('vhWelcomeOv');
+    if(wel && wel.classList.contains('sh')){ window.vhCloseWelcome(); return; }
+    var ov=document.getElementById('vaatzHelpOv');
+    if(ov && ov.classList.contains('sh')) window.vhCloseHelp();
   });
+
+  /* ─── 첫 실행 환영 모달: 튜토리얼 실행 여부를 물어봄 (강제 X) ─── */
+  var WELCOME_KEY = 'vaatz-help-welcome-v1';
+  function buildWelcome(){
+    if(document.getElementById('vhWelcomeOv')) return;
+    injectStyle();
+    var ov = document.createElement('div');
+    ov.className = 'vh-wel-ov'; ov.id = 'vhWelcomeOv';
+    ov.addEventListener('click', function(e){ if(e.target===ov) window.vhCloseWelcome(); });
+    ov.innerHTML =
+      '<div class="vh-wel-card">'
+      + '<button class="vh-wel-x" onclick="vhCloseWelcome()" title="닫기">✕</button>'
+      + '<div class="vh-wel-emoji">👋</div>'
+      + '<div class="vh-wel-h">VAATZ AI에 오신 걸 환영해요</div>'
+      + '<div class="vh-wel-sub">구매본부 지식을 <b>근거와 함께</b> 답해주는 AI 플랫폼이에요.<br>1분 가이드 투어로 핵심 기능을 둘러볼까요?</div>'
+      + '<div class="vh-wel-feats">'
+        + '<div class="vh-wel-feat"><div class="vh-wel-feat-ic">💬</div><div class="vh-wel-feat-t">근거 있는<br>AI 답변</div></div>'
+        + '<div class="vh-wel-feat"><div class="vh-wel-feat-ic">🤖</div><div class="vh-wel-feat-t">AI 에이전트<br>마켓</div></div>'
+        + '<div class="vh-wel-feat"><div class="vh-wel-feat-ic">📖</div><div class="vh-wel-feat-t">검색형<br>사용설명서</div></div>'
+      + '</div>'
+      + '<div class="vh-wel-acts">'
+        + '<button class="vh-wel-primary" onclick="vhWelcomeTour()">✨ 1분 가이드 투어 시작</button>'
+        + '<button class="vh-wel-skip" onclick="vhCloseWelcome()">나중에 할게요</button>'
+      + '</div>'
+      + '<div class="vh-wel-foot">언제든 좌측 하단 <b>❓ 사용설명서</b>에서 다시 볼 수 있어요.</div>'
+      + '</div>';
+    document.body.appendChild(ov);
+  }
+  window.vhShowWelcome = function(){ buildWelcome(); var o=document.getElementById('vhWelcomeOv'); if(o) o.classList.add('sh'); try{ localStorage.setItem(WELCOME_KEY,'1'); }catch(e){} };
+  window.vhCloseWelcome = function(){ var o=document.getElementById('vhWelcomeOv'); if(o) o.classList.remove('sh'); };
+  window.vhWelcomeTour = function(){ window.vhCloseWelcome(); setTimeout(function(){ window.vhStartTour(); }, 220); };
 
   function boot(){
     var ok = ensureHelpButton();
     if(!ok){ setTimeout(boot, 400); return; }
-    /* 첫 방문 시 가이드 투어 자동 실행 */
-    var seen=false; try{ seen = !!localStorage.getItem(TOUR_KEY); }catch(e){}
-    if(!seen){ setTimeout(function(){ if($('.iw')) window.vhStartTour(); }, 1400); }
+    /* 첫 실행 시 환영 모달로 튜토리얼 실행 여부 안내 (자동 강제 X) */
+    var seen=false; try{ seen = !!localStorage.getItem(WELCOME_KEY); }catch(e){}
+    if(!seen){ setTimeout(function(){ if($('.iw')) window.vhShowWelcome(); }, 1200); }
   }
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', function(){ setTimeout(boot, 350); });
   else setTimeout(boot, 350);
