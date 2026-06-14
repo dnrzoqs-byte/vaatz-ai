@@ -7659,3 +7659,461 @@ window.vaatzClaimQuest = function(id){
   else setTimeout(boot, 300);
 
 })();
+
+
+/* ═══════════════════════════════════════════════════════════════
+ * §17  사용설명서 시스템 — Help Center + 첫 방문 가이드 투어
+ *       + PDF/인쇄 매뉴얼 + 마크다운 내보내기
+ *      · ❓ 사용설명서 버튼(사이드바 푸터)으로 Help Center 열기
+ *      · 첫 방문 시 스포트라이트 투어 자동 실행(localStorage 기록)
+ *      · 모든 콘텐츠는 DOCS 1곳에서 정의 → 화면/PDF/MD 공용
+ * ═══════════════════════════════════════════════════════════════ */
+(function(){
+  'use strict';
+  var $  = function(s,r){ return (r||document).querySelector(s); };
+  var TOUR_KEY = 'vaatz-help-tour-v1';
+
+  /* ─────────────────────────────────────────────
+   * 1) 설명서 콘텐츠 (Help Center · PDF · MD 공용)
+   * ───────────────────────────────────────────── */
+  var DOCS = [
+    { id:'quickstart', icon:'🚀', name:'빠른 시작', articles:[
+      { t:'VAATZ AI는 무엇인가요?', b:'현대·기아 <b>구매본부 RAG 지식 플랫폼</b>입니다. 구매업무규정·업무표준·VAATZ 매뉴얼·품질 5스타 기준 등 사내 지식을 검색해 <b>근거(출처)와 함께</b> 답변합니다.' },
+      { t:'3단계로 시작하기', b:'<ul><li>① 화면 하단 <b>입력창</b>에 구매 업무 질문을 입력합니다.</li><li>② 답변의 <b>답변 근거</b>(우측 패널)에서 인용된 문서·조항을 확인합니다.</li><li>③ 필요한 문서는 <b>내 파일</b>에 올리거나 <b>데이터 업로드 요청</b>으로 지식 베이스에 반영 요청합니다.</li></ul>' },
+      { t:'화면 구성 한눈에 보기', b:'<ul><li><b>좌측 사이드바</b> — 새 대화, 구매 DB, 요청, 최근 대화, Admin</li><li><b>가운데</b> — AI 채팅(질문·답변)</li><li><b>우측 작업 패널</b> — 내 파일 / 답변 근거</li><li><b>우하단 Buddy</b> — 커뮤니티·캐릭터·관리 바로가기</li></ul>' }
+    ]},
+    { id:'chat', icon:'💬', name:'AI 채팅 & RAG', articles:[
+      { t:'질문하기', b:'하단 입력창에 자연어로 질문하세요. <b>Enter</b>로 전송, <b>Ctrl+K</b>로 빠른 입력이 가능합니다. 📎 파일첨부·📷 이미지도 함께 보낼 수 있습니다.' },
+      { t:'답변 근거(출처) 확인', b:'답변 상단의 <b>RAG 파이프라인</b>에 인용된 문서 청크 칩(예: 규정 §23)이 표시됩니다. 칩을 클릭하면 우측 <b>답변 근거</b> 탭에서 원문 위치를 확인할 수 있습니다.' },
+      { t:'검색 범위 전환', b:'상단의 <b>구매지식 ↔ 내 파일</b> 스위치로 검색 대상을 바꿉니다. 사내 공식 지식만 볼지, 내가 올린 개인 문서를 대상으로 할지 선택하세요.' },
+      { t:'웹 검색 활용', b:'상단 <b>🌐 웹 검색</b> 토글을 켜면 외부 웹 결과를 답변에 함께 반영합니다. 사내 지식만으로 부족할 때 사용하세요.' },
+      { t:'신뢰도 표시 보는 법', b:'답변마다 <b>신뢰도(%)</b>와 인용 문서 수가 표기됩니다. 신뢰도가 낮으면 규정 원문을 한 번 더 확인하고, 👍/👎 피드백으로 품질 개선에 기여하세요.' }
+    ]},
+    { id:'panel', icon:'📂', name:'작업 패널', articles:[
+      { t:'내 파일', b:'개인 문서를 업로드하고 폴더로 관리합니다. <b>드래그앤드롭</b> 업로드를 지원하며, 검색 범위를 <b>내 파일</b>로 두면 이 문서들을 대상으로 답변합니다.' },
+      { t:'답변 근거', b:'방금 받은 답변이 인용한 문서·청크를 출처로 보여줍니다. 어떤 규정/매뉴얼에 근거했는지 추적할 수 있습니다.' },
+      { t:'패널 열고 닫기 / 크기 조절', b:'우측 상단 <b>✕</b>로 패널을 닫고, 좌측 경계를 드래그해 <b>폭</b>을 조절할 수 있습니다.' }
+    ]},
+    { id:'db', icon:'🗄️', name:'구매 DB', articles:[
+      { t:'구매 DB 둘러보기', b:'사이드바 <b>구매 DB</b>에서 표준 지식을 카테고리별로 열람합니다.<ul><li><b>용어사전</b> — 구매 용어 정의</li><li><b>업무표준</b> — 표준 프로세스(STD)</li><li><b>품질 5스타</b> — 등급/평가 기준</li><li><b>입찰관리</b> — 입찰 방식·절차</li></ul>' }
+    ]},
+    { id:'request', icon:'📤', name:'요청 & 이력', articles:[
+      { t:'데이터 업로드 요청', b:'사이드바 <b>데이터 업로드 요청</b>으로 새 문서를 지식 베이스에 반영 요청합니다. 관리자 승인 후 AI가 학습해 검색에 반영됩니다.' },
+      { t:'이력 관리', b:'질의·업로드·승인·AI 반영 이력을 한곳에서 확인합니다. 진행 상태와 처리 내역을 추적할 수 있습니다.' }
+    ]},
+    { id:'community', icon:'👥', name:'지식 커뮤니티', articles:[
+      { t:'커뮤니티 열기', b:'우하단 <b>VAATZ Buddy</b> 또는 메뉴에서 커뮤니티를 엽니다. Q&A · 명예의 전당 · 내 레벨 · 내 캐릭터 · 상점 · 칭호·퀘스트 · <b>AI 에이전트</b> 탭으로 구성됩니다.' },
+      { t:'Q&A 참여', b:'<b>✏️ 질문하기</b>로 질문을 등록하고 동료의 질문에 답변하세요. 추천 10회 이상 + 채택된 답변은 관리자 검증 후 <b>AI 학습 DB에 반영</b>되며 작성자에게 <b>+100pt</b>가 지급됩니다.' },
+      { t:'명예의 전당', b:'주간/월간/연간 단위로 기여도가 높은 멤버 랭킹을 확인할 수 있습니다.' }
+    ]},
+    { id:'agent', icon:'🤖', name:'AI 에이전트 마켓', articles:[
+      { t:'AI 에이전트 마켓이란?', b:'<b>클로드 코드</b>로 만든 업무 자동화 Agent(.exe)를 <b>구매·개발·품질·관리·구매공통</b> 5개 영역별로 공유하고 다운로드하는 공간입니다. (커뮤니티 → <b>🤖 AI 에이전트</b> 탭)' },
+      { t:'에이전트 다운로드', b:'영역 칩으로 분야를 고르거나 검색한 뒤, 카드의 <b>⬇️ 다운로드 (.exe)</b> 버튼을 누릅니다. (현재 데모 환경에서는 안내용 README 파일이 내려받아집니다.)' },
+      { t:'내 에이전트 공유', b:'<b>➕ 내 에이전트 공유</b> → 이름·영역·설명·실행 파일(.exe)을 입력해 등록합니다. 공유하면 <b>+50pt</b>, 다운로드가 많은 에이전트는 명예의 전당에 노출됩니다.' }
+    ]},
+    { id:'character', icon:'🎮', name:'캐릭터 & 포인트', articles:[
+      { t:'포인트 적립 & 레벨', b:'Q&A 채택, 에이전트 공유 등 커뮤니티 기여로 포인트(pt)를 모으면 캐릭터 레벨이 오릅니다. (최대 <b>Lv.100</b>, 등급별 칭호 부여)' },
+      { t:'캐릭터 꾸미기 / 상점', b:'모은 pt로 <b>상점</b>에서 모자·악세서리·펫·배경·이펙트·마이카 뱃지를 구매하고, <b>내 캐릭터</b> 탭에서 장착해 나만의 캐릭터를 꾸밉니다.' }
+    ]},
+    { id:'admin', icon:'🛠️', name:'관리자', articles:[
+      { t:'관리자 패널 열기', b:'사이드바 하단의 <b>Admin</b> 버튼 또는 Buddy 허브에서 관리자 패널을 엽니다. (권한이 있는 담당자만)' },
+      { t:'주요 관리 기능', b:'<ul><li><b>팀 폴더</b> — 팀 문서 전체 관리/등록 요청</li><li><b>최종 승인</b> — 검토 완료 문서의 최종 승인·반려</li><li><b>데이터마트</b> — 외부 데이터 소스 연계</li><li><b>AI 모드</b> — 폴더팩 연결 정책 관리</li><li><b>권한 관리</b> — 사용자 열람 권한 설정</li></ul>' }
+    ]},
+    { id:'settings', icon:'👤', name:'마이페이지 & 설정', articles:[
+      { t:'마이페이지', b:'사이드바 하단의 <b>프로필</b>(이름/부서)을 클릭하면 마이페이지가 열립니다.' },
+      { t:'테마 전환', b:'프로필 옆 <b>🌙</b> 버튼으로 다크/라이트 테마를 전환합니다. 설정은 기기에 저장됩니다.' },
+      { t:'닉네임', b:'커뮤니티 활동에 표시되는 닉네임을 확인·사용합니다.' }
+    ]},
+    { id:'faq', icon:'❓', name:'자주 묻는 질문', articles:[
+      { t:'답변이 부정확해요', b:'검색 범위(구매지식/내 파일)와 웹 검색 설정을 먼저 확인하세요. 신뢰도가 낮으면 규정 원문을 확인하고, 답변 하단 <b>👎 부정확</b>으로 피드백하면 품질 개선에 반영됩니다.' },
+      { t:'내 문서를 AI가 참고하게 하려면?', b:'우측 <b>내 파일</b>에 업로드한 뒤 검색 범위를 <b>내 파일</b>로 바꾸세요. 사내 공식 지식으로 만들려면 <b>데이터 업로드 요청</b>으로 반영 요청합니다.' },
+      { t:'단축키', b:'<ul><li><b>Enter</b> — 메시지 전송</li><li><b>Ctrl+K</b> — 빠른 입력</li></ul>' },
+      { t:'가이드 투어를 다시 보고 싶어요', b:'설명서 상단의 <b>🚀 가이드 투어</b> 버튼을 누르면 화면 안내를 다시 볼 수 있습니다.' }
+    ]}
+  ];
+
+  function catById(id){ for(var i=0;i<DOCS.length;i++){ if(DOCS[i].id===id) return DOCS[i]; } return DOCS[0]; }
+
+  /* HTML → 텍스트 (MD/PDF 텍스트 변환용) */
+  function htmlToText(h){
+    return String(h||'')
+      .replace(/<li>/g,'\n  • ').replace(/<\/li>/g,'')
+      .replace(/<\/p>/g,'\n').replace(/<br\s*\/?>/g,'\n')
+      .replace(/<[^>]+>/g,'')
+      .replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&#39;/g,"'").replace(/&quot;/g,'"')
+      .replace(/[ \t]+\n/g,'\n').replace(/\n{3,}/g,'\n\n').trim();
+  }
+
+  /* ─────────────────────────────────────────────
+   * 2) 스타일 주입
+   * ───────────────────────────────────────────── */
+  function injectStyle(){
+    if(document.getElementById('vaatzHelpStyle')) return;
+    var css = [
+      '.vh-ov{position:fixed;inset:0;background:rgba(0,0,0,.5);backdrop-filter:blur(4px);z-index:100000;display:none;align-items:center;justify-content:center;padding:24px}',
+      '.vh-ov.sh{display:flex}',
+      '.vh-box{width:min(940px,96vw);height:min(86vh,880px);background:var(--bg-1);border:1px solid var(--border-2);border-radius:16px;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 24px 70px rgba(0,0,0,.5)}',
+      '.vh-hd{display:flex;align-items:center;gap:8px;padding:15px 18px;border-bottom:1px solid var(--border-1);background:var(--bg-2);flex-wrap:wrap}',
+      '.vh-hd h3{font-size:15px;font-weight:800;flex:1;min-width:150px;display:flex;align-items:center;gap:7px;margin:0}',
+      '.vh-tool{font-size:11.5px;font-weight:700;padding:7px 12px;border-radius:8px;border:1px solid var(--border-2);background:var(--bg-3);color:var(--text-2);cursor:pointer;font-family:inherit;white-space:nowrap;transition:.13s}',
+      '.vh-tool:hover{border-color:var(--accent);color:var(--accent)}',
+      '.vh-tool.accent{background:var(--accent);color:#fff;border-color:var(--accent)}',
+      '.vh-tool.accent:hover{filter:brightness(1.08);color:#fff}',
+      '.vh-x{font-size:17px;background:none;border:none;color:var(--text-3);cursor:pointer;padding:2px 6px;line-height:1}',
+      '.vh-x:hover{color:var(--text-1)}',
+      '.vh-sub{padding:13px 18px 0}',
+      '.vh-search{display:flex;align-items:center;gap:7px;background:var(--bg-3);border:1px solid var(--border-1);border-radius:9px;padding:9px 12px}',
+      '.vh-search input{flex:1;background:none;border:none;outline:none;color:var(--text-1);font-size:13px;font-family:inherit}',
+      '.vh-chips{display:flex;gap:6px;flex-wrap:wrap;padding:12px 18px 4px}',
+      '.vh-chip{font-size:11.5px;font-weight:600;padding:6px 11px;border-radius:999px;border:1.5px solid var(--border-2);background:var(--bg-2);color:var(--text-2);cursor:pointer;font-family:inherit;transition:.12s}',
+      '.vh-chip:hover{border-color:var(--accent);color:var(--accent)}',
+      '.vh-chip.on{background:var(--accent);color:#fff;border-color:var(--accent)}',
+      '.vh-body{flex:1;overflow-y:auto;padding:8px 18px 22px}',
+      '.vh-cat-h{font-size:13.5px;font-weight:800;margin:14px 0 9px;color:var(--text-1);display:flex;align-items:center;gap:7px}',
+      '.vh-art{background:var(--bg-2);border:1px solid var(--border-1);border-radius:11px;padding:13px 15px;margin-bottom:9px}',
+      '.vh-art-cat{font-size:9.5px;color:var(--accent);font-weight:800;margin-bottom:4px;letter-spacing:.3px}',
+      '.vh-art-t{font-size:12.5px;font-weight:700;color:var(--text-1);margin-bottom:6px}',
+      '.vh-art-b{font-size:12px;color:var(--text-3);line-height:1.75}',
+      '.vh-art-b ul{margin:6px 0 0;padding-left:18px}',
+      '.vh-art-b li{margin:3px 0}',
+      '.vh-art-b b{color:var(--text-2);font-weight:700}',
+      '.vh-empty{text-align:center;color:var(--text-4);font-size:12px;padding:48px 12px}',
+      /* 사이드바 도움말 버튼 강조 */
+      '#vhHelpBtn{position:relative}',
+      /* 가이드 투어 */
+      '.vh-tour-block{position:fixed;inset:0;z-index:100010;background:transparent}',
+      '.vh-tour-mask{position:fixed;z-index:100011;border-radius:12px;box-shadow:0 0 0 9999px rgba(0,0,0,.62);pointer-events:none;border:2.5px solid var(--accent,#4b8ef0);transition:left .25s ease,top .25s ease,width .25s ease,height .25s ease}',
+      '.vh-tour-tip{position:fixed;z-index:100020;width:308px;max-width:92vw;background:var(--bg-1,#1a1d24);border:1px solid var(--border-2,#333);border-radius:14px;padding:15px 16px;box-shadow:0 16px 48px rgba(0,0,0,.55)}',
+      '.vh-tip-step{font-size:10px;font-weight:800;color:var(--accent);letter-spacing:.6px}',
+      '.vh-tip-t{font-size:14.5px;font-weight:800;margin:5px 0 7px;color:var(--text-1,#fff)}',
+      '.vh-tip-b{font-size:12px;color:var(--text-3,#bbb);line-height:1.7}',
+      '.vh-tip-link{display:inline-block;margin-top:11px;font-size:11.5px;color:var(--accent);cursor:pointer;font-weight:700}',
+      '.vh-tip-acts{display:flex;align-items:center;gap:8px;margin-top:14px}',
+      '.vh-tip-acts .sp{flex:1}',
+      '.vh-tip-skip{font-size:11px;background:none;border:none;color:var(--text-4,#888);cursor:pointer;font-family:inherit;text-decoration:underline}',
+      '.vh-tip-btn{font-size:12px;font-weight:700;padding:7px 14px;border-radius:8px;border:1px solid var(--border-2,#333);background:var(--bg-3,#22262e);color:var(--text-2,#ddd);cursor:pointer;font-family:inherit}',
+      '.vh-tip-btn:hover{border-color:var(--accent)}',
+      '.vh-tip-btn.primary{background:var(--accent);color:#fff;border-color:var(--accent)}'
+    ].join('');
+    var s = document.createElement('style');
+    s.id = 'vaatzHelpStyle'; s.textContent = css;
+    document.head.appendChild(s);
+  }
+
+  /* ─────────────────────────────────────────────
+   * 3) Help Center 모달
+   * ───────────────────────────────────────────── */
+  var hstate = { cat:'quickstart', q:'' };
+
+  function buildModal(){
+    if(document.getElementById('vaatzHelpOv')) return;
+    injectStyle();
+    var ov = document.createElement('div');
+    ov.className = 'vh-ov'; ov.id = 'vaatzHelpOv';
+    ov.addEventListener('click', function(e){ if(e.target===ov) window.vhCloseHelp(); });
+    ov.innerHTML =
+      '<div class="vh-box">'
+      + '<div class="vh-hd">'
+        + '<h3>📖 VAATZ AI 사용설명서</h3>'
+        + '<button class="vh-tool accent" onclick="vhStartTour()">🚀 가이드 투어</button>'
+        + '<button class="vh-tool" onclick="vhPrintManual()">🖨 PDF/인쇄</button>'
+        + '<button class="vh-tool" onclick="vhDownloadMd()">⬇️ 매뉴얼(.md)</button>'
+        + '<button class="vh-x" onclick="vhCloseHelp()" title="닫기">✕</button>'
+      + '</div>'
+      + '<div class="vh-sub"><div class="vh-search"><span style="font-size:12px;color:var(--text-4)">🔍</span>'
+        + '<input id="vhSearchInput" placeholder="설명서 검색 (기능·키워드)..." oninput="vhSearch(this.value)"></div></div>'
+      + '<div class="vh-chips" id="vhChips"></div>'
+      + '<div class="vh-body" id="vhBody"></div>'
+      + '</div>';
+    document.body.appendChild(ov);
+  }
+
+  function renderHelp(){
+    buildModal();
+    var chips = document.getElementById('vhChips');
+    var body  = document.getElementById('vhBody');
+    if(!chips || !body) return;
+
+    var q = (hstate.q||'').trim().toLowerCase();
+
+    /* 칩 */
+    chips.style.display = q ? 'none' : 'flex';
+    if(!q){
+      chips.innerHTML = DOCS.map(function(c){
+        return '<button class="vh-chip'+(hstate.cat===c.id?' on':'')+'" onclick="vhGo(\''+c.id+'\')">'+c.icon+' '+c.name+'</button>';
+      }).join('');
+    }
+
+    /* 본문 */
+    if(q){
+      var hits = [];
+      DOCS.forEach(function(c){
+        c.articles.forEach(function(a){
+          var hay = (a.t+' '+htmlToText(a.b)+' '+c.name).toLowerCase();
+          if(hay.indexOf(q)!==-1) hits.push({c:c, a:a});
+        });
+      });
+      body.innerHTML = hits.length
+        ? '<div class="vh-cat-h">🔍 검색 결과 '+hits.length+'건</div>'
+          + hits.map(function(h){
+              return '<div class="vh-art"><div class="vh-art-cat">'+h.c.icon+' '+h.c.name+'</div>'
+                + '<div class="vh-art-t">'+h.a.t+'</div><div class="vh-art-b">'+h.a.b+'</div></div>';
+            }).join('')
+        : '<div class="vh-empty">😶 "'+escapeHtml(hstate.q)+'"에 대한 결과가 없습니다.<br>다른 키워드로 검색해 보세요.</div>';
+    } else {
+      var cat = catById(hstate.cat);
+      body.innerHTML = '<div class="vh-cat-h">'+cat.icon+' '+cat.name+'</div>'
+        + cat.articles.map(function(a){
+            return '<div class="vh-art"><div class="vh-art-t">'+a.t+'</div><div class="vh-art-b">'+a.b+'</div></div>';
+          }).join('');
+      body.scrollTop = 0;
+    }
+  }
+  function escapeHtml(s){ return String(s==null?'':s).replace(/[&<>"']/g,function(m){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m];}); }
+
+  window.vhOpenHelp = function(cat){
+    buildModal();
+    if(cat) hstate.cat = cat;
+    hstate.q = '';
+    var ov = document.getElementById('vaatzHelpOv');
+    if(ov) ov.classList.add('sh');
+    renderHelp();
+    var si = document.getElementById('vhSearchInput'); if(si){ si.value=''; setTimeout(function(){ try{ si.focus(); }catch(e){} }, 50); }
+  };
+  window.vhCloseHelp = function(){ var ov=document.getElementById('vaatzHelpOv'); if(ov) ov.classList.remove('sh'); };
+  window.vhGo = function(id){ hstate.cat=id; hstate.q=''; var si=document.getElementById('vhSearchInput'); if(si) si.value=''; renderHelp(); };
+  window.vhSearch = function(v){ hstate.q=v||''; renderHelp(); };
+
+  /* ─────────────────────────────────────────────
+   * 4) 첫 방문 가이드 투어 (스포트라이트)
+   * ───────────────────────────────────────────── */
+  function tourSteps(){
+    return [
+      { sel:'.sb',           t:'좌측 사이드바',     b:'<b>＋ 새 대화</b>로 질문을 시작하고, <b>구매 DB</b>·요청·<b>최근 대화</b>를 여기서 이동합니다.' },
+      { sel:'.iw',           t:'질문 입력창',       b:'구매 업무 질문을 자연어로 입력하세요. AI가 사내 규정을 근거와 함께 답해줍니다. <b>Enter</b> 전송 · <b>Ctrl+K</b> 빠른 입력.' },
+      { sel:'.sc-sw',        t:'검색 범위 전환',    b:'<b>구매지식</b>(사내 공식 지식) ↔ <b>내 파일</b>(내가 올린 문서) 검색 대상을 전환합니다.' },
+      { sel:'.web-tg-mini',  t:'웹 검색 토글',      b:'켜면 외부 <b>웹 검색</b> 결과를 답변에 함께 반영합니다.' },
+      { sel:'#rp',           t:'작업 패널',         b:'<b>답변 근거</b>에서 인용된 출처를 확인하고, <b>내 파일</b>에서 개인 문서를 관리합니다.' },
+      { sel:'#floatChar',    t:'VAATZ Buddy',       b:'우하단 캐릭터로 <b>지식 커뮤니티</b>·Q&A·캐릭터·<b>AI 에이전트 마켓</b>에 빠르게 진입합니다.' },
+      { sel:'.sb-ft .sb-i:not(#vhHelpBtn)',  t:'관리자 / 설정',     b:'권한이 있다면 <b>Admin</b>에서 팀 폴더·최종 승인·AI 모드를 관리합니다. 프로필·🌙 테마도 사이드바 하단에 있어요.' },
+      { sel:'#vhHelpBtn',    t:'언제든 다시 보기',  b:'설명이 필요하면 여기 <b>❓ 사용설명서</b>를 누르세요. 검색형 도움말과 이 투어를 다시 볼 수 있습니다.', last:true }
+    ];
+  }
+
+  var tour = { steps:[], idx:0, dir:1, onResize:null };
+
+  function elVisible(el){
+    if(!el) return false;
+    var r = el.getBoundingClientRect();
+    if(r.width<2 || r.height<2) return false;       /* position:fixed 도 rect 크기로 판정 (offsetParent 사용 금지) */
+    var cs = window.getComputedStyle(el);
+    if(cs.display==='none' || cs.visibility==='hidden' || parseFloat(cs.opacity||'1')===0) return false;
+    return true;
+  }
+  function resolveIdx(i, dir){
+    while(i>=0 && i<tour.steps.length){
+      if(elVisible($(tour.steps[i].sel))) return i;
+      i += dir;
+    }
+    return -1;
+  }
+
+  function ensureTourEls(){
+    injectStyle();
+    if(!document.getElementById('vhTourBlock')){
+      var blk=document.createElement('div'); blk.className='vh-tour-block'; blk.id='vhTourBlock';
+      blk.addEventListener('click', function(e){ e.stopPropagation(); }); /* 배경 클릭 무시 */
+      document.body.appendChild(blk);
+    }
+    if(!document.getElementById('vhTourMask')){
+      var m=document.createElement('div'); m.className='vh-tour-mask'; m.id='vhTourMask'; document.body.appendChild(m);
+    }
+    if(!document.getElementById('vhTourTip')){
+      var t=document.createElement('div'); t.className='vh-tour-tip'; t.id='vhTourTip'; document.body.appendChild(t);
+    }
+  }
+
+  function renderTour(){
+    var i = resolveIdx(tour.idx, tour.dir);
+    if(i<0){ // 진행 방향에 더 이상 유효한 단계 없음
+      if(tour.dir<0){ i = resolveIdx(0,1); }      // 뒤로 가다 막히면 첫 유효 단계
+      if(i<0){ finishTour(); return; }
+    }
+    tour.idx = i;
+    var step = tour.steps[i];
+    var el = $(step.sel);
+    if(!el){ finishTour(); return; }
+
+    try{ el.scrollIntoView({block:'center', inline:'nearest', behavior:'smooth'}); }catch(e){}
+
+    setTimeout(function(){
+      var r = el.getBoundingClientRect();
+      var pad = 6;
+      var mask = document.getElementById('vhTourMask');
+      var tip  = document.getElementById('vhTourTip');
+      if(!mask||!tip) return;
+      mask.style.left   = Math.max(4, r.left-pad)+'px';
+      mask.style.top    = Math.max(4, r.top-pad)+'px';
+      mask.style.width  = Math.min(window.innerWidth-8, r.width+pad*2)+'px';
+      mask.style.height = Math.min(window.innerHeight-8, r.height+pad*2)+'px';
+
+      var isLast = !!step.last;
+      var total = tour.steps.length;
+      tip.innerHTML =
+        '<div class="vh-tip-step">단계 '+(i+1)+' / '+total+'</div>'
+        + '<div class="vh-tip-t">'+step.t+'</div>'
+        + '<div class="vh-tip-b">'+step.b+'</div>'
+        + (isLast ? '<span class="vh-tip-link" onclick="vhTourFinishOpenHelp()">📖 전체 설명서 보기</span>' : '')
+        + '<div class="vh-tip-acts">'
+          + '<button class="vh-tip-skip" onclick="vhTourSkip()">건너뛰기</button>'
+          + '<span class="sp"></span>'
+          + (i>0 ? '<button class="vh-tip-btn" onclick="vhTourPrev()">이전</button>' : '')
+          + '<button class="vh-tip-btn primary" onclick="'+(isLast?'vhTourSkip()':'vhTourNext()')+'">'+(isLast?'완료 ✓':'다음 →')+'</button>'
+        + '</div>';
+
+      /* 툴팁 위치: 타겟 아래 우선, 공간 없으면 위/옆 */
+      tip.style.visibility='hidden'; tip.style.display='block';
+      var tw = tip.offsetWidth, th = tip.offsetHeight;
+      var gap = 14, left, top;
+      if(r.bottom + gap + th < window.innerHeight){ top = r.bottom + gap; }
+      else if(r.top - gap - th > 0){ top = r.top - gap - th; }
+      else { top = Math.max(12, (window.innerHeight - th)/2); }
+      left = r.left + r.width/2 - tw/2;
+      left = Math.max(12, Math.min(left, window.innerWidth - tw - 12));
+      tip.style.left = left+'px';
+      tip.style.top  = top+'px';
+      tip.style.visibility='visible';
+    }, 200);
+  }
+
+  function finishTour(){
+    ['vhTourBlock','vhTourMask','vhTourTip'].forEach(function(id){ var e=document.getElementById(id); if(e) e.remove(); });
+    if(tour.onResize){ window.removeEventListener('resize', tour.onResize); window.removeEventListener('keydown', tour.onKey, true); tour.onResize=null; }
+    try{ localStorage.setItem(TOUR_KEY, '1'); }catch(e){}
+  }
+
+  window.vhStartTour = function(){
+    window.vhCloseHelp();
+    tour.steps = tourSteps(); tour.idx = 0; tour.dir = 1;
+    ensureTourEls();
+    tour.onResize = function(){ renderTour(); };
+    tour.onKey = function(e){ if(e.key==='Escape'){ e.preventDefault(); vhTourSkip(); } else if(e.key==='ArrowRight'){ vhTourNext(); } else if(e.key==='ArrowLeft'){ vhTourPrev(); } };
+    window.addEventListener('resize', tour.onResize);
+    window.addEventListener('keydown', tour.onKey, true);
+    setTimeout(renderTour, 60);
+  };
+  window.vhTourNext = function(){ tour.dir=1; tour.idx++; renderTour(); };
+  window.vhTourPrev = function(){ tour.dir=-1; tour.idx--; if(tour.idx<0) tour.idx=0; renderTour(); };
+  window.vhTourSkip = function(){ finishTour(); };
+  window.vhTourFinishOpenHelp = function(){ finishTour(); setTimeout(function(){ window.vhOpenHelp(); }, 120); };
+
+  /* ─────────────────────────────────────────────
+   * 5) PDF/인쇄 + 마크다운 내보내기
+   * ───────────────────────────────────────────── */
+  function manualDateStr(){ var d=new Date(); return d.getFullYear()+'.'+('0'+(d.getMonth()+1)).slice(-2)+'.'+('0'+d.getDate()).slice(-2); }
+
+  function buildManualHtml(){
+    var toc = DOCS.map(function(c,i){ return '<li>'+(i+1)+'. '+c.icon+' '+escapeHtml(c.name)+'</li>'; }).join('');
+    var secs = DOCS.map(function(c,i){
+      var arts = c.articles.map(function(a){
+        return '<div class="m-art"><h3>'+escapeHtml(a.t)+'</h3><div class="m-b">'+a.b+'</div></div>';
+      }).join('');
+      return '<section class="m-sec"><h2>'+(i+1)+'. '+c.icon+' '+escapeHtml(c.name)+'</h2>'+arts+'</section>';
+    }).join('');
+    return [
+      '<!DOCTYPE html><html lang="ko"><head><meta charset="UTF-8"><title>VAATZ AI 사용자 매뉴얼</title>',
+      '<style>',
+      '*{box-sizing:border-box} body{font-family:"Noto Sans KR","Malgun Gothic",sans-serif;color:#1a1a1a;line-height:1.7;margin:0;padding:0;background:#fff}',
+      '.m-wrap{max-width:760px;margin:0 auto;padding:40px 36px}',
+      '.m-cover{text-align:center;padding:60px 0 40px;border-bottom:3px solid #4b8ef0;margin-bottom:30px}',
+      '.m-cover .badge{font-size:13px;font-weight:700;color:#4b8ef0;letter-spacing:2px}',
+      '.m-cover h1{font-size:32px;margin:14px 0 8px;font-weight:800}',
+      '.m-cover p{color:#666;font-size:14px;margin:4px 0}',
+      '.m-toc{background:#f5f7fb;border:1px solid #e3e8f0;border-radius:10px;padding:20px 26px;margin-bottom:34px}',
+      '.m-toc h2{font-size:16px;margin:0 0 10px;border:none;padding:0}',
+      '.m-toc ul{margin:0;padding-left:18px} .m-toc li{margin:5px 0;font-size:13.5px;color:#333}',
+      '.m-sec{margin-bottom:30px;page-break-inside:avoid}',
+      '.m-sec h2{font-size:19px;font-weight:800;border-bottom:2px solid #4b8ef0;padding-bottom:7px;margin:0 0 14px}',
+      '.m-art{margin:0 0 16px;padding:0 0 0 2px}',
+      '.m-art h3{font-size:14.5px;font-weight:700;margin:0 0 5px;color:#1a3a80}',
+      '.m-b{font-size:13px;color:#333} .m-b ul{margin:6px 0 0;padding-left:20px} .m-b li{margin:3px 0} .m-b b{color:#000}',
+      '.m-ft{margin-top:40px;padding-top:16px;border-top:1px solid #ddd;font-size:11px;color:#999;text-align:center}',
+      '@media print{ .m-wrap{padding:0 6mm} .m-sec{page-break-inside:avoid} @page{margin:16mm 0} }',
+      '</style></head><body><div class="m-wrap">',
+      '<div class="m-cover"><div class="badge">HYUNDAI · KIA PROCUREMENT</div><h1>VAATZ AI 사용자 매뉴얼</h1>',
+      '<p>구매본부 RAG 지식 플랫폼</p><p>발행일 '+manualDateStr()+'</p></div>',
+      '<div class="m-toc"><h2>목차</h2><ul>'+toc+'</ul></div>',
+      secs,
+      '<div class="m-ft">ⓒ VAATZ AI · 본 매뉴얼은 플랫폼 내 설명서에서 자동 생성되었습니다.</div>',
+      '</div></body></html>'
+    ].join('');
+  }
+
+  window.vhPrintManual = function(){
+    var html = buildManualHtml();
+    var old = document.getElementById('vhPrintFrame'); if(old) old.remove();
+    var f = document.createElement('iframe');
+    f.id='vhPrintFrame';
+    f.style.cssText='position:fixed;right:0;bottom:0;width:0;height:0;border:0;opacity:0';
+    document.body.appendChild(f);
+    var d = f.contentWindow.document;
+    d.open(); d.write(html); d.close();
+    var printed=false;
+    function go(){ if(printed) return; printed=true; try{ f.contentWindow.focus(); f.contentWindow.print(); }catch(e){} setTimeout(function(){ f.remove(); }, 1500); }
+    f.onload = go;
+    setTimeout(go, 700);
+  };
+
+  window.vhDownloadMd = function(){
+    var lines = ['# VAATZ AI 사용자 매뉴얼','','> 구매본부 RAG 지식 플랫폼 · 발행일 '+manualDateStr(),'','## 목차',''];
+    DOCS.forEach(function(c,i){ lines.push((i+1)+'. '+c.icon+' '+c.name); });
+    lines.push('');
+    DOCS.forEach(function(c,i){
+      lines.push(''); lines.push('## '+(i+1)+'. '+c.icon+' '+c.name); lines.push('');
+      c.articles.forEach(function(a){ lines.push('### '+a.t); lines.push(''); lines.push(htmlToText(a.b)); lines.push(''); });
+    });
+    lines.push('---'); lines.push('ⓒ VAATZ AI · 플랫폼 내 설명서에서 자동 생성');
+    var md = lines.join('\n');
+    try{
+      var blob = new Blob([md], { type:'text/markdown;charset=utf-8' });
+      var url = URL.createObjectURL(blob);
+      var a = document.createElement('a'); a.href=url; a.download='VAATZ_AI_사용자매뉴얼.md';
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(function(){ URL.revokeObjectURL(url); }, 1500);
+    }catch(e){}
+    try{ (window.toast||window.say||function(){})('매뉴얼(.md)을 내려받았습니다.','⬇️',2200); }catch(e){}
+  };
+
+  /* ─────────────────────────────────────────────
+   * 6) 사이드바 도움말 버튼 주입 + 부팅
+   * ───────────────────────────────────────────── */
+  function ensureHelpButton(){
+    var ft = $('.sb-ft');
+    if(!ft) return false;
+    injectStyle();
+    if(!document.getElementById('vhHelpBtn')){
+      var b = document.createElement('button');
+      b.className='sb-i'; b.id='vhHelpBtn';
+      b.setAttribute('onclick','vhOpenHelp()');
+      b.innerHTML='<span style="width:16px;display:inline-flex;align-items:center;justify-content:center;margin-right:8px;font-size:13px">❓</span>사용설명서';
+      ft.insertBefore(b, ft.firstChild);
+    }
+    return true;
+  }
+
+  /* ESC로 Help Center 닫기 */
+  document.addEventListener('keydown', function(e){
+    if(e.key==='Escape'){ var ov=document.getElementById('vaatzHelpOv'); if(ov && ov.classList.contains('sh')) window.vhCloseHelp(); }
+  });
+
+  function boot(){
+    var ok = ensureHelpButton();
+    if(!ok){ setTimeout(boot, 400); return; }
+    /* 첫 방문 시 가이드 투어 자동 실행 */
+    var seen=false; try{ seen = !!localStorage.getItem(TOUR_KEY); }catch(e){}
+    if(!seen){ setTimeout(function(){ if($('.iw')) window.vhStartTour(); }, 1400); }
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', function(){ setTimeout(boot, 350); });
+  else setTimeout(boot, 350);
+
+})();
