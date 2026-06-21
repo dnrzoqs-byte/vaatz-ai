@@ -7367,11 +7367,10 @@ window.vaatzClaimQuest = function(id){
 
   /* 5개 영역 정의 */
   var AREAS = [
-    { id:'purchase', name:'구매',     icon:'🛒', c:'#4b8ef0' },
-    { id:'dev',      name:'개발',     icon:'💻', c:'#8b7cf0' },
-    { id:'quality',  name:'품질',     icon:'✅', c:'#2bb673' },
-    { id:'manage',   name:'관리',     icon:'📋', c:'#e0a13a' },
-    { id:'common',   name:'구매공통', icon:'🔗', c:'#1fb6b6' }
+    { id:'purchase', name:'구매', icon:'🛒', c:'#4b8ef0' },
+    { id:'dev',      name:'개발', icon:'💻', c:'#8b7cf0' },
+    { id:'quality',  name:'품질', icon:'✅', c:'#2bb673' },
+    { id:'manage',   name:'관리', icon:'📋', c:'#e0a13a' }
   ];
   function areaInfo(id){ for(var i=0;i<AREAS.length;i++){ if(AREAS[i].id===id) return AREAS[i]; } return {id:id,name:id,icon:'🤖',c:'#4b8ef0'}; }
 
@@ -7395,9 +7394,9 @@ window.vaatzClaimQuest = function(id){
       { id:11, area:'manage', icon:'🔔', name:'계약 만료 알림 Agent',      ver:'1.3', desc:'계약 만료 30/60/90일 전 자동 알림과 갱신 검토 안건을 생성합니다.', author:'계약관리봇', lv:3, size:'8.2 MB', dl:167, updated:'5일 전', tags:['계약','만료','알림'] },
       { id:12, area:'manage', icon:'💰', name:'예산 집행 모니터링 Agent',   ver:'1.0', desc:'팀별 예산 집행률을 실시간 추적하고 초과 위험 항목을 색상 경보로 표시합니다.', author:'예산지킴이', lv:2, size:'11.7 MB', dl:74, updated:'2일 전', tags:['예산','집행률','모니터링'] },
 
-      { id:13, area:'common', icon:'🧠', name:'사내 규정 Q&A Agent',       ver:'3.2', desc:'구매업무규정·하도급법 등 사내 지식 베이스 기반 RAG로 질문에 근거 조항과 함께 답변합니다.', author:'VAATZ달인', lv:5, size:'52.1 MB', dl:588, updated:'오늘', tags:['RAG','규정','Q&A'] },
-      { id:14, area:'common', icon:'🗒️', name:'회의록 요약 Agent',        ver:'1.8', desc:'회의 녹취/메모를 입력하면 결정사항·액션아이템·담당자를 표로 정리합니다.', author:'기록의신', lv:4, size:'17.0 MB', dl:233, updated:'3일 전', tags:['회의록','요약','액션아이템'] },
-      { id:15, area:'common', icon:'✉️', name:'대외 이메일 초안 Agent',     ver:'1.1', desc:'협력사 대상 공문/이메일을 상황별 톤으로 초안 작성합니다. 영문 번역 포함.', author:'커뮤니케이터', lv:3, size:'10.4 MB', dl:129, updated:'1주 전', tags:['이메일','공문','번역'] }
+      { id:13, area:'purchase', icon:'🧠', name:'사내 규정 Q&A Agent',       ver:'3.2', desc:'구매업무규정·하도급법 등 사내 지식 베이스 기반 RAG로 질문에 근거 조항과 함께 답변합니다.', author:'VAATZ달인', lv:5, size:'52.1 MB', dl:588, updated:'오늘', tags:['RAG','규정','Q&A'] },
+      { id:14, area:'manage', icon:'🗒️', name:'회의록 요약 Agent',        ver:'1.8', desc:'회의 녹취/메모를 입력하면 결정사항·액션아이템·담당자를 표로 정리합니다.', author:'기록의신', lv:4, size:'17.0 MB', dl:233, updated:'3일 전', tags:['회의록','요약','액션아이템'] },
+      { id:15, area:'purchase', icon:'✉️', name:'대외 이메일 초안 Agent',     ver:'1.1', desc:'협력사 대상 공문/이메일을 상황별 톤으로 초안 작성합니다. 영문 번역 포함.', author:'커뮤니케이터', lv:3, size:'10.4 MB', dl:129, updated:'1주 전', tags:['이메일','공문','번역'] }
     ];
   }
 
@@ -7411,9 +7410,13 @@ window.vaatzClaimQuest = function(id){
   };
   function statusInfo(s){ return s==='official' ? STATUS.official : STATUS.temp; }
   function isOfficial(a){ return a && a.status==='official'; }
+  function isMine(a){ return !!(a && a.mine); }
   (function normStatus(){
     var off={1:1,2:1,4:1,7:1,9:1,10:1,13:1,16:1};
-    st.list.forEach(function(a){ if(a.status!=='official' && a.status!=='temp') a.status = off[a.id]?'official':'temp'; });
+    st.list.forEach(function(a){
+      if(a.area==='common') a.area='purchase';           /* 4카테고리 마이그레이션 */
+      if(a.status!=='official' && a.status!=='temp') a.status = off[a.id]?'official':'temp';
+    });
   })();
   /* 최종 승인 권한(ADMIN) — Admin 패널 안에서의 동작은 ADMIN으로 간주 */
   function canApprove(){ try{ if(document.documentElement.getAttribute('data-user-role')==='admin') return true; if(localStorage.getItem('vaatz-admin')==='1') return true; }catch(e){} var ao=document.getElementById('ao'); return !!(ao && ao.classList.contains('sh')); }
@@ -7505,7 +7508,24 @@ window.vaatzClaimQuest = function(id){
       '#ct-agent .agent-official-toggle.on{background:#2bb673;border-color:#2bb673;color:#fff}',
       '#ct-agent .agent-gate-txt{font-size:10.5px;color:var(--text-3);line-height:1.6;background:var(--bg-3);border:1px solid var(--border-1);border-radius:8px;padding:9px 11px;margin-bottom:10px}',
       '#ct-agent .agent-gate-txt b{color:var(--text-2)}',
-      '#ct-agent .agent-gate-pill{font-size:9px;font-weight:800;color:var(--accent);background:var(--accent-dim,rgba(75,142,240,.16));padding:2px 7px;border-radius:999px;margin-left:4px;vertical-align:middle}'
+      '#ct-agent .agent-gate-pill{font-size:9px;font-weight:800;color:var(--accent);background:var(--accent-dim,rgba(75,142,240,.16));padding:2px 7px;border-radius:999px;margin-left:4px;vertical-align:middle}',
+      '#ct-agent .agent-rank{background:linear-gradient(135deg,rgba(240,90,70,.10),rgba(75,142,240,.04));border:1px solid var(--border-1);border-radius:14px;padding:12px 14px;margin-bottom:14px}',
+      '#ct-agent .agent-rank-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}',
+      '#ct-agent .agent-rank-t{font-size:12.5px;font-weight:800;color:var(--text-1)}',
+      '#ct-agent .agent-live{display:flex;align-items:center;gap:5px;font-size:9.5px;font-weight:800;color:#f0603e;letter-spacing:.5px}',
+      '#ct-agent .agent-live-dot{width:7px;height:7px;border-radius:50%;background:#f0603e;animation:agentPulse 1.4s infinite}',
+      '@keyframes agentPulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.35;transform:scale(.65)}}',
+      '#ct-agent .agent-rank-row{display:flex;align-items:center;gap:10px;padding:6px;border-radius:8px;cursor:pointer;transition:.12s}',
+      '#ct-agent .agent-rank-row:hover{background:var(--bg-3)}',
+      '#ct-agent .agent-rank-no{width:24px;text-align:center;font-size:15px}',
+      '#ct-agent .agent-rank-num{font-size:12px;font-weight:800;font-family:Outfit,sans-serif;color:var(--text-4)}',
+      '#ct-agent .agent-rank-nm{flex:1;min-width:0;font-size:12px;font-weight:600;color:var(--text-1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}',
+      '#ct-agent .agent-rank-area{font-size:13px;flex-shrink:0}',
+      '#ct-agent .agent-rank-dl{font-size:11px;font-weight:700;color:var(--text-3);font-family:Outfit,sans-serif;white-space:nowrap}',
+      '#ct-agent .agent-rank-empty{font-size:11px;color:var(--text-4);padding:6px}',
+      '#ct-agent .agent-sec-h{font-size:12.5px;font-weight:800;color:var(--text-2);margin:18px 0 10px;display:flex;align-items:center;gap:8px}',
+      '#ct-agent .agent-sec-n{font-size:10px;font-weight:700;color:var(--text-4);background:var(--bg-3);border:1px solid var(--border-1);padding:1px 9px;border-radius:999px}',
+      '#ct-agent .agent-sec-empty{font-size:11px;color:var(--text-4);padding:16px;text-align:center;border:1px dashed var(--border-2);border-radius:10px}'
     ].join('');
     var s = document.createElement('style');
     s.id='agentMktStyle'; s.textContent=css;
@@ -7557,7 +7577,6 @@ window.vaatzClaimQuest = function(id){
       var n = st.list.filter(function(a){return a.area===ar.id;}).length;
       html += '<button class="agent-chip'+(st.area===ar.id?' on':'')+'" style="--ag-c:'+(ar.c||'#4b8ef0')+'" onclick="agentFilter(\''+ar.id+'\',this)"><span class="agent-chip-dot"></span>'+ar.icon+' '+ar.name+' <span class="agent-chip-n">'+n+'</span></button>';
     });
-    html += '<button class="agent-chip agent-official-toggle'+(st.officialOnly?' on':'')+'" title="ADMIN 최종 승인된 공식만" onclick="agentToggleOfficial()">✅ 공식만</button>';
     return html;
   }
 
@@ -7578,9 +7597,30 @@ window.vaatzClaimQuest = function(id){
       + '<div class="agent-tags">'+tags+'</div>'
       + '<div class="agent-meta"><span>👤 '+esc(a.author)+'</span><span class="dot">·</span><span>💾 '+esc(a.size||'—')+'</span><span class="dot">·</span><span>⬇ '+(a.dl||0).toLocaleString()+'</span></div>'
       + '<div class="agent-acts">'+primary
-      + '<button class="agent-info-btn" title="수정" onclick="agentEdit('+a.id+')">✏️</button>'
+      + (isMine(a) ? '<button class="agent-info-btn" title="내 에이전트 수정" onclick="agentEdit('+a.id+')">✏️</button>' : '')
       + '<button class="agent-info-btn" title="상세 정보" onclick="agentDetail('+a.id+')">ℹ️</button></div>'
       + '</div>';
+  }
+
+  /* 🔥 실시간 인기 순위 (gamification) — 공식 에이전트 다운로드 기준 */
+  function renderRankStrip(){
+    var top = st.list.filter(isOfficial).slice().sort(function(a,b){ return (b.dl||0)-(a.dl||0); }).slice(0,5);
+    if(!top.length) return '<div class="agent-rank-empty">공식 에이전트가 등록되면 실시간 인기 순위가 표시됩니다.</div>';
+    return top.map(function(a,i){
+      var ar=areaInfo(a.area), medal=['🥇','🥈','🥉'][i]||('<span class="agent-rank-num">'+(i+1)+'</span>');
+      var trend=i<2?'🔥':(i<3?'📈':'');
+      return '<div class="agent-rank-row" onclick="agentDownload('+a.id+')" title="다운로드">'
+        + '<span class="agent-rank-no">'+medal+'</span>'
+        + '<span class="agent-rank-nm">'+esc(a.name)+'</span>'
+        + '<span class="agent-rank-area" style="color:'+(ar.c||'#4b8ef0')+'" title="'+esc(ar.name)+'">'+ar.icon+'</span>'
+        + '<span class="agent-rank-dl">'+trend+' ⬇ '+(a.dl||0).toLocaleString()+'</span>'
+        + '</div>';
+    }).join('');
+  }
+
+  function sectionHtml(title, arr, emptyMsg){
+    return '<div class="agent-sec-h">'+title+' <span class="agent-sec-n">'+arr.length+'</span></div>'
+      + (arr.length ? '<div class="agent-grid">'+arr.map(cardHtml).join('')+'</div>' : '<div class="agent-sec-empty">'+emptyMsg+'</div>');
   }
 
   function uploadHtml(){
@@ -7602,25 +7642,36 @@ window.vaatzClaimQuest = function(id){
     if(!ensureAgentTab()) return;
     var panel = $('#ct-agent'); if(!panel) return;
     var list = filtered();
-    var grid = list.length
-      ? '<div class="agent-grid">'+list.map(cardHtml).join('')+'</div>'
-      : '<div class="agent-empty">😶 해당 영역에 등록된 에이전트가 없습니다.<br>첫 번째로 공유해보세요!</div>';
+    var officialList = list.filter(isOfficial);
+    var tempList = list.filter(function(a){ return !isOfficial(a); });
+    var totalOff = st.list.filter(isOfficial).length, totalTmp = st.list.length-totalOff;
     panel.innerHTML =
       '<div class="agent-hd">'
         + '<div class="agent-hd-txt">'
           + '<div class="agent-title">🤖 AI 에이전트 마켓</div>'
-          + '<div class="agent-sub">💡 <b style="color:var(--text-2)">클로드 코드</b>로 만든 업무 자동화 Agent를 5개 영역으로 제공합니다. <b style="color:#e0a13a">🧪 임시(PoC)</b>는 누구나 올릴 수 있고, <b style="color:#2bb673">✅ 공식</b>은 <b style="color:var(--text-2)">ADMIN 최종 심사</b>를 통과한 신뢰 에이전트입니다. (공식만 다운로드 가능)</div>'
+          + '<div class="agent-sub">💡 <b style="color:var(--text-2)">클로드 코드</b>로 만든 업무 자동화 Agent를 <b>구매·개발·품질·관리</b> 4개 영역으로 운영합니다. <b style="color:#e0a13a">🧪 임시(PoC)</b>는 누구나 올릴 수 있고, <b style="color:#2bb673">✅ 공식</b>은 <b style="color:var(--text-2)">ADMIN 최종 심사</b>를 통과한 신뢰 에이전트입니다.</div>'
         + '</div>'
         + '<button class="agent-share-btn" onclick="agentToggleUpload(true)">➕ 에이전트 올리기</button>'
       + '</div>'
       + uploadHtml()
+      + '<div class="agent-rank"><div class="agent-rank-hd"><span class="agent-rank-t">🔥 실시간 인기 TOP</span><span class="agent-live"><span class="agent-live-dot"></span>LIVE</span></div><div id="agentRankStrip">'+renderRankStrip()+'</div></div>'
       + '<div class="agent-toolbar"><div class="agent-search"><span style="font-size:11px;color:var(--text-4)">🔍</span><input id="agentSearchInput" placeholder="에이전트 검색 (이름·설명·태그)..." oninput="agentSearch(this.value)" value="'+esc(st.q)+'"></div></div>'
-      + '<div class="agent-stats"><span>🤖 등록 <b>'+st.list.length+'</b></span><span>⬇ 총 다운로드 <b>'+st.list.reduce(function(s,a){return s+(a.dl||0);},0).toLocaleString()+'</b></span><span>🗂 영역 <b>'+AREAS.length+'</b></span></div>'
+      + '<div class="agent-stats"><span>✅ 공식 <b>'+totalOff+'</b></span><span>🧪 임시(PoC) <b>'+totalTmp+'</b></span><span>⬇ 총 다운로드 <b>'+st.list.reduce(function(s,a){return s+(a.dl||0);},0).toLocaleString()+'</b></span></div>'
       + '<div class="agent-chips">'+chipsHtml()+'</div>'
-      + grid;
+      + sectionHtml('✅ 공식 에이전트', officialList, '이 조건의 공식 에이전트가 없습니다.')
+      + sectionHtml('🧪 임시(PoC) · 승인 대기', tempList, '승인 대기 중인 에이전트가 없습니다.');
     /* 검색어 유지 시 커서 위치 복원 */
     var si = $('#agentSearchInput');
     if(si && st.q){ try{ si.focus(); si.setSelectionRange(si.value.length, si.value.length); }catch(e){} }
+    /* 실시간 순위 라이브 타이머 (1회만 등록) */
+    if(!window.__agentLiveTimer){
+      window.__agentLiveTimer = setInterval(function(){
+        var p=document.getElementById('ct-agent'); if(!p || p.style.display==='none') return;
+        var offs=st.list.filter(isOfficial); if(!offs.length) return;
+        var a=offs[Math.floor(Math.random()*offs.length)]; a.dl=(a.dl||0)+(1+Math.floor(Math.random()*3));
+        var strip=document.getElementById('agentRankStrip'); if(strip) strip.innerHTML=renderRankStrip();
+      }, 9000);
+    }
   }
 
   /* ── 탭 전환 ── */
@@ -7664,7 +7715,7 @@ window.vaatzClaimQuest = function(id){
     }
     st.list.unshift({ id:Date.now(), area:area, icon:'🤖', name:name, ver:'1.0',
       desc:desc||'설명이 등록되지 않았습니다.', author:'프로큐어히어로(나)', lv:5,
-      size:size||'—', dl:0, updated:'방금', tags:['신규','클로드코드'], status:'temp' });
+      size:size||'—', dl:0, updated:'방금', tags:['신규','클로드코드'], status:'temp', mine:true });
     st.upload=false; st.area=area; st.q=''; st.officialOnly=false;
     agentRefreshAll();
     say('🧪 "'+name+'" 임시(PoC) 등록 완료 — ADMIN 최종 승인 후 공식 전환됩니다.','✅',3200);
@@ -8591,8 +8642,7 @@ window.vaatzClaimQuest = function(id){
 
   function areas(){ return window.__agentAreas || [
     { id:'purchase', name:'구매', icon:'🛒', c:'#4b8ef0' },{ id:'dev', name:'개발', icon:'💻', c:'#8b7cf0' },
-    { id:'quality', name:'품질', icon:'✅', c:'#2bb673' },{ id:'manage', name:'관리', icon:'📋', c:'#e0a13a' },
-    { id:'common', name:'구매공통', icon:'🔗', c:'#1fb6b6' }
+    { id:'quality', name:'품질', icon:'✅', c:'#2bb673' },{ id:'manage', name:'관리', icon:'📋', c:'#e0a13a' }
   ]; }
   function areaMeta(id){ var a=areas(); for(var i=0;i<a.length;i++){ if(a[i].id===id) return a[i]; } return {id:id,name:id,icon:'🤖',c:'#4b8ef0'}; }
   function agentList(){
@@ -8654,43 +8704,55 @@ window.vaatzClaimQuest = function(id){
       '#rp .rpa-dl.pending:hover{filter:none;color:var(--accent)}',
       '#rp .rpa-chip.rpa-official.on{background:#2bb673;border-color:#2bb673;color:#fff}',
       '#sourceFullBtn{display:none!important}',
-      '#rp .rp-h{padding:9px 12px 2px;border-bottom:none;min-height:0}',
-      '#rp .rp-h .rp-t{font-size:10px;font-weight:700;color:var(--text-4);letter-spacing:.5px;text-transform:uppercase}',
-      '#rp .rp-tabs{padding-top:6px}',
+      '#rp .rp-h{display:none}',
+      '#rp .rp-tabs{padding-top:11px;align-items:center}',
+      '#rp .rp-x{flex-shrink:0;width:30px;height:30px;border:1px solid var(--border-2);background:var(--bg-2);color:var(--text-3);border-radius:9px;cursor:pointer;font-size:13px;line-height:1;display:flex;align-items:center;justify-content:center}',
+      '#rp .rp-x:hover{border-color:#e0604e;color:#e0604e}',
+      '#rp .rpa-sec{font-size:10.5px;font-weight:800;color:var(--text-3);margin:12px 2px 8px;display:flex;align-items:center;gap:6px}',
+      '#rp .rpa-sec:first-child{margin-top:2px}',
+      '#rp .rpa-sec-n{font-size:9px;font-weight:700;color:var(--text-4);background:var(--bg-3);border:1px solid var(--border-1);padding:1px 7px;border-radius:999px}',
       '#rpReopen{position:fixed;right:0;top:50%;transform:translateY(-50%);z-index:60;background:var(--accent);color:#fff;border:none;border-radius:10px 0 0 10px;padding:13px 6px;cursor:pointer;box-shadow:-2px 2px 12px rgba(0,0,0,.28);display:none;writing-mode:vertical-rl;font-size:11px;font-weight:800;letter-spacing:1.5px}',
       '#rpReopen:hover{filter:brightness(1.08);padding-right:9px}'
     ].join('');
     var s=document.createElement('style'); s.id='rpAgentStyle'; s.textContent=css; document.head.appendChild(s);
   }
 
+  function rpRowHtml(a){
+    var ar=areaMeta(a.area), c=ar.c||'#4b8ef0', official=a.status==='official';
+    var ic = window.agentAreaSvg ? window.agentAreaSvg(a.area,20) : esc(a.icon||'🤖');
+    var badge = window.agentStatusBadge ? window.agentStatusBadge(a.status||'temp') : '';
+    var btn = official
+      ? '<button class="rpa-dl" title="다운로드 (.exe)" onclick="event.stopPropagation();rpAgentDownload('+a.id+')">⬇</button>'
+      : '<button class="rpa-dl pending" title="임시(PoC) · 미리보기" onclick="event.stopPropagation();agentDetail&&agentDetail('+a.id+')">🧪</button>';
+    return '<div class="rpa-row'+(official?'':' is-review')+'" style="--ag-c:'+c+'" onclick="agentDetail&&agentDetail('+a.id+')">'
+      + '<div class="rpa-ic" style="background:'+c+'1f;border-color:'+c+'40">'+ic+'</div>'
+      + '<div class="rpa-main"><div class="rpa-nm">'+esc(a.name)+'</div>'
+      + '<div class="rpa-meta">'+badge+'<span style="color:'+c+'">'+esc(ar.name)+'</span> · v'+esc(a.ver||'1.0')+' · ⬇ '+(a.dl||0).toLocaleString()+'</div></div>'
+      + btn + '</div>';
+  }
   function rpRenderAgents(){
     var box=document.getElementById('rpAgentBox'); if(!box) return;
     var list=agentList();
+    var offs=list.filter(function(a){return a.status==='official';});
+    var tmps=list.filter(function(a){return a.status!=='official';});
     var chips='<button class="rpa-chip'+(rpAg.area==='all'?' on':'')+'" onclick="rpAgentFilter(\'all\')">전체</button>'
-      + areas().map(function(ar){ return '<button class="rpa-chip'+(rpAg.area===ar.id?' on':'')+'" title="'+esc(ar.name)+'" style="--ag-c:'+(ar.c||'#4b8ef0')+'" onclick="rpAgentFilter(\''+ar.id+'\')"><span class="rpa-chip-dot"></span>'+ar.icon+'</button>'; }).join('')
-      + '<button class="rpa-chip rpa-official'+(rpAg.officialOnly?' on':'')+'" title="정식(심사 완료)만 보기" onclick="rpAgentToggleOfficial()">✅ 정식</button>';
-    var rows=list.length ? list.map(function(a){
-        var ar=areaMeta(a.area), c=ar.c||'#4b8ef0', official=a.status==='official';
-        var ic = window.agentAreaSvg ? window.agentAreaSvg(a.area,20) : esc(a.icon||'🤖');
-        var badge = window.agentStatusBadge ? window.agentStatusBadge(a.status||'review') : '';
-        var btn = official
-          ? '<button class="rpa-dl" title="다운로드 (.exe)" onclick="event.stopPropagation();rpAgentDownload('+a.id+')">⬇</button>'
-          : '<button class="rpa-dl pending" title="심사 중" onclick="event.stopPropagation();agentDetail&&agentDetail('+a.id+')">🔎</button>';
-        return '<div class="rpa-row'+(official?'':' is-review')+'" style="--ag-c:'+c+'" onclick="agentDetail&&agentDetail('+a.id+')">'
-          + '<div class="rpa-ic" style="background:'+c+'1f;border-color:'+c+'40">'+ic+'</div>'
-          + '<div class="rpa-main"><div class="rpa-nm">'+esc(a.name)+'</div>'
-          + '<div class="rpa-meta">'+badge+'<span style="color:'+c+'">'+esc(ar.name)+'</span> · v'+esc(a.ver||'1.0')+' · ⬇ '+(a.dl||0).toLocaleString()+'</div></div>'
-          + btn
-          + '</div>';
-      }).join('') : '<div class="rpa-empty">😶 해당 조건의 에이전트가 없어요.<br>아래 전체 마켓에서 더 찾아보세요.</div>';
+      + areas().map(function(ar){ return '<button class="rpa-chip'+(rpAg.area===ar.id?' on':'')+'" title="'+esc(ar.name)+'" style="--ag-c:'+(ar.c||'#4b8ef0')+'" onclick="rpAgentFilter(\''+ar.id+'\')"><span class="rpa-chip-dot"></span>'+ar.icon+'</button>'; }).join('');
+    var listHtml;
+    if(!offs.length && !tmps.length){ listHtml='<div class="rpa-empty">😶 해당 조건의 에이전트가 없어요.<br>아래 전체 마켓에서 더 찾아보세요.</div>'; }
+    else {
+      listHtml = '<div class="rpa-sec">✅ 공식 <span class="rpa-sec-n">'+offs.length+'</span></div>'
+        + (offs.length ? offs.map(rpRowHtml).join('') : '<div class="rpa-empty" style="padding:12px">공식 에이전트 없음</div>')
+        + '<div class="rpa-sec">🧪 임시(PoC) <span class="rpa-sec-n">'+tmps.length+'</span></div>'
+        + (tmps.length ? tmps.map(rpRowHtml).join('') : '<div class="rpa-empty" style="padding:12px">임시 에이전트 없음</div>');
+    }
     box.innerHTML =
       '<div class="rpa-hd"><div class="rpa-title">🤖 구매본부 AI Agent</div>'
-        + '<div class="rpa-sub">클로드 코드로 만든 업무 자동화 Agent를 우측에서 바로 받아 쓰세요.</div></div>'
+        + '<div class="rpa-sub"><b style="color:#2bb673">✅ 공식</b>만 다운로드되고 <b style="color:#e0a13a">🧪 임시</b>는 미리보기예요.</div></div>'
       + '<div class="rpa-bar"><div class="rpa-search"><span style="font-size:12px;color:var(--text-4)">🔍</span>'
         + '<input id="rpAgentSearch" placeholder="에이전트 검색" oninput="rpAgentSearch(this.value)" value="'+esc(rpAg.q)+'"></div></div>'
       + '<div class="rpa-chips">'+chips+'</div>'
-      + '<div class="rpa-list">'+rows+'</div>'
-      + '<div class="rpa-foot"><span>총 '+list.length+'개</span><button class="rpa-foot-btn" onclick="rpOpenMarket()">🛒 전체 마켓 열기</button></div>';
+      + '<div class="rpa-list">'+listHtml+'</div>'
+      + '<div class="rpa-foot"><span>공식 '+offs.length+' · 임시 '+tmps.length+'</span><button class="rpa-foot-btn" onclick="rpOpenMarket()">🛒 전체 마켓</button></div>';
     if(rpAg.q){ var si=document.getElementById('rpAgentSearch'); if(si){ try{ si.focus(); si.setSelectionRange(si.value.length, si.value.length); }catch(e){} } }
   }
 
@@ -8732,6 +8794,8 @@ window.vaatzClaimQuest = function(id){
     /* 탭 순서: 답변 근거를 첫 번째로 (우선순위) */
     var tabsWrap=document.querySelector('#rp .rp-tabs');
     if(tabsWrap && ts && tabsWrap.firstElementChild!==ts){ tabsWrap.insertBefore(ts, tabsWrap.firstElementChild); }
+    /* 헤더(작업 패널 라벨) 제거 → 닫기 ✕를 탭 줄로 이동 (공간 확보) */
+    if(tabsWrap && !document.getElementById('rpCloseX')){ var x=document.createElement('button'); x.id='rpCloseX'; x.className='rp-x'; x.title='패널 닫기'; x.textContent='✕'; x.onclick=function(){ if(window.rpT) window.rpT(false); }; tabsWrap.appendChild(x); }
     /* 제목을 슬림 라벨로 (탭이 현재 위치를 알려주므로 길게 안 씀) */
     var rt=document.getElementById('rpTitle'); if(rt) rt.textContent='작업 패널';
     /* 페인 내용 교체 (1회) */
