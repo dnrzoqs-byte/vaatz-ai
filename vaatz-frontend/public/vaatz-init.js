@@ -7370,7 +7370,7 @@ window.vaatzClaimQuest = function(id){
     { id:'purchase', name:'구매', icon:'🛒', c:'#4b8ef0' },
     { id:'dev',      name:'개발', icon:'💻', c:'#8b7cf0' },
     { id:'quality',  name:'품질', icon:'✅', c:'#2bb673' },
-    { id:'manage',   name:'관리', icon:'📋', c:'#e0a13a' }
+    { id:'manage',   name:'관리(기타)', icon:'📋', c:'#e0a13a' }
   ];
   function areaInfo(id){ for(var i=0;i<AREAS.length;i++){ if(AREAS[i].id===id) return AREAS[i]; } return {id:id,name:id,icon:'🤖',c:'#4b8ef0'}; }
 
@@ -7525,7 +7525,11 @@ window.vaatzClaimQuest = function(id){
       '#ct-agent .agent-rank-empty{font-size:11px;color:var(--text-4);padding:6px}',
       '#ct-agent .agent-sec-h{font-size:12.5px;font-weight:800;color:var(--text-2);margin:18px 0 10px;display:flex;align-items:center;gap:8px}',
       '#ct-agent .agent-sec-n{font-size:10px;font-weight:700;color:var(--text-4);background:var(--bg-3);border:1px solid var(--border-1);padding:1px 9px;border-radius:999px}',
-      '#ct-agent .agent-sec-empty{font-size:11px;color:var(--text-4);padding:16px;text-align:center;border:1px dashed var(--border-2);border-radius:10px}'
+      '#ct-agent .agent-sec-empty{font-size:11px;color:var(--text-4);padding:16px;text-align:center;border:1px dashed var(--border-2);border-radius:10px}',
+      '#ct-agent .agent-dl-btn.poc{background:rgba(224,161,58,.16);color:#e0a13a;border:1px solid rgba(224,161,58,.45)}',
+      '#ct-agent .agent-dl-btn.poc:hover{filter:none;background:#e0a13a;color:#fff;border-color:#e0a13a}',
+      '#ct-agent .agent-caution{font-size:10.5px;line-height:1.6;color:var(--text-3);background:rgba(224,161,58,.10);border:1px solid rgba(224,161,58,.30);border-radius:10px;padding:9px 12px;margin:0 0 6px}',
+      '#ct-agent .agent-caution b{color:var(--text-2)}'
     ].join('');
     var s = document.createElement('style');
     s.id='agentMktStyle'; s.textContent=css;
@@ -7583,10 +7587,10 @@ window.vaatzClaimQuest = function(id){
   function cardHtml(a){
     var ar = areaInfo(a.area), c = ar.c||'#4b8ef0', official = a.status==='official';
     var tags = (a.tags||[]).slice(0,3).map(function(t){return '<span class="agent-tag">#'+esc(t)+'</span>';}).join('');
-    var hot = official && (a.dl||0) >= 250 ? '<span class="agent-hot">🔥 인기</span>' : '';
+    var hot = official && (a.dl||0) >= 250 ? '<span class="agent-hot">🔥 HOT</span>' : '';
     var primary = official
       ? '<button class="agent-dl-btn" onclick="agentDownload('+a.id+')">⬇ 다운로드 <span class="ext">.exe</span></button>'
-      : '<button class="agent-dl-btn pending" onclick="agentDetail('+a.id+')">🧪 임시(PoC) · 미리보기</button>';
+      : '<button class="agent-dl-btn poc" title="임시(PoC) — 검증 전, 활용에 유의" onclick="agentDownload('+a.id+')">⬇ 다운로드 <span class="ext">PoC</span></button>';
     return '<div class="agent-card'+(official?'':' is-review')+'" style="--ag-c:'+c+'">'
       + '<div class="agent-card-top">'
         + '<div class="agent-ic" style="background:'+c+'1f;border-color:'+c+'40">'+areaSvg(a.area,24)+'</div>'
@@ -7649,17 +7653,18 @@ window.vaatzClaimQuest = function(id){
       '<div class="agent-hd">'
         + '<div class="agent-hd-txt">'
           + '<div class="agent-title">🤖 AI 에이전트 마켓</div>'
-          + '<div class="agent-sub">💡 <b style="color:var(--text-2)">클로드 코드</b>로 만든 업무 자동화 Agent를 <b>구매·개발·품질·관리</b> 4개 영역으로 운영합니다. <b style="color:#e0a13a">🧪 임시(PoC)</b>는 누구나 올릴 수 있고, <b style="color:#2bb673">✅ 공식</b>은 <b style="color:var(--text-2)">ADMIN 최종 심사</b>를 통과한 신뢰 에이전트입니다.</div>'
+          + '<div class="agent-sub">💡 <b style="color:var(--text-2)">클로드 코드</b>로 만든 업무 자동화 Agent를 <b>구매·개발·품질·관리(기타)</b> 4개 타입으로 운영합니다. <b style="color:#2bb673">✅ 공식</b>은 ADMIN 심사를 통과한 신뢰 버전, <b style="color:#e0a13a">🧪 임시(PoC)</b>는 누구나 올린 시험판입니다. (둘 다 다운로드 가능)</div>'
         + '</div>'
         + '<button class="agent-share-btn" onclick="agentToggleUpload(true)">➕ 에이전트 올리기</button>'
       + '</div>'
       + uploadHtml()
-      + '<div class="agent-rank"><div class="agent-rank-hd"><span class="agent-rank-t">🔥 실시간 인기 TOP</span><span class="agent-live"><span class="agent-live-dot"></span>LIVE</span></div><div id="agentRankStrip">'+renderRankStrip()+'</div></div>'
+      + '<div class="agent-rank"><div class="agent-rank-hd"><span class="agent-rank-t">🔥 공식 HOT · 실시간 인기 TOP</span><span class="agent-live"><span class="agent-live-dot"></span>LIVE</span></div><div id="agentRankStrip">'+renderRankStrip()+'</div></div>'
       + '<div class="agent-toolbar"><div class="agent-search"><span style="font-size:11px;color:var(--text-4)">🔍</span><input id="agentSearchInput" placeholder="에이전트 검색 (이름·설명·태그)..." oninput="agentSearch(this.value)" value="'+esc(st.q)+'"></div></div>'
       + '<div class="agent-stats"><span>✅ 공식 <b>'+totalOff+'</b></span><span>🧪 임시(PoC) <b>'+totalTmp+'</b></span><span>⬇ 총 다운로드 <b>'+st.list.reduce(function(s,a){return s+(a.dl||0);},0).toLocaleString()+'</b></span></div>'
       + '<div class="agent-chips">'+chipsHtml()+'</div>'
-      + sectionHtml('✅ 공식 에이전트', officialList, '이 조건의 공식 에이전트가 없습니다.')
-      + sectionHtml('🧪 임시(PoC) · 승인 대기', tempList, '승인 대기 중인 에이전트가 없습니다.');
+      + '<div class="agent-caution">⚠️ <b>임시(PoC)</b> 에이전트는 검증 전 시험판입니다. 실제 업무 적용 전 결과를 반드시 확인하세요. 신뢰가 필요하면 <b style="color:#2bb673">✅ 공식</b>을 이용하세요.</div>'
+      + sectionHtml('✅ 공식 에이전트 · 심사 통과', officialList, '이 조건의 공식 에이전트가 없습니다.')
+      + sectionHtml('🧪 임시(PoC) · 검증 전 — 활용 유의', tempList, '임시(PoC) 에이전트가 없습니다.');
     /* 검색어 유지 시 커서 위치 복원 */
     var si = $('#agentSearchInput');
     if(si && st.q){ try{ si.focus(); si.setSelectionRange(si.value.length, si.value.length); }catch(e){} }
@@ -7700,7 +7705,7 @@ window.vaatzClaimQuest = function(id){
 
   window.agentSubmit = function(){
     var name = ($('#agName')&&$('#agName').value||'').trim();
-    var area = ($('#agArea')&&$('#agArea').value) || 'common';
+    var area = ($('#agArea')&&$('#agArea').value) || 'purchase';
     var desc = ($('#agDesc')&&$('#agDesc').value||'').trim();
     var fileEl = $('#agFile');
     if(!name){ say('에이전트 이름을 입력해주세요.','⚠️',1700); return; }
@@ -7747,7 +7752,7 @@ window.vaatzClaimQuest = function(id){
   window.agentDownload = function(id){
     var a=null; for(var i=0;i<st.list.length;i++){ if(st.list[i].id===id){ a=st.list[i]; break; } }
     if(!a) return;
-    if(a.status!=='official'){ say('아직 심사 중인 에이전트입니다. 정식(✅) 전환 후 다운로드할 수 있어요.','🔎',2600); return; }
+    var isTemp = a.status!=='official';
     a.dl = (a.dl||0)+1;
     var ar = areaInfo(a.area);
     try{
@@ -7757,11 +7762,13 @@ window.vaatzClaimQuest = function(id){
         '════════════════════════════════════════',
         '',
         '에이전트 : '+a.name+'  (v'+a.ver+')',
+        '상태     : '+(isTemp?'🧪 임시(PoC) — 검증 전, 활용에 유의':'✅ 공식 (ADMIN 심사 통과)'),
         '영역     : '+ar.name,
         '제작자   : '+a.author,
         '파일크기 : '+a.size,
         '다운로드 : '+a.dl+'회',
         '',
+        (isTemp?'[⚠️ 주의] 임시(PoC) 에이전트입니다. 시험판이므로 실제 업무 적용 전 결과를 반드시 검토하세요.\n':''),
         '[설명]',
         a.desc,
         '',
@@ -7779,7 +7786,7 @@ window.vaatzClaimQuest = function(id){
       document.body.appendChild(el); el.click(); el.remove();
       setTimeout(function(){ URL.revokeObjectURL(url); }, 1500);
     }catch(e){}
-    say('⬇️ "'+a.name+'" 다운로드를 시작합니다 (데모: README 제공)','⬇️',2600);
+    say(isTemp ? '⚠️ 임시(PoC) "'+a.name+'" 다운로드 — 검증 전 시험판이니 활용에 유의하세요.' : '⬇️ "'+a.name+'" 다운로드를 시작합니다 (데모: README 제공)', isTemp?'⚠️':'⬇️', 2800);
     agentRefreshAll();
   };
 
@@ -8702,6 +8709,8 @@ window.vaatzClaimQuest = function(id){
       '#rp .rpa-row.is-review{opacity:.92;border-left-style:dashed}',
       '#rp .rpa-dl.pending{background:var(--bg-3);color:var(--text-3)}',
       '#rp .rpa-dl.pending:hover{filter:none;color:var(--accent)}',
+      '#rp .rpa-dl.poc{background:rgba(224,161,58,.18);color:#e0a13a}',
+      '#rp .rpa-dl.poc:hover{filter:none;background:#e0a13a;color:#fff}',
       '#rp .rpa-chip.rpa-official.on{background:#2bb673;border-color:#2bb673;color:#fff}',
       '#sourceFullBtn{display:none!important}',
       '#rp .rp-h{display:none}',
@@ -8721,9 +8730,7 @@ window.vaatzClaimQuest = function(id){
     var ar=areaMeta(a.area), c=ar.c||'#4b8ef0', official=a.status==='official';
     var ic = window.agentAreaSvg ? window.agentAreaSvg(a.area,20) : esc(a.icon||'🤖');
     var badge = window.agentStatusBadge ? window.agentStatusBadge(a.status||'temp') : '';
-    var btn = official
-      ? '<button class="rpa-dl" title="다운로드 (.exe)" onclick="event.stopPropagation();rpAgentDownload('+a.id+')">⬇</button>'
-      : '<button class="rpa-dl pending" title="임시(PoC) · 미리보기" onclick="event.stopPropagation();agentDetail&&agentDetail('+a.id+')">🧪</button>';
+    var btn = '<button class="rpa-dl'+(official?'':' poc')+'" title="'+(official?'다운로드 (.exe)':'임시(PoC) 다운로드 — 검증 전, 활용 유의')+'" onclick="event.stopPropagation();rpAgentDownload('+a.id+')">⬇</button>';
     return '<div class="rpa-row'+(official?'':' is-review')+'" style="--ag-c:'+c+'" onclick="agentDetail&&agentDetail('+a.id+')">'
       + '<div class="rpa-ic" style="background:'+c+'1f;border-color:'+c+'40">'+ic+'</div>'
       + '<div class="rpa-main"><div class="rpa-nm">'+esc(a.name)+'</div>'
@@ -9047,7 +9054,16 @@ window.vaatzClaimQuest = function(id){
     var first=el.firstElementChild;
     if(first && first.classList && first.classList.contains('wf-strip')) first.remove();
     el.insertAdjacentHTML('afterbegin', stripHtml(id));
+    purgeAdminButtons();
   }
+  /* '폴더 추가' · '전체 팀 승인' 버튼 제거 (팀 폴더 모달 포함 전역) */
+  function purgeAdminButtons(){
+    Array.prototype.forEach.call(document.querySelectorAll('button'), function(b){
+      var t=(b.textContent||'').trim();
+      if(t.indexOf('전체 팀 승인')>=0 || t.indexOf('폴더 추가')>=0) b.remove();
+    });
+  }
+  window.__wfPurge = purgeAdminButtons;
 
   /* at() 래핑: 홈=모니터링 / 단계 탭=파이프라인 스트립 주입 */
   var _at=window.at;
@@ -9057,17 +9073,102 @@ window.vaatzClaimQuest = function(id){
       if(_at) _at.apply(this, arguments);
       if(id==='p-home') setTimeout(renderHomeMonitor, 30);
       else if(id==='p-req'||id==='p-final'||id==='p-list') setTimeout(function(){ injectStrip(id); }, 90);
+      setTimeout(purgeAdminButtons, 140);
     };
   }
   /* oa() 래핑: Admin 열릴 때 홈 모니터링 렌더 */
   var _oa=window.oa;
   if(_oa && !window.__wfOaWrapped){
     window.__wfOaWrapped=true;
-    window.oa=function(){ if(_oa) _oa.apply(this, arguments); setTimeout(renderHomeMonitor, 90); };
+    window.oa=function(){ if(_oa) _oa.apply(this, arguments); [90,400,1000].forEach(function(d){ setTimeout(function(){ renderHomeMonitor(); purgeAdminButtons(); }, d); }); };
   }
 
-  function boot(){ if($('#p-home')){ renderHomeMonitor(); } else { setTimeout(boot, 500); } }
+  function boot(){ if($('#p-home')){ renderHomeMonitor(); purgeAdminButtons(); } else { setTimeout(boot, 500); } }
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', function(){ setTimeout(boot, 460); });
   else setTimeout(boot, 460);
+
+})();
+
+
+/* ═══════════════════════════════════════════════════════════════
+ * §22  ADMIN · 사용자·권한 — 팀 Admin 사번 기반 관리
+ *      · "HR I/F 정상" 자동연동 표기 제거
+ *      · 팀 Admin을 사번으로 직접 추가/삭제 (localStorage 보관)
+ * ═══════════════════════════════════════════════════════════════ */
+(function(){
+  'use strict';
+  var $  = function(s,r){ return (r||document).querySelector(s); };
+  var esc= function(s){ return String(s==null?'':s).replace(/[&<>"']/g,function(m){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]; }); };
+  var say= function(m,i,d){ try{ (window.toast||window.say||console.log)(m,i||'✅',d||2000); }catch(e){} };
+  var KEY='vaatz-team-admins-v1';
+
+  function seed(){ return [
+    {team:'구매전략팀', name:'이준혁 책임', emp:'21H0481'},
+    {team:'구매디지털추진팀', name:'박성민 매니저', emp:'19K1147'},
+    {team:'구매기획팀', name:'정현수 책임', emp:'18H0922'},
+    {team:'원가관리팀', name:'한도윤 매니저', emp:'20K0356'},
+    {team:'품질구매팀', name:'윤서연 매니저', emp:'22H0710'},
+    {team:'해외구매팀', name:'장민우 책임', emp:'17K0288'},
+    {team:'협력사관리팀', name:'이소라 매니저', emp:'21K0934'},
+    {team:'일반자재구매팀', name:'오민재 책임', emp:'19H0617'}
+  ]; }
+  function load(){ try{ var s=localStorage.getItem(KEY); return s?JSON.parse(s):seed(); }catch(e){ return seed(); } }
+  function save(){ try{ localStorage.setItem(KEY, JSON.stringify(items)); }catch(e){} }
+  var items=load();
+
+  function injectStyle(){
+    if(document.getElementById('taStyle')) return;
+    var css=[
+      '#p-usr .ta-emp{font-size:12px;color:var(--text-2);font-family:Outfit,monospace;font-weight:700}',
+      '#p-usr .ta-del{color:#e0604e!important;border-color:rgba(224,96,78,.4)!important}',
+      '#p-usr .ta-del:hover{background:#e0604e!important;color:#fff!important}',
+      '#p-usr .ta-add{display:flex;gap:7px;margin-top:12px;flex-wrap:wrap;align-items:center;padding-top:12px;border-top:1px dashed var(--border-2)}',
+      '#p-usr .ta-add input{flex:1;min-width:90px;background:var(--bg-3);border:1px solid var(--border-1);border-radius:8px;padding:8px 10px;color:var(--text-1);font-size:12px;font-family:inherit;outline:none}',
+      '#p-usr .ta-add .add-btn{font-size:12px;font-weight:700;padding:8px 14px;background:var(--accent);color:#fff;border:none;border-radius:8px;cursor:pointer;font-family:inherit;white-space:nowrap}',
+      '#p-usr .ta-pill{font-size:9px;font-weight:800;color:var(--accent);background:var(--accent-dim,rgba(75,142,240,.16));padding:2px 8px;border-radius:999px;margin-left:6px;vertical-align:middle}'
+    ].join('');
+    var s=document.createElement('style'); s.id='taStyle'; s.textContent=css; document.head.appendChild(s);
+  }
+
+  function renderTeamAdmins(){
+    var usr=$('#p-usr'); if(!usr) return;
+    var card=usr.querySelector('.v27-perm-card'); if(!card) return;
+    injectStyle();
+    card.innerHTML =
+      '<h3>팀 Admin 배정 <span class="ta-pill">사번 기반</span></h3>'
+      + '<p>팀별 담당자를 <b>사번</b>으로 직접 등록·삭제합니다. (HR I/F 자동연동 미사용)</p>'
+      + items.map(function(t,i){
+          return '<div class="v27-admin-row"><div class="team">'+esc(t.team)+'</div><div class="user">'+esc(t.name)+'</div>'
+            + '<div class="ta-emp">사번 '+esc(t.emp||'-')+'</div>'
+            + '<button class="v27-btn ta-del" onclick="taDel('+i+')">삭제</button></div>';
+        }).join('')
+      + '<div class="ta-add"><input id="taTeam" placeholder="팀명"><input id="taName" placeholder="담당자 이름"><input id="taEmp" placeholder="사번"><button class="add-btn" onclick="taAdd()">＋ 추가</button></div>';
+  }
+  window.renderTeamAdmins = renderTeamAdmins;
+  window.taAdd = function(){
+    var team=($('#taTeam')&&$('#taTeam').value||'').trim();
+    var name=($('#taName')&&$('#taName').value||'').trim();
+    var emp =($('#taEmp')&&$('#taEmp').value||'').trim();
+    if(!team || !name || !emp){ say('팀명·이름·사번을 모두 입력해주세요.','⚠️',1800); return; }
+    items.push({team:team, name:name, emp:emp}); save(); renderTeamAdmins();
+    say('✅ '+team+' 팀 Admin('+name+' · '+emp+')을 등록했습니다.','✅',2400);
+  };
+  window.taDel = function(i){
+    var t=items[i]; if(!t) return;
+    if(!confirm((t.team||'')+' · '+(t.name||'')+' 팀 Admin을 삭제하시겠습니까?')) return;
+    items.splice(i,1); save(); renderTeamAdmins();
+    say('🗑 팀 Admin을 삭제했습니다.','🗑',1800);
+  };
+
+  var _at=window.at;
+  if(_at && !window.__taAtWrapped){
+    window.__taAtWrapped=true;
+    window.at=function(b,id){ if(_at) _at.apply(this,arguments); if(id==='p-usr') setTimeout(renderTeamAdmins, 80); };
+  }
+  var _oa=window.oa;
+  if(_oa && !window.__taOaWrapped){
+    window.__taOaWrapped=true;
+    window.oa=function(){ if(_oa) _oa.apply(this,arguments); setTimeout(function(){ if($('#p-usr') && $('#p-usr').style.display!=='none') renderTeamAdmins(); }, 120); };
+  }
 
 })();
