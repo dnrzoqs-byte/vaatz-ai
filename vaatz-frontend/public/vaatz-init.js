@@ -7404,22 +7404,23 @@ window.vaatzClaimQuest = function(id){
   var st = window.__agentMkt = window.__agentMkt || { list: seedAgents(), area:'all', q:'', upload:false, officialOnly:false };
 
   /* ── 거버넌스: 정식/심사 단계 + 권한 업로드 ── */
+  /* 2단계: 임시(PoC) / 공식(최종 심사 통과) */
   var STATUS = {
-    official:{ label:'정식',   icon:'✅', c:'#2bb673', desc:'PoC·서비스 심사 완료' },
-    poc:     { label:'PoC',    icon:'🧪', c:'#8b7cf0', desc:'PoC 검증 단계' },
-    review:  { label:'심사중', icon:'🔎', c:'#e0a13a', desc:'서비스 심사 대기' }
+    official:{ label:'공식', icon:'✅', c:'#2bb673', desc:'ADMIN 최종 심사 통과 — 신뢰할 수 있는 정식 에이전트' },
+    temp:    { label:'임시', icon:'🧪', c:'#e0a13a', desc:'PoC 단계 — ADMIN 최종 승인 전' }
   };
-  function statusInfo(s){ return STATUS[s] || STATUS.review; }
+  function statusInfo(s){ return s==='official' ? STATUS.official : STATUS.temp; }
+  function isOfficial(a){ return a && a.status==='official'; }
   (function normStatus(){
-    var off={1:1,2:1,4:1,7:1,9:1,10:1,13:1,16:1}, poc={3:1,6:1,12:1};
-    st.list.forEach(function(a){ if(!a.status) a.status = off[a.id]?'official':(poc[a.id]?'poc':'review'); });
+    var off={1:1,2:1,4:1,7:1,9:1,10:1,13:1,16:1};
+    st.list.forEach(function(a){ if(a.status!=='official' && a.status!=='temp') a.status = off[a.id]?'official':'temp'; });
   })();
-  function canPublish(){
-    try{ if(document.documentElement.getAttribute('data-user-role')==='admin') return true; if(localStorage.getItem('vaatz-agent-publisher')==='1') return true; }catch(e){}
-    return false;
-  }
-  window.__agentCanPublish = canPublish;
-  window.agentSetPublisher = function(on){ try{ localStorage.setItem('vaatz-agent-publisher', on?'1':'0'); }catch(e){} say(on?'승인 담당자 권한을 활성화했습니다. (데모)':'담당자 권한을 해제했습니다.', on?'🔓':'🔒', 2200); renderAgents(); };
+  /* 최종 승인 권한(ADMIN) — Admin 패널 안에서의 동작은 ADMIN으로 간주 */
+  function canApprove(){ try{ if(document.documentElement.getAttribute('data-user-role')==='admin') return true; if(localStorage.getItem('vaatz-admin')==='1') return true; }catch(e){} var ao=document.getElementById('ao'); return !!(ao && ao.classList.contains('sh')); }
+  window.__agentCanApprove = canApprove;
+  /* 마켓/패널/Admin 동시 새로고침 */
+  function agentRefreshAll(){ try{ renderAgents(); }catch(e){} try{ window.rpRenderAgents && window.rpRenderAgents(); }catch(e){} try{ window.renderAdminAgents && window.renderAdminAgents(); }catch(e){} }
+  window.agentRefreshAll = agentRefreshAll;
 
   /* 영역별 라인 아이콘 (촌스러운 이모지 대체) */
   function areaSvg(areaId, size){
@@ -7556,7 +7557,7 @@ window.vaatzClaimQuest = function(id){
       var n = st.list.filter(function(a){return a.area===ar.id;}).length;
       html += '<button class="agent-chip'+(st.area===ar.id?' on':'')+'" style="--ag-c:'+(ar.c||'#4b8ef0')+'" onclick="agentFilter(\''+ar.id+'\',this)"><span class="agent-chip-dot"></span>'+ar.icon+' '+ar.name+' <span class="agent-chip-n">'+n+'</span></button>';
     });
-    html += '<button class="agent-chip agent-official-toggle'+(st.officialOnly?' on':'')+'" title="PoC·서비스 심사 완료 정식만" onclick="agentToggleOfficial()">✅ 정식만</button>';
+    html += '<button class="agent-chip agent-official-toggle'+(st.officialOnly?' on':'')+'" title="ADMIN 최종 승인된 공식만" onclick="agentToggleOfficial()">✅ 공식만</button>';
     return html;
   }
 
@@ -7564,10 +7565,9 @@ window.vaatzClaimQuest = function(id){
     var ar = areaInfo(a.area), c = ar.c||'#4b8ef0', official = a.status==='official';
     var tags = (a.tags||[]).slice(0,3).map(function(t){return '<span class="agent-tag">#'+esc(t)+'</span>';}).join('');
     var hot = official && (a.dl||0) >= 250 ? '<span class="agent-hot">🔥 인기</span>' : '';
-    var promote = (canPublish() && !official) ? '<button class="agent-promote" title="서비스 심사 완료 → 정식 등록" onclick="agentPromote('+a.id+')">✅ 정식 승인</button>' : '';
     var primary = official
       ? '<button class="agent-dl-btn" onclick="agentDownload('+a.id+')">⬇ 다운로드 <span class="ext">.exe</span></button>'
-      : '<button class="agent-dl-btn pending" onclick="agentDetail('+a.id+')">🔎 심사중 · 미리보기</button>';
+      : '<button class="agent-dl-btn pending" onclick="agentDetail('+a.id+')">🧪 임시(PoC) · 미리보기</button>';
     return '<div class="agent-card'+(official?'':' is-review')+'" style="--ag-c:'+c+'">'
       + '<div class="agent-card-top">'
         + '<div class="agent-ic" style="background:'+c+'1f;border-color:'+c+'40">'+areaSvg(a.area,24)+'</div>'
@@ -7577,29 +7577,24 @@ window.vaatzClaimQuest = function(id){
       + '<div class="agent-desc">'+esc(a.desc)+'</div>'
       + '<div class="agent-tags">'+tags+'</div>'
       + '<div class="agent-meta"><span>👤 '+esc(a.author)+'</span><span class="dot">·</span><span>💾 '+esc(a.size||'—')+'</span><span class="dot">·</span><span>⬇ '+(a.dl||0).toLocaleString()+'</span></div>'
-      + '<div class="agent-acts">'+primary+promote
+      + '<div class="agent-acts">'+primary
+      + '<button class="agent-info-btn" title="수정" onclick="agentEdit('+a.id+')">✏️</button>'
       + '<button class="agent-info-btn" title="상세 정보" onclick="agentDetail('+a.id+')">ℹ️</button></div>'
       + '</div>';
   }
 
   function uploadHtml(){
     if(!st.upload) return '';
-    if(!canPublish()){
-      return '<div class="agent-upload gate">'
-        + '<h4>🔒 에이전트 등록 권한 필요</h4>'
-        + '<div class="agent-gate-txt">AI 에이전트 등록은 <b>승인된 담당자</b>만 가능합니다. 등록된 에이전트는 <b>PoC → 서비스 심사</b>를 거쳐 <b>✅ 정식</b>으로 제공됩니다. 등록을 원하면 구매디지털추진팀에 신청하세요.</div>'
-        + '<div class="agent-up-acts"><button class="cancel" onclick="agentToggleUpload(false)">닫기</button><button class="ok" onclick="agentSetPublisher(true)">데모: 담당자 권한으로 보기</button></div>'
-        + '</div>';
-    }
-    var opts = AREAS.map(function(ar){ return '<option value="'+ar.id+'">'+ar.icon+' '+ar.name+'</option>'; }).join('');
+    var ed = st.editId ? (function(){ for(var i=0;i<st.list.length;i++){ if(st.list[i].id===st.editId) return st.list[i]; } return null; })() : null;
+    var opts = AREAS.map(function(ar){ return '<option value="'+ar.id+'"'+(ed&&ed.area===ar.id?' selected':'')+'>'+ar.icon+' '+ar.name+'</option>'; }).join('');
     return '<div class="agent-upload">'
-      + '<h4>➕ 에이전트 등록 신청 <span class="agent-gate-pill">승인 담당자</span></h4>'
-      + '<div class="agent-gate-txt">등록하면 <b>🔎 심사중</b> 상태로 접수되고, <b>PoC · 서비스 심사</b> 완료 후 <b>✅ 정식</b>으로 전환됩니다.</div>'
-      + '<div class="agent-fld"><label>에이전트 이름</label><input id="agName" placeholder="예: 발주서 검증 Agent"></div>'
+      + '<h4>'+(ed?'✏️ 에이전트 수정':'➕ 에이전트 올리기')+'</h4>'
+      + '<div class="agent-gate-txt">누구나 올리고 수정할 수 있어요. 올린 에이전트는 <b>🧪 임시(PoC)</b>로 등록되며, <b>ADMIN 최종 승인</b> 후 <b>✅ 공식</b>으로 전환됩니다.'+(ed&&ed.status==='official'?' <b style="color:#e0a13a">※ 공식 에이전트를 수정하면 다시 임시(PoC)로 내려가 재승인이 필요합니다.</b>':'')+'</div>'
+      + '<div class="agent-fld"><label>에이전트 이름</label><input id="agName" value="'+(ed?esc(ed.name):'')+'" placeholder="예: 발주서 검증 Agent"></div>'
       + '<div class="agent-fld"><label>영역</label><select id="agArea">'+opts+'</select></div>'
-      + '<div class="agent-fld"><label>설명</label><textarea id="agDesc" placeholder="어떤 업무를 자동화하나요? 입력/출력과 활용 팁을 적어주세요."></textarea></div>'
-      + '<div class="agent-fld"><label>실행 파일 (.exe)</label><input id="agFile" type="file" accept=".exe,.zip,.msi"></div>'
-      + '<div class="agent-up-acts"><button class="cancel" onclick="agentToggleUpload(false)">취소</button><button class="ok" onclick="agentSubmit()">심사 등록 신청</button></div>'
+      + '<div class="agent-fld"><label>설명</label><textarea id="agDesc" placeholder="어떤 업무를 자동화하나요? 입력/출력과 활용 팁을 적어주세요.">'+(ed?esc(ed.desc):'')+'</textarea></div>'
+      + '<div class="agent-fld"><label>실행 파일 (.exe)'+(ed?' <span style="color:var(--text-4);font-weight:400">— 변경 시에만 첨부</span>':'')+'</label><input id="agFile" type="file" accept=".exe,.zip,.msi"></div>'
+      + '<div class="agent-up-acts"><button class="cancel" onclick="agentToggleUpload(false)">취소</button><button class="ok" onclick="agentSubmit()">'+(ed?'수정 저장':'임시(PoC)로 올리기')+'</button></div>'
       + '</div>';
   }
 
@@ -7614,9 +7609,9 @@ window.vaatzClaimQuest = function(id){
       '<div class="agent-hd">'
         + '<div class="agent-hd-txt">'
           + '<div class="agent-title">🤖 AI 에이전트 마켓</div>'
-          + '<div class="agent-sub">💡 <b style="color:var(--text-2)">클로드 코드</b>로 만든 업무 자동화 Agent(.exe)를 구매·개발·품질·관리·구매공통 5개 영역으로 제공합니다. <b style="color:#2bb673">✅ 정식</b>은 PoC·서비스 심사를 통과한 에이전트이며, 등록은 <b style="color:var(--text-2)">승인된 담당자</b>만 가능합니다.</div>'
+          + '<div class="agent-sub">💡 <b style="color:var(--text-2)">클로드 코드</b>로 만든 업무 자동화 Agent를 5개 영역으로 제공합니다. <b style="color:#e0a13a">🧪 임시(PoC)</b>는 누구나 올릴 수 있고, <b style="color:#2bb673">✅ 공식</b>은 <b style="color:var(--text-2)">ADMIN 최종 심사</b>를 통과한 신뢰 에이전트입니다. (공식만 다운로드 가능)</div>'
         + '</div>'
-        + '<button class="agent-share-btn" onclick="agentToggleUpload(true)">➕ 에이전트 등록</button>'
+        + '<button class="agent-share-btn" onclick="agentToggleUpload(true)">➕ 에이전트 올리기</button>'
       + '</div>'
       + uploadHtml()
       + '<div class="agent-toolbar"><div class="agent-search"><span style="font-size:11px;color:var(--text-4)">🔍</span><input id="agentSearchInput" placeholder="에이전트 검색 (이름·설명·태그)..." oninput="agentSearch(this.value)" value="'+esc(st.q)+'"></div></div>'
@@ -7647,30 +7642,53 @@ window.vaatzClaimQuest = function(id){
   };
   window.agentSearch = function(v){ st.q = v||''; renderAgents(); };
 
-  /* ── 공유 폼 토글 / 등록 ── */
-  window.agentToggleUpload = function(show){ st.upload = !!show; renderAgents(); if(show){ var n=$('#agName'); if(n) try{n.focus();}catch(e){} } };
+  /* ── 업로드/수정 폼 토글 ── */
+  window.agentToggleUpload = function(show){ st.upload = !!show; if(!show) st.editId=null; renderAgents(); if(show){ var n=$('#agName'); if(n) try{n.focus();}catch(e){} } };
+  window.agentEdit = function(id){ st.editId=id; st.upload=true; renderAgents(); var n=$('#agName'); if(n) try{ n.focus(); n.setSelectionRange(n.value.length,n.value.length); }catch(e){} };
+  function findAgent(id){ for(var i=0;i<st.list.length;i++){ if(st.list[i].id===id) return st.list[i]; } return null; }
+
   window.agentSubmit = function(){
-    if(!canPublish()){ say('에이전트 등록 권한이 없습니다.','🔒',1900); return; }
     var name = ($('#agName')&&$('#agName').value||'').trim();
     var area = ($('#agArea')&&$('#agArea').value) || 'common';
     var desc = ($('#agDesc')&&$('#agDesc').value||'').trim();
     var fileEl = $('#agFile');
     if(!name){ say('에이전트 이름을 입력해주세요.','⚠️',1700); return; }
-    var size = '—';
-    if(fileEl && fileEl.files && fileEl.files[0]){ size = (fileEl.files[0].size/1048576).toFixed(1)+' MB'; }
+    var size = (fileEl && fileEl.files && fileEl.files[0]) ? (fileEl.files[0].size/1048576).toFixed(1)+' MB' : null;
+    if(st.editId){
+      var a=findAgent(st.editId);
+      if(a){ a.name=name; a.area=area; a.desc=desc||a.desc; if(size)a.size=size; a.updated='방금';
+        a.status='temp'; /* 수정 시 재승인 필요 → 임시로 */ }
+      st.upload=false; st.editId=null; st.area=area; agentRefreshAll();
+      say('✏️ "'+name+'" 수정 완료 — 임시(PoC)로 전환되어 ADMIN 재승인이 필요합니다.','✅',3200);
+      return;
+    }
     st.list.unshift({ id:Date.now(), area:area, icon:'🤖', name:name, ver:'1.0',
       desc:desc||'설명이 등록되지 않았습니다.', author:'프로큐어히어로(나)', lv:5,
-      size:size, dl:0, updated:'방금', tags:['신규','클로드코드'], status:'review' });
-    st.upload = false; st.area = area; st.q=''; st.officialOnly=false;
-    renderAgents();
-    say('📝 "'+name+'" 등록 신청 완료 — PoC·서비스 심사 후 정식 전환됩니다.','✅',3200);
+      size:size||'—', dl:0, updated:'방금', tags:['신규','클로드코드'], status:'temp' });
+    st.upload=false; st.area=area; st.q=''; st.officialOnly=false;
+    agentRefreshAll();
+    say('🧪 "'+name+'" 임시(PoC) 등록 완료 — ADMIN 최종 승인 후 공식 전환됩니다.','✅',3200);
   };
+
+  /* ── 승인/반려/삭제 (ADMIN) ── */
   window.agentPromote = function(id){
-    if(!canPublish()){ say('정식 승인 권한이 없습니다.','🔒',1800); return; }
-    var a=null; for(var i=0;i<st.list.length;i++){ if(st.list[i].id===id){ a=st.list[i]; break; } }
-    if(!a) return; a.status='official';
-    renderAgents();
-    say('✅ "'+a.name+'" 서비스 심사 완료 — 정식 등록되었습니다.','✅',2800);
+    if(!canApprove()){ say('최종 승인은 ADMIN만 가능합니다.','🔒',2000); return; }
+    var a=findAgent(id); if(!a) return; a.status='official'; a.updated='방금';
+    agentRefreshAll();
+    say('✅ "'+a.name+'" 최종 심사 통과 — 공식 에이전트로 승인했습니다.','✅',2800);
+  };
+  window.agentReject = function(id){
+    if(!canApprove()){ say('승인 변경은 ADMIN만 가능합니다.','🔒',2000); return; }
+    var a=findAgent(id); if(!a) return; a.status='temp';
+    agentRefreshAll();
+    say('↩️ "'+a.name+'"를 임시(PoC)로 되돌렸습니다.','↩️',2400);
+  };
+  window.agentDelete = function(id){
+    var a=findAgent(id); if(!a) return;
+    if(!confirm('"'+a.name+'" 에이전트를 삭제하시겠습니까?')) return;
+    st.list = st.list.filter(function(x){ return x.id!==id; });
+    agentRefreshAll();
+    say('🗑 "'+a.name+'" 삭제했습니다.','🗑',2000);
   };
   window.agentToggleOfficial = function(){ st.officialOnly=!st.officialOnly; renderAgents(); };
 
@@ -7711,15 +7729,15 @@ window.vaatzClaimQuest = function(id){
       setTimeout(function(){ URL.revokeObjectURL(url); }, 1500);
     }catch(e){}
     say('⬇️ "'+a.name+'" 다운로드를 시작합니다 (데모: README 제공)','⬇️',2600);
-    renderAgents();
+    agentRefreshAll();
   };
 
   /* ── 상세 정보 ── */
   window.agentDetail = function(id){
     var a=null; for(var i=0;i<st.list.length;i++){ if(st.list[i].id===id){ a=st.list[i]; break; } }
     if(!a) return;
-    var ar = areaInfo(a.area);
-    say(ar.icon+' '+a.name+' v'+a.ver+' · '+a.author+' · ⬇️'+a.dl+' · '+a.size,'ℹ️',3400);
+    var si=statusInfo(a.status);
+    say(si.icon+' '+si.label+' · '+a.name+' v'+a.ver+' · '+a.author+' · ⬇️'+(a.dl||0),'ℹ️',3600);
   };
 
   /* ── 표준 탭 전환 시 ct-agent 숨김 보장 (commTab/openComm 래핑) ── */
@@ -8635,7 +8653,12 @@ window.vaatzClaimQuest = function(id){
       '#rp .rpa-dl.pending{background:var(--bg-3);color:var(--text-3)}',
       '#rp .rpa-dl.pending:hover{filter:none;color:var(--accent)}',
       '#rp .rpa-chip.rpa-official.on{background:#2bb673;border-color:#2bb673;color:#fff}',
-      '#sourceFullBtn{display:none!important}'
+      '#sourceFullBtn{display:none!important}',
+      '#rp .rp-h{padding:9px 12px 2px;border-bottom:none;min-height:0}',
+      '#rp .rp-h .rp-t{font-size:10px;font-weight:700;color:var(--text-4);letter-spacing:.5px;text-transform:uppercase}',
+      '#rp .rp-tabs{padding-top:6px}',
+      '#rpReopen{position:fixed;right:0;top:50%;transform:translateY(-50%);z-index:60;background:var(--accent);color:#fff;border:none;border-radius:10px 0 0 10px;padding:13px 6px;cursor:pointer;box-shadow:-2px 2px 12px rgba(0,0,0,.28);display:none;writing-mode:vertical-rl;font-size:11px;font-weight:800;letter-spacing:1.5px}',
+      '#rpReopen:hover{filter:brightness(1.08);padding-right:9px}'
     ].join('');
     var s=document.createElement('style'); s.id='rpAgentStyle'; s.textContent=css; document.head.appendChild(s);
   }
@@ -8676,6 +8699,18 @@ window.vaatzClaimQuest = function(id){
   window.rpAgentToggleOfficial = function(){ rpAg.officialOnly=!rpAg.officialOnly; rpRenderAgents(); };
   window.rpAgentDownload = function(id){ if(window.agentDownload) window.agentDownload(id); setTimeout(rpRenderAgents, 40); };
   window.rpOpenMarket = function(){ if(window.openAgentMarket) window.openAgentMarket(); else if(window.openComm) window.openComm('qa'); };
+  window.rpRenderAgents = rpRenderAgents;
+
+  /* ── 우측 패널 재오픈 핸들 (닫았을 때 다시 열기) ── */
+  function ensureReopen(){
+    if(document.getElementById('rpReopen')) return;
+    var b=document.createElement('button'); b.id='rpReopen'; b.title='작업 패널 열기';
+    b.textContent='◀ 작업 패널';
+    b.onclick=function(){ if(window.rpT) window.rpT(true); else { var rp=document.getElementById('rp'); if(rp) rp.classList.add('sh'); } syncReopen(); };
+    document.body.appendChild(b);
+  }
+  function syncReopen(){ var rp=document.getElementById('rp'), h=document.getElementById('rpReopen'); if(!h) return; h.style.display=(rp && rp.classList.contains('sh'))?'none':'block'; }
+  window.__rpSyncReopen = syncReopen;
 
   /* "가운데 창 크게(근거 크게 보기)" 제거 — 혼란 요소 */
   window.toggleSourceFull = function(){};
@@ -8697,18 +8732,24 @@ window.vaatzClaimQuest = function(id){
     /* 탭 순서: 답변 근거를 첫 번째로 (우선순위) */
     var tabsWrap=document.querySelector('#rp .rp-tabs');
     if(tabsWrap && ts && tabsWrap.firstElementChild!==ts){ tabsWrap.insertBefore(ts, tabsWrap.firstElementChild); }
+    /* 제목을 슬림 라벨로 (탭이 현재 위치를 알려주므로 길게 안 씀) */
+    var rt=document.getElementById('rpTitle'); if(rt) rt.textContent='작업 패널';
     /* 페인 내용 교체 (1회) */
     if(!document.getElementById('rpAgentBox')){ pane.innerHTML='<div id="rpAgentBox" class="rpa-wrap"></div>'; }
     rpRenderAgents();
     return true;
   }
 
-  /* rpSwitchTab 래핑: 'my' 탭 = AI Agent 렌더 + 제목 변경 */
+  /* rpSwitchTab 래핑: 슬림 제목 유지 + 'my' 탭 = AI Agent 렌더 */
   var _rpsw = window.rpSwitchTab;
   window.rpSwitchTab = function(tab){
     if(_rpsw) _rpsw.apply(this, arguments);
-    if(tab==='my'){ var t=document.getElementById('rpTitle'); if(t) t.textContent='🤖 작업 패널 · 구매 AI Agent'; ensureRpAgents(); }
+    var t=document.getElementById('rpTitle'); if(t) t.textContent='작업 패널';
+    if(tab==='my') ensureRpAgents();
   };
+  /* rpT 래핑: 닫기/열기 시 재오픈 핸들 동기화 */
+  var _rpT = window.rpT;
+  window.rpT = function(){ if(_rpT) _rpT.apply(this, arguments); syncReopen(); };
 
   var rpBusy=false;
   function observeRp(){
@@ -8718,8 +8759,125 @@ window.vaatzClaimQuest = function(id){
       mo.observe(rp,{childList:true,subtree:true});
     }catch(e){}
   }
-  function boot(){ if(!ensureRpAgents()){ setTimeout(boot, 400); return; } removeEnlarge(); observeRp(); }
+  function boot(){ if(!ensureRpAgents()){ setTimeout(boot, 400); return; } removeEnlarge(); observeRp(); ensureReopen(); syncReopen(); }
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', function(){ setTimeout(boot, 380); });
   else setTimeout(boot, 380);
+
+})();
+
+
+/* ═══════════════════════════════════════════════════════════════
+ * §20  ADMIN · AI Agent 관리 탭
+ *      · 누구나 올린 임시(PoC) 에이전트를 ADMIN이 최종 승인(공식)/반려/수정/삭제
+ *      · 데이터는 §16(window.__agentMkt) 공유, 변경 시 마켓·우측패널 동시 반영
+ * ═══════════════════════════════════════════════════════════════ */
+(function(){
+  'use strict';
+  var $  = function(s,r){ return (r||document).querySelector(s); };
+  var esc= function(s){ return String(s==null?'':s).replace(/[&<>"']/g,function(m){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]; }); };
+  var fil = 'all';
+
+  function areasMeta(){ return window.__agentAreas || []; }
+  function areaMeta(id){ var a=areasMeta(); for(var i=0;i<a.length;i++){ if(a[i].id===id) return a[i]; } return {id:id,name:id,icon:'🤖',c:'#4b8ef0'}; }
+  function list(){ var st=window.__agentMkt; return (st&&st.list)||[]; }
+
+  function injectStyle(){
+    if(document.getElementById('admAgentStyle')) return;
+    var css=[
+      '#p-agent .aa-stats{display:flex;gap:18px;margin:4px 0 16px;font-size:12px;color:var(--text-3);flex-wrap:wrap}',
+      '#p-agent .aa-stats b{font-family:Outfit,sans-serif;color:var(--text-1)}',
+      '#p-agent .aa-chips{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap}',
+      '#p-agent .aa-chip{font-size:12px;font-weight:600;padding:7px 14px;border-radius:999px;border:1.5px solid var(--border-2);background:var(--bg-2);color:var(--text-2);cursor:pointer;font-family:inherit}',
+      '#p-agent .aa-chip.on{background:var(--accent);color:#fff;border-color:var(--accent)}',
+      '#p-agent .aa-row{display:flex;align-items:center;gap:12px;padding:12px 14px;border:1px solid var(--border-1);border-left:3px solid var(--ag-c,var(--accent));border-radius:12px;background:var(--bg-2);margin-bottom:9px}',
+      '#p-agent .aa-ic{flex-shrink:0;width:42px;height:42px;border-radius:11px;display:flex;align-items:center;justify-content:center;border:1px solid var(--border-2)}',
+      '#p-agent .aa-ic svg{display:block}',
+      '#p-agent .aa-main{flex:1;min-width:0}',
+      '#p-agent .aa-nm{font-size:13.5px;font-weight:700;color:var(--text-1)}',
+      '#p-agent .aa-meta{font-size:11px;color:var(--text-4);margin-top:3px;display:flex;gap:8px;flex-wrap:wrap;align-items:center}',
+      '#p-agent .aa-acts{display:flex;gap:6px;flex-shrink:0;flex-wrap:wrap;justify-content:flex-end}',
+      '#p-agent .aa-btn{font-size:11.5px;font-weight:700;padding:7px 11px;border-radius:8px;border:1px solid var(--border-2);background:var(--bg-3);color:var(--text-2);cursor:pointer;font-family:inherit;white-space:nowrap}',
+      '#p-agent .aa-btn:hover{border-color:var(--accent);color:var(--accent)}',
+      '#p-agent .aa-btn.approve{background:#2bb673;border-color:#2bb673;color:#fff}',
+      '#p-agent .aa-btn.approve:hover{filter:brightness(1.08);color:#fff}',
+      '#p-agent .aa-btn.del:hover{border-color:#e0604e;color:#e0604e}',
+      '#p-agent .aa-empty{text-align:center;color:var(--text-4);font-size:13px;padding:50px}',
+      '#p-agent .agent-status{font-size:9.5px;font-weight:800;padding:2px 8px;border-radius:999px;white-space:nowrap}'
+    ].join('');
+    var s=document.createElement('style'); s.id='admAgentStyle'; s.textContent=css; document.head.appendChild(s);
+  }
+
+  function ensureAdminAgentTab(){
+    var tabs=$('.adm-t'), box=$('.adm');
+    if(!tabs || !box) return false;
+    injectStyle();
+    if(!$('#admAgentTabBtn')){
+      var b=document.createElement('button');
+      b.className='atb'; b.id='admAgentTabBtn';
+      b.setAttribute('onclick',"at(this,'p-agent')");
+      b.innerHTML='🤖 AI Agent 관리';
+      tabs.appendChild(b);
+    }
+    if(!$('#p-agent')){
+      var p=document.createElement('div'); p.id='p-agent'; p.className='adm-b'; p.style.display='none';
+      box.appendChild(p);
+    }
+    return true;
+  }
+
+  window.renderAdminAgents = function(){
+    if(!ensureAdminAgentTab()) return;
+    var el=$('#p-agent'); if(!el) return;
+    var all=list();
+    var off=all.filter(function(a){return a.status==='official';}).length;
+    var tmp=all.length-off;
+    var dl=all.reduce(function(s,a){return s+(a.dl||0);},0);
+    var rows=all.filter(function(a){ return fil==='all' || (fil==='official'?a.status==='official':a.status!=='official'); });
+    var sb=window.agentStatusBadge||function(){return '';};
+    var svg=window.agentAreaSvg||function(){return '🤖';};
+    var body=rows.length ? rows.map(function(a){
+      var ar=areaMeta(a.area), c=ar.c||'#4b8ef0', official=a.status==='official';
+      var actApprove = official
+        ? '<button class="aa-btn" onclick="agentReject('+a.id+')">↩️ 임시로</button>'
+        : '<button class="aa-btn approve" onclick="agentPromote('+a.id+')">✅ 공식 승인</button>';
+      return '<div class="aa-row" style="--ag-c:'+c+'">'
+        + '<div class="aa-ic" style="background:'+c+'1f;border-color:'+c+'40">'+svg(a.area,22)+'</div>'
+        + '<div class="aa-main"><div class="aa-nm">'+esc(a.name)+' <span style="font-size:10px;color:var(--text-4);font-weight:600">v'+esc(a.ver||'1.0')+'</span></div>'
+        + '<div class="aa-meta">'+sb(a.status)+'<span style="color:'+c+'">'+ar.icon+' '+esc(ar.name)+'</span> · 👤 '+esc(a.author)+' · ⬇ '+(a.dl||0).toLocaleString()+' · '+esc(a.updated||'')+'</div></div>'
+        + '<div class="aa-acts">'+actApprove
+          + '<button class="aa-btn" onclick="adminAgentEdit('+a.id+')">✏️ 수정</button>'
+          + '<button class="aa-btn del" onclick="agentDelete('+a.id+')">🗑 삭제</button></div>'
+        + '</div>';
+    }).join('') : '<div class="aa-empty">해당 상태의 에이전트가 없습니다.</div>';
+    el.innerHTML =
+      '<div class="v23-admin-title"><div><div class="v23-title-main">🤖 AI Agent 관리</div>'
+      + '<div class="v23-title-sub">누구나 올린 <b>🧪 임시(PoC)</b> 에이전트를 검토해 <b>✅ 공식 승인</b>하거나 반려·수정·삭제합니다. 사용자에게는 <b>공식</b> 에이전트만 다운로드로 제공됩니다.</div></div></div>'
+      + '<div class="aa-stats"><span>✅ 공식 <b>'+off+'</b></span><span>🧪 임시(PoC) <b>'+tmp+'</b></span><span>⬇ 총 다운로드 <b>'+dl.toLocaleString()+'</b></span></div>'
+      + '<div class="aa-chips">'
+        + '<button class="aa-chip'+(fil==='all'?' on':'')+'" onclick="adminAgentFilter(\'all\')">전체 '+all.length+'</button>'
+        + '<button class="aa-chip'+(fil==='temp'?' on':'')+'" onclick="adminAgentFilter(\'temp\')">🧪 승인 대기 '+tmp+'</button>'
+        + '<button class="aa-chip'+(fil==='official'?' on':'')+'" onclick="adminAgentFilter(\'official\')">✅ 공식 '+off+'</button>'
+      + '</div>'
+      + body;
+  };
+  window.adminAgentFilter = function(f){ fil=f; window.renderAdminAgents(); };
+  window.adminAgentEdit = function(id){ try{ window.ca && window.ca(); }catch(e){} if(window.openAgentMarket){ window.openAgentMarket(); setTimeout(function(){ window.agentEdit && window.agentEdit(id); }, 360); } else if(window.agentEdit){ window.agentEdit(id); } };
+
+  /* at() 래핑: p-agent 탭 열릴 때 렌더 */
+  var _at=window.at;
+  if(_at && !window.__admAgentAtWrapped){
+    window.__admAgentAtWrapped=true;
+    window.at=function(b,id){ if(_at) _at.apply(this,arguments); if(id==='p-agent') window.renderAdminAgents(); };
+  }
+  /* oa() 래핑: Admin 열릴 때 탭 보장 */
+  var _oa=window.oa;
+  if(_oa && !window.__admAgentOaWrapped){
+    window.__admAgentOaWrapped=true;
+    window.oa=function(){ if(_oa) _oa.apply(this,arguments); setTimeout(ensureAdminAgentTab, 60); };
+  }
+
+  function boot(){ if(!ensureAdminAgentTab()){ setTimeout(boot, 500); } }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', function(){ setTimeout(boot, 420); });
+  else setTimeout(boot, 420);
 
 })();
