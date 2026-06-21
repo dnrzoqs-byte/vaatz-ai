@@ -7667,6 +7667,13 @@ window.vaatzClaimQuest = function(id){
     };
   }
 
+  /* ── 외부(우측 작업 패널 등) 재사용을 위한 노출 ── */
+  window.__agentAreas = AREAS;
+  window.openAgentMarket = function(){
+    if(window.openComm) window.openComm('qa');
+    setTimeout(function(){ ensureAgentTab(); var b=document.getElementById('agentTabBtn'); if(b && window.agentTab) window.agentTab(b); }, 200);
+  };
+
   /* ── 부팅: 모달 DOM 준비되면 탭 주입 ── */
   function boot(){ if(!ensureAgentTab()){ setTimeout(boot, 400); } }
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', function(){ setTimeout(boot, 300); });
@@ -8472,5 +8479,133 @@ window.vaatzClaimQuest = function(id){
   function boot(){ runNormalize(); purgeStrayMemo(); observe(); [800,1800,3200].forEach(function(d){ setTimeout(function(){ runNormalize(); purgeStrayMemo(); }, d); }); }
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', function(){ setTimeout(boot, 300); });
   else setTimeout(boot, 300);
+
+})();
+
+
+/* ═══════════════════════════════════════════════════════════════
+ * §19  우측 작업 패널 개편 — "내 파일" → "구매 AI Agent"
+ *      · 내 파일 탭/페인을 제거하고 구매본부 AI Agent 모음집으로 교체
+ *      · "답변 근거" 탭은 그대로 유지
+ *      · 두 탭을 상단 세그먼트 형태로 정리
+ *      · 에이전트 데이터는 §16(window.__agentMkt) 공유, 다운로드는 전역 재사용
+ * ═══════════════════════════════════════════════════════════════ */
+(function(){
+  'use strict';
+  var $  = function(s,r){ return (r||document).querySelector(s); };
+  var esc= function(s){ return String(s==null?'':s).replace(/[&<>"']/g,function(m){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]; }); };
+  var rpAg = { area:'all', q:'' };
+
+  function areas(){ return window.__agentAreas || [
+    { id:'purchase', name:'구매', icon:'🛒', c:'#4b8ef0' },{ id:'dev', name:'개발', icon:'💻', c:'#8b7cf0' },
+    { id:'quality', name:'품질', icon:'✅', c:'#2bb673' },{ id:'manage', name:'관리', icon:'📋', c:'#e0a13a' },
+    { id:'common', name:'구매공통', icon:'🔗', c:'#1fb6b6' }
+  ]; }
+  function areaMeta(id){ var a=areas(); for(var i=0;i<a.length;i++){ if(a[i].id===id) return a[i]; } return {id:id,name:id,icon:'🤖',c:'#4b8ef0'}; }
+  function agentList(){
+    var st=window.__agentMkt, list=(st&&st.list)||[];
+    var q=(rpAg.q||'').trim().toLowerCase();
+    return list.filter(function(a){
+      if(rpAg.area!=='all' && a.area!==rpAg.area) return false;
+      if(q){ var hay=(a.name+' '+a.desc+' '+(a.tags||[]).join(' ')).toLowerCase(); if(hay.indexOf(q)<0) return false; }
+      return true;
+    });
+  }
+
+  function injectStyle(){
+    if(document.getElementById('rpAgentStyle')) return;
+    var css=[
+      /* 상단 탭 세그먼트 */
+      '#rp .rp-tabs{display:flex;gap:6px;padding:10px 12px 9px;background:transparent;border-bottom:1px solid var(--border-1)}',
+      '#rp .rp-tabs .rp-tab{flex:1;display:flex;align-items:center;justify-content:center;gap:5px;padding:9px 8px;border-radius:10px;font-size:12px;font-weight:700;border:1px solid var(--border-2);background:var(--bg-2);color:var(--text-3);cursor:pointer;transition:.13s;opacity:1}',
+      '#rp .rp-tabs .rp-tab:hover{border-color:var(--accent);color:var(--accent)}',
+      '#rp .rp-tabs .rp-tab.on{background:var(--accent);color:#fff;border-color:var(--accent);box-shadow:0 2px 8px rgba(75,142,240,.3)}',
+      '#rp .rp-tabs .rp-tab .rp-tab-count{display:none}',
+      /* AI Agent 페인 */
+      '#rp #rpPaneMy.on{display:flex;flex-direction:column;height:100%;min-height:0;padding:0}',
+      '#rp .rpa-wrap{display:flex;flex-direction:column;flex:1;min-height:0}',
+      '#rp .rpa-hd{padding:13px 14px 0}',
+      '#rp .rpa-title{font-size:13.5px;font-weight:800;color:var(--text-1);display:flex;align-items:center;gap:6px}',
+      '#rp .rpa-sub{font-size:10.5px;color:var(--text-4);line-height:1.55;margin-top:3px}',
+      '#rp .rpa-bar{padding:11px 14px 0}',
+      '#rp .rpa-search{display:flex;align-items:center;gap:6px;background:var(--bg-3);border:1px solid var(--border-1);border-radius:9px;padding:8px 11px}',
+      '#rp .rpa-search input{flex:1;background:none;border:none;outline:none;color:var(--text-1);font-size:12px;font-family:inherit}',
+      '#rp .rpa-chips{display:flex;gap:6px;flex-wrap:wrap;padding:11px 14px 4px}',
+      '#rp .rpa-chip{font-size:10.5px;font-weight:700;padding:5px 10px;border-radius:999px;border:1.5px solid var(--border-2);background:var(--bg-2);color:var(--text-2);cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:4px}',
+      '#rp .rpa-chip:hover{border-color:var(--accent);color:var(--accent)}',
+      '#rp .rpa-chip.on{background:var(--accent);color:#fff;border-color:var(--accent)}',
+      '#rp .rpa-chip-dot{width:6px;height:6px;border-radius:50%;background:var(--ag-c,var(--accent))}',
+      '#rp .rpa-chip.on .rpa-chip-dot{background:#fff}',
+      '#rp .rpa-list{flex:1;overflow-y:auto;padding:9px 14px 12px}',
+      '#rp .rpa-row{display:flex;align-items:center;gap:10px;padding:10px;border:1px solid var(--border-1);border-left:3px solid var(--ag-c,var(--accent));border-radius:12px;background:var(--bg-2);margin-bottom:8px;cursor:pointer;transition:.13s}',
+      '#rp .rpa-row:hover{border-color:var(--ag-c,var(--accent));transform:translateX(2px)}',
+      '#rp .rpa-ic{flex-shrink:0;width:38px;height:38px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:20px;border:1px solid var(--border-2)}',
+      '#rp .rpa-main{flex:1;min-width:0}',
+      '#rp .rpa-nm{font-size:12px;font-weight:700;color:var(--text-1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}',
+      '#rp .rpa-meta{font-size:10px;color:var(--text-4);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}',
+      '#rp .rpa-dl{flex-shrink:0;width:34px;height:34px;border-radius:9px;border:none;background:var(--accent);color:#fff;font-size:14px;cursor:pointer;transition:.13s}',
+      '#rp .rpa-dl:hover{filter:brightness(1.1);transform:translateY(-1px)}',
+      '#rp .rpa-empty{text-align:center;color:var(--text-4);font-size:11.5px;padding:34px 12px;line-height:1.8}',
+      '#rp .rpa-foot{padding:9px 14px;border-top:1px solid var(--border-1);display:flex;align-items:center;justify-content:space-between;gap:8px}',
+      '#rp .rpa-foot span{font-size:10.5px;color:var(--text-4)}',
+      '#rp .rpa-foot-btn{font-size:11px;font-weight:700;color:#fff;background:var(--accent);border:none;border-radius:8px;padding:7px 12px;cursor:pointer;font-family:inherit;transition:.13s}',
+      '#rp .rpa-foot-btn:hover{filter:brightness(1.08)}'
+    ].join('');
+    var s=document.createElement('style'); s.id='rpAgentStyle'; s.textContent=css; document.head.appendChild(s);
+  }
+
+  function rpRenderAgents(){
+    var box=document.getElementById('rpAgentBox'); if(!box) return;
+    var list=agentList();
+    var chips='<button class="rpa-chip'+(rpAg.area==='all'?' on':'')+'" onclick="rpAgentFilter(\'all\')">전체</button>'
+      + areas().map(function(ar){ return '<button class="rpa-chip'+(rpAg.area===ar.id?' on':'')+'" title="'+esc(ar.name)+'" style="--ag-c:'+(ar.c||'#4b8ef0')+'" onclick="rpAgentFilter(\''+ar.id+'\')"><span class="rpa-chip-dot"></span>'+ar.icon+'</button>'; }).join('');
+    var rows=list.length ? list.map(function(a){
+        var ar=areaMeta(a.area), c=ar.c||'#4b8ef0';
+        return '<div class="rpa-row" style="--ag-c:'+c+'" onclick="agentDetail&&agentDetail('+a.id+')">'
+          + '<div class="rpa-ic" style="background:'+c+'1f;border-color:'+c+'40">'+esc(a.icon||'🤖')+'</div>'
+          + '<div class="rpa-main"><div class="rpa-nm">'+esc(a.name)+'</div>'
+          + '<div class="rpa-meta">'+ar.icon+' '+esc(ar.name)+' · v'+esc(a.ver||'1.0')+' · ⬇ '+(a.dl||0).toLocaleString()+'</div></div>'
+          + '<button class="rpa-dl" title="다운로드 (.exe)" onclick="event.stopPropagation();rpAgentDownload('+a.id+')">⬇</button>'
+          + '</div>';
+      }).join('') : '<div class="rpa-empty">😶 해당 영역에 에이전트가 없어요.<br>아래 전체 마켓에서 더 찾아보세요.</div>';
+    box.innerHTML =
+      '<div class="rpa-hd"><div class="rpa-title">🤖 구매본부 AI Agent</div>'
+        + '<div class="rpa-sub">클로드 코드로 만든 업무 자동화 Agent를 우측에서 바로 받아 쓰세요.</div></div>'
+      + '<div class="rpa-bar"><div class="rpa-search"><span style="font-size:12px;color:var(--text-4)">🔍</span>'
+        + '<input id="rpAgentSearch" placeholder="에이전트 검색" oninput="rpAgentSearch(this.value)" value="'+esc(rpAg.q)+'"></div></div>'
+      + '<div class="rpa-chips">'+chips+'</div>'
+      + '<div class="rpa-list">'+rows+'</div>'
+      + '<div class="rpa-foot"><span>총 '+list.length+'개</span><button class="rpa-foot-btn" onclick="rpOpenMarket()">🛒 전체 마켓 열기</button></div>';
+    if(rpAg.q){ var si=document.getElementById('rpAgentSearch'); if(si){ try{ si.focus(); si.setSelectionRange(si.value.length, si.value.length); }catch(e){} } }
+  }
+
+  window.rpAgentFilter = function(area){ rpAg.area=area; rpRenderAgents(); };
+  window.rpAgentSearch = function(v){ rpAg.q=v||''; rpRenderAgents(); };
+  window.rpAgentDownload = function(id){ if(window.agentDownload) window.agentDownload(id); setTimeout(rpRenderAgents, 40); };
+  window.rpOpenMarket = function(){ if(window.openAgentMarket) window.openAgentMarket(); else if(window.openComm) window.openComm('qa'); };
+
+  function ensureRpAgents(){
+    var pane=document.getElementById('rpPaneMy'), tab=document.getElementById('rpTabMy');
+    if(!pane || !tab) return false;
+    injectStyle();
+    /* 탭 라벨: 내 파일 → 구매 AI Agent (+ 답변 근거 탭의 인라인 opacity 제거) */
+    if(tab.getAttribute('data-rpa')!=='1'){ tab.setAttribute('data-rpa','1'); tab.innerHTML='<span>🤖</span>구매 AI Agent'; tab.style.opacity=''; }
+    var ts=document.getElementById('rpTabSrc'); if(ts) ts.style.opacity='';
+    /* 페인 내용 교체 (1회) */
+    if(!document.getElementById('rpAgentBox')){ pane.innerHTML='<div id="rpAgentBox" class="rpa-wrap"></div>'; }
+    rpRenderAgents();
+    return true;
+  }
+
+  /* rpSwitchTab 래핑: 'my' 탭 = AI Agent 렌더 + 제목 변경 */
+  var _rpsw = window.rpSwitchTab;
+  window.rpSwitchTab = function(tab){
+    if(_rpsw) _rpsw.apply(this, arguments);
+    if(tab==='my'){ var t=document.getElementById('rpTitle'); if(t) t.textContent='🤖 작업 패널 · 구매 AI Agent'; ensureRpAgents(); }
+  };
+
+  function boot(){ if(!ensureRpAgents()){ setTimeout(boot, 400); } }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', function(){ setTimeout(boot, 380); });
+  else setTimeout(boot, 380);
 
 })();
