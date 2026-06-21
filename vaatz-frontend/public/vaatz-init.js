@@ -8945,3 +8945,129 @@ window.vaatzClaimQuest = function(id){
   else setTimeout(boot, 420);
 
 })();
+
+
+/* ═══════════════════════════════════════════════════════════════
+ * §21  ADMIN 워크플로우 정비
+ *      · 운영 홈 = 모니터링 전용(승인/폴더추가 액션 제거)
+ *      · 팀 문서 검토 → 최종 승인 → 최종 리스트 파이프라인 스트립으로 연결
+ *        (단계별 실시간 카운트 + 클릭 이동 → 업무 흐름을 매끄럽게)
+ * ═══════════════════════════════════════════════════════════════ */
+(function(){
+  'use strict';
+  var $  = function(s,r){ return (r||document).querySelector(s); };
+  var esc= function(s){ return String(s==null?'':s).replace(/[&<>"']/g,function(m){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]; }); };
+
+  function injectStyle(){
+    if(document.getElementById('wfStyle')) return;
+    var css=[
+      '#ao .wf-strip{display:flex;align-items:stretch;margin:0 0 16px;border:1px solid var(--border-1);border-radius:13px;overflow:hidden;background:var(--bg-2)}',
+      '#ao .wf-node{flex:1;display:flex;flex-direction:column;gap:3px;padding:12px 14px;cursor:pointer;transition:.13s;border:0;background:transparent;text-align:left;font-family:inherit}',
+      '#ao .wf-node:hover{background:var(--bg-3)}',
+      '#ao .wf-node.on{background:var(--accent-dim,rgba(75,142,240,.13))}',
+      '#ao .wf-node-t{font-size:11px;font-weight:700;color:var(--text-2);display:flex;align-items:center;gap:5px}',
+      '#ao .wf-node-v{font-size:21px;font-weight:800;font-family:Outfit,sans-serif;color:var(--text-1);line-height:1.1}',
+      '#ao .wf-node-s{font-size:9.5px;color:var(--text-4)}',
+      '#ao .wf-arrow{display:flex;align-items:center;color:var(--text-4);font-size:15px;padding:0 4px}',
+      '#ao .mon-kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(118px,1fr));gap:10px;margin-bottom:18px}',
+      '#ao .mon-kpi{background:var(--bg-2);border:1px solid var(--border-1);border-radius:12px;padding:14px}',
+      '#ao .mon-kpi-v{font-size:23px;font-weight:800;font-family:Outfit,sans-serif;line-height:1.1}',
+      '#ao .mon-kpi-l{font-size:11px;color:var(--text-3);margin-top:4px}',
+      '#ao .mon-sec-t{font-size:13px;font-weight:800;margin:4px 0 11px;color:var(--text-1)}',
+      '#ao .mon-row{display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px solid var(--border-1);border-radius:10px;background:var(--bg-2);margin-bottom:7px}',
+      '#ao .mon-row .t{flex:1;min-width:0;font-size:12.5px;color:var(--text-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}',
+      '#ao .mon-row .m{font-size:10.5px;color:var(--text-4);white-space:nowrap}',
+      '#ao .mon-pill{font-size:9.5px;font-weight:800;padding:2px 8px;border-radius:999px;white-space:nowrap}'
+    ].join('');
+    var s=document.createElement('style'); s.id='wfStyle'; s.textContent=css; document.head.appendChild(s);
+  }
+
+  function counts(){
+    var d=window.teamDocs||[], c={draft:0,req:0,sup:0,done:0};
+    d.forEach(function(x){ var s=x.status;
+      if(s==='작성·보완중') c.draft++;
+      else if(s==='등록 요청됨') c.req++;
+      else if(s==='보완 요청') c.sup++;
+      else if(s==='AI 검색 반영완료') c.done++;
+    });
+    return c;
+  }
+  function go(id){ (window.goTab||window.openAdminTab||function(){})(id); }
+  window.__wfGo = go;
+
+  function node(id,icon,title,val,sub,active){
+    return '<button class="wf-node'+(active===id?' on':'')+'" onclick="__wfGo(\''+id+'\')">'
+      + '<div class="wf-node-t">'+icon+' '+title+'</div>'
+      + '<div class="wf-node-v">'+val+'</div>'
+      + '<div class="wf-node-s">'+sub+'</div></button>';
+  }
+  function stripHtml(active){
+    var c=counts();
+    return '<div class="wf-strip">'
+      + node('p-req','📁','팀 문서 검토', c.draft+c.req, '작성·요청 '+(c.draft+c.req)+'건'+(c.sup?(' · 보완 '+c.sup):''), active)
+      + '<div class="wf-arrow">→</div>'
+      + node('p-final','✅','최종 승인', c.req, '승인 대기 '+c.req+'건', active)
+      + '<div class="wf-arrow">→</div>'
+      + node('p-list','📋','최종 리스트', c.done, 'AI 반영 '+c.done+'건', active)
+      + '</div>';
+  }
+
+  function monPill(s){
+    var c = s==='AI 검색 반영완료'?'#2bb673' : s==='등록 요청됨'?'#4b8ef0' : s==='보완 요청'?'#e0604e' : '#e0a13a';
+    return '<span class="mon-pill" style="background:'+c+'22;color:'+c+'">'+esc(s)+'</span>';
+  }
+  function kpi(v,l,color){ return '<div class="mon-kpi"><div class="mon-kpi-v" style="color:'+(color||'var(--text-1)')+'">'+v+'</div><div class="mon-kpi-l">'+l+'</div></div>'; }
+
+  function renderHomeMonitor(){
+    var el=$('#p-home'); if(!el) return;
+    injectStyle();
+    var c=counts(), total=(window.teamDocs||[]).length;
+    var recent=(window.teamDocs||[]).slice(0,7).map(function(d){
+      return '<div class="mon-row"><span class="t">'+esc(d.name||'문서')+'</span><span class="m">'+esc(d.team||'')+' · '+esc(d.owner||'')+'</span>'+monPill(d.status||'작성·보완중')+'</div>';
+    }).join('') || '<div class="mon-row"><span class="t" style="color:var(--text-4)">문서가 없습니다.</span></div>';
+    el.innerHTML =
+      '<div class="v23-admin-title"><div><div class="v23-title-main">📊 운영 홈 · 모니터링</div>'
+      + '<div class="v23-title-sub">문서 워크플로우 현황을 한눈에 모니터링합니다. 실제 승인·등록 작업은 아래 각 단계 탭에서 진행합니다.</div></div></div>'
+      + stripHtml('')
+      + '<div class="mon-kpis">'
+        + kpi(total,'총 문서')
+        + kpi(c.req,'승인 대기','var(--accent)')
+        + kpi(c.done,'AI 반영 완료','#2bb673')
+        + kpi(c.sup,'보완 요청','#e0a13a')
+        + kpi('94.2%','답변 신뢰도','#8b7cf0')
+        + kpi('2,847','월 질의')
+      + '</div>'
+      + '<div class="mon-sec-t">🔄 최근 처리 현황</div>'
+      + recent;
+  }
+
+  function injectStrip(id){
+    var el=document.getElementById(id); if(!el) return;
+    injectStyle();
+    var first=el.firstElementChild;
+    if(first && first.classList && first.classList.contains('wf-strip')) first.remove();
+    el.insertAdjacentHTML('afterbegin', stripHtml(id));
+  }
+
+  /* at() 래핑: 홈=모니터링 / 단계 탭=파이프라인 스트립 주입 */
+  var _at=window.at;
+  if(_at && !window.__wfAtWrapped){
+    window.__wfAtWrapped=true;
+    window.at=function(b,id){
+      if(_at) _at.apply(this, arguments);
+      if(id==='p-home') setTimeout(renderHomeMonitor, 30);
+      else if(id==='p-req'||id==='p-final'||id==='p-list') setTimeout(function(){ injectStrip(id); }, 90);
+    };
+  }
+  /* oa() 래핑: Admin 열릴 때 홈 모니터링 렌더 */
+  var _oa=window.oa;
+  if(_oa && !window.__wfOaWrapped){
+    window.__wfOaWrapped=true;
+    window.oa=function(){ if(_oa) _oa.apply(this, arguments); setTimeout(renderHomeMonitor, 90); };
+  }
+
+  function boot(){ if($('#p-home')){ renderHomeMonitor(); } else { setTimeout(boot, 500); } }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', function(){ setTimeout(boot, 460); });
+  else setTimeout(boot, 460);
+
+})();
