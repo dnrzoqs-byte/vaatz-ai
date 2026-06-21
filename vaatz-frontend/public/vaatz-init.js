@@ -7412,10 +7412,11 @@ window.vaatzClaimQuest = function(id){
   function isOfficial(a){ return a && a.status==='official'; }
   function isMine(a){ return !!(a && a.mine); }
   (function normStatus(){
-    var off={1:1,2:1,4:1,7:1,9:1,10:1,13:1,16:1};
+    var off={1:1,2:1,4:1,7:1,9:1,10:1,13:1,16:1}, feat={13:1,1:1};
     st.list.forEach(function(a){
       if(a.area==='common') a.area='purchase';           /* 4카테고리 마이그레이션 */
       if(a.status!=='official' && a.status!=='temp') a.status = off[a.id]?'official':'temp';
+      if(a.featured==null) a.featured = !!feat[a.id];      /* 추천(홍보) */
     });
   })();
   /* 최종 승인 권한(ADMIN) — Admin 패널 안에서의 동작은 ADMIN으로 간주 */
@@ -7531,7 +7532,20 @@ window.vaatzClaimQuest = function(id){
       '#ct-agent .agent-dl-btn.poc{background:rgba(224,161,58,.16);color:#e0a13a;border:1px solid rgba(224,161,58,.45)}',
       '#ct-agent .agent-dl-btn.poc:hover{filter:none;background:#e0a13a;color:#fff;border-color:#e0a13a}',
       '#ct-agent .agent-caution{font-size:10.5px;line-height:1.6;color:var(--text-3);background:rgba(224,161,58,.10);border:1px solid rgba(224,161,58,.30);border-radius:10px;padding:9px 12px;margin:0 0 6px}',
-      '#ct-agent .agent-caution b{color:var(--text-2)}'
+      '#ct-agent .agent-caution b{color:var(--text-2)}',
+      '#ct-agent .agent-feat{font-size:9px;font-weight:800;padding:2px 7px;border-radius:999px;background:rgba(139,124,240,.16);color:#8b7cf0;white-space:nowrap}',
+      '#ct-agent .agent-card.featured{border-color:rgba(139,124,240,.5)}',
+      '#ct-agent .agent-promo{background:linear-gradient(135deg,rgba(139,124,240,.14),rgba(75,142,240,.05));border:1px solid rgba(139,124,240,.32);border-radius:14px;padding:13px 14px;margin-bottom:14px}',
+      '#ct-agent .agent-promo-hd{font-size:12.5px;font-weight:800;color:var(--text-1);margin-bottom:9px;display:flex;align-items:baseline;gap:8px}',
+      '#ct-agent .agent-promo-sub{font-size:10px;font-weight:600;color:var(--text-4)}',
+      '#ct-agent .agent-promo-row{display:flex;gap:10px;overflow-x:auto;padding-bottom:2px}',
+      '#ct-agent .agent-promo-card{flex:0 0 230px;display:flex;align-items:center;gap:10px;background:var(--bg-2);border:1px solid var(--border-2);border-left:3px solid var(--ag-c,#8b7cf0);border-radius:12px;padding:11px;cursor:pointer;transition:.13s}',
+      '#ct-agent .agent-promo-card:hover{border-color:var(--ag-c,#8b7cf0);transform:translateY(-2px);box-shadow:0 8px 20px -8px rgba(0,0,0,.28)}',
+      '#ct-agent .agent-promo-ic{flex-shrink:0;width:40px;height:40px;border-radius:11px;display:flex;align-items:center;justify-content:center;border:1px solid var(--border-2)}',
+      '#ct-agent .agent-promo-main{flex:1;min-width:0}',
+      '#ct-agent .agent-promo-nm{font-size:12.5px;font-weight:700;color:var(--text-1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}',
+      '#ct-agent .agent-promo-meta{font-size:10px;color:var(--text-4);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}',
+      '#ct-agent .agent-promo-go{flex-shrink:0;font-size:10.5px;font-weight:800;color:#8b7cf0}'
     ].join('');
     var s = document.createElement('style');
     s.id='agentMktStyle'; s.textContent=css;
@@ -7593,10 +7607,10 @@ window.vaatzClaimQuest = function(id){
     var primary = official
       ? '<button class="agent-dl-btn" onclick="agentDownload('+a.id+')">⬇ 다운로드 <span class="ext">.exe</span></button>'
       : '<button class="agent-dl-btn poc" title="임시(PoC) — 검증 전, 활용에 유의" onclick="agentDownload('+a.id+')">⬇ 다운로드 <span class="ext">PoC</span></button>';
-    return '<div class="agent-card'+(official?'':' is-review')+'" style="--ag-c:'+c+'">'
+    return '<div class="agent-card'+(official?'':' is-review')+(a.featured&&official?' featured':'')+'" style="--ag-c:'+c+'">'
       + '<div class="agent-card-top">'
         + '<div class="agent-ic" style="background:'+c+'1f;border-color:'+c+'40">'+areaSvg(a.area,24)+'</div>'
-        + '<div class="agent-badges">'+statusBadgeHtml(a.status)+'<span class="agent-area-badge" style="background:'+c+'1f;color:'+c+'">'+ar.icon+' '+esc(ar.name)+'</span>'+hot+'</div>'
+        + '<div class="agent-badges">'+statusBadgeHtml(a.status)+'<span class="agent-area-badge" style="background:'+c+'1f;color:'+c+'">'+ar.icon+' '+esc(ar.name)+'</span>'+(a.featured&&official?'<span class="agent-feat">📣 추천</span>':'')+hot+'</div>'
       + '</div>'
       + '<div class="agent-name">'+esc(a.name)+' <span class="agent-ver">v'+esc(a.ver||'1.0')+'</span></div>'
       + '<div class="agent-desc">'+esc(a.desc)+'</div>'
@@ -7622,6 +7636,23 @@ window.vaatzClaimQuest = function(id){
         + '<span class="agent-rank-dl">'+trend+' ⬇ '+(a.dl||0).toLocaleString()+'</span>'
         + '</div>';
     }).join('');
+  }
+
+  /* 📣 추천(홍보) 스포트라이트 — 관리자가 띄운 좋은 에이전트 */
+  function renderPromoStrip(){
+    var feat=st.list.filter(function(a){ return a.featured && isOfficial(a); });
+    if(!feat.length) return '';
+    feat.sort(function(a,b){ return (b.dl||0)-(a.dl||0); });
+    return '<div class="agent-promo"><div class="agent-promo-hd">📣 추천 에이전트 <span class="agent-promo-sub">관리자가 추천하는 검증된 에이전트</span></div>'
+      + '<div class="agent-promo-row">'
+      + feat.map(function(a){ var ar=areaInfo(a.area), c=ar.c||'#4b8ef0';
+          return '<div class="agent-promo-card" style="--ag-c:'+c+'" onclick="agentDownload('+a.id+')" title="다운로드">'
+            + '<div class="agent-promo-ic" style="background:'+c+'1f;border-color:'+c+'40">'+areaSvg(a.area,22)+'</div>'
+            + '<div class="agent-promo-main"><div class="agent-promo-nm">'+esc(a.name)+'</div>'
+            + '<div class="agent-promo-meta">'+ar.icon+' '+esc(ar.name)+' · ⬇ '+(a.dl||0).toLocaleString()+'</div></div>'
+            + '<div class="agent-promo-go">받기 →</div></div>';
+        }).join('')
+      + '</div></div>';
   }
 
   function sectionHtml(title, desc, arr, emptyMsg){
@@ -7650,6 +7681,7 @@ window.vaatzClaimQuest = function(id){
     var panel = $('#ct-agent'); if(!panel) return;
     var list = filtered();
     var officialList = list.filter(isOfficial);
+    officialList.sort(function(a,b){ return (b.featured?1:0)-(a.featured?1:0) || (b.dl||0)-(a.dl||0); });
     var tempList = list.filter(function(a){ return !isOfficial(a); });
     var totalOff = st.list.filter(isOfficial).length, totalTmp = st.list.length-totalOff;
     panel.innerHTML =
@@ -7661,6 +7693,7 @@ window.vaatzClaimQuest = function(id){
         + '<button class="agent-share-btn" onclick="agentToggleUpload(true)">➕ 에이전트 올리기</button>'
       + '</div>'
       + uploadHtml()
+      + renderPromoStrip()
       + '<div class="agent-rank"><div class="agent-rank-hd"><span class="agent-rank-t">🔥 공식 HOT · 실시간 인기 TOP</span><span class="agent-live"><span class="agent-live-dot"></span>LIVE</span></div><div id="agentRankStrip">'+renderRankStrip()+'</div></div>'
       + '<div class="agent-toolbar"><div class="agent-search"><span style="font-size:11px;color:var(--text-4)">🔍</span><input id="agentSearchInput" placeholder="에이전트 검색 (이름·설명·태그)..." oninput="agentSearch(this.value)" value="'+esc(st.q)+'"></div></div>'
       + '<div class="agent-stats"><span>✅ 공식 <b>'+totalOff+'</b></span><span>🧪 임시(PoC) <b>'+totalTmp+'</b></span><span>⬇ 총 다운로드 <b>'+st.list.reduce(function(s,a){return s+(a.dl||0);},0).toLocaleString()+'</b></span></div>'
@@ -7750,6 +7783,19 @@ window.vaatzClaimQuest = function(id){
     say('🗑 "'+a.name+'" 삭제했습니다.','🗑',2000);
   };
   window.agentToggleOfficial = function(){ st.officialOnly=!st.officialOnly; renderAgents(); };
+  /* 추천(홍보) — ADMIN이 좋은 공식 에이전트를 띄움 */
+  window.agentFeature = function(id){
+    if(!canApprove()){ say('홍보 설정은 ADMIN만 가능합니다.','🔒',1900); return; }
+    var a=findAgent(id); if(!a) return;
+    if(a.status!=='official'){ say('공식(✅) 에이전트만 홍보할 수 있어요. 먼저 승인하세요.','ℹ️',2400); return; }
+    a.featured=true; agentRefreshAll();
+    say('📣 "'+a.name+'"를 추천 에이전트로 홍보합니다.','📣',2400);
+  };
+  window.agentUnfeature = function(id){
+    if(!canApprove()){ say('홍보 해제는 ADMIN만 가능합니다.','🔒',1900); return; }
+    var a=findAgent(id); if(!a) return; a.featured=false; agentRefreshAll();
+    say('홍보를 해제했습니다.','✓',1800);
+  };
 
   /* ── 다운로드 (데모: README 매니페스트 제공) ── */
   window.agentDownload = function(id){
@@ -8621,7 +8667,9 @@ window.vaatzClaimQuest = function(id){
       '#companionHub.v29-hop{animation:none!important}',
       '.companion-hub.v27-walk,.companion-hub.v27-left,.companion-hub.v27-right{left:auto!important;right:12px!important;transform:none!important}',
       '.companion-hub{transition:transform .2s ease, box-shadow .2s ease!important}',
-      '.companion-card{box-shadow:0 10px 30px -10px rgba(0,0,0,.35)!important}'
+      '.companion-card{box-shadow:0 10px 30px -10px rgba(0,0,0,.35)!important}',
+      /* 캐릭터 위 말풍선(💡 전구/팁) 버블 제거 — 불필요 */
+      '#v29BuddyBubble,#v28BuddyNudge,#v27BuddySpeech,.v29-buddy-bubble,.v27-buddy-speech,#charBubble,.float-char-bubble{display:none!important}'
     ].join('');
     var s=document.createElement('style'); s.id='companionCalmStyle'; s.textContent=css; (document.head||document.documentElement).appendChild(s);
   }
@@ -8683,7 +8731,7 @@ window.vaatzClaimQuest = function(id){
       return true;
     });
     var rank={official:0,poc:1,review:2};
-    out.sort(function(a,b){ return (rank[a.status]==null?1:rank[a.status])-(rank[b.status]==null?1:rank[b.status]) || (b.dl||0)-(a.dl||0); });
+    out.sort(function(a,b){ return (rank[a.status]==null?1:rank[a.status])-(rank[b.status]==null?1:rank[b.status]) || ((b.featured?1:0)-(a.featured?1:0)) || ((b.dl||0)-(a.dl||0)); });
     return out;
   }
 
@@ -8757,7 +8805,7 @@ window.vaatzClaimQuest = function(id){
     var btn = '<button class="rpa-dl'+(official?'':' poc')+'" title="'+(official?'다운로드 (.exe)':'임시(PoC) 다운로드 — 검증 전, 활용 유의')+'" onclick="event.stopPropagation();rpAgentDownload('+a.id+')">⬇</button>';
     return '<div class="rpa-row'+(official?'':' is-review')+'" style="--ag-c:'+c+'" onclick="agentDetail&&agentDetail('+a.id+')">'
       + '<div class="rpa-ic" style="background:'+c+'1f;border-color:'+c+'40">'+ic+'</div>'
-      + '<div class="rpa-main"><div class="rpa-nm">'+esc(a.name)+'</div>'
+      + '<div class="rpa-main"><div class="rpa-nm">'+(a.featured&&official?'<span style="color:#8b7cf0">📣 </span>':'')+esc(a.name)+'</div>'
       + '<div class="rpa-meta">'+badge+'<span style="color:'+c+'">'+esc(ar.name)+'</span> · v'+esc(a.ver||'1.0')+' · ⬇ '+(a.dl||0).toLocaleString()+'</div></div>'
       + btn + '</div>';
   }
@@ -8900,7 +8948,10 @@ window.vaatzClaimQuest = function(id){
       '#p-agent .aa-btn.approve:hover{filter:brightness(1.08);color:#fff}',
       '#p-agent .aa-btn.del:hover{border-color:#e0604e;color:#e0604e}',
       '#p-agent .aa-empty{text-align:center;color:var(--text-4);font-size:13px;padding:50px}',
-      '#p-agent .agent-status{font-size:9.5px;font-weight:800;padding:2px 8px;border-radius:999px;white-space:nowrap}'
+      '#p-agent .agent-status{font-size:9.5px;font-weight:800;padding:2px 8px;border-radius:999px;white-space:nowrap}',
+      '#p-agent .aa-btn.feat{color:#8b7cf0;border-color:rgba(139,124,240,.4)}',
+      '#p-agent .aa-btn.feat:hover{background:#8b7cf0;color:#fff;border-color:#8b7cf0}',
+      '#p-agent .aa-btn.feat.on{background:#8b7cf0;color:#fff;border-color:#8b7cf0}'
     ].join('');
     var s=document.createElement('style'); s.id='admAgentStyle'; s.textContent=css; document.head.appendChild(s);
   }
@@ -8938,11 +8989,15 @@ window.vaatzClaimQuest = function(id){
       var actApprove = official
         ? '<button class="aa-btn" onclick="agentReject('+a.id+')">↩️ 임시로</button>'
         : '<button class="aa-btn approve" onclick="agentPromote('+a.id+')">✅ 공식 승인</button>';
+      var actFeature = official
+        ? (a.featured ? '<button class="aa-btn feat on" onclick="agentUnfeature('+a.id+')">📣 홍보중</button>'
+                      : '<button class="aa-btn feat" onclick="agentFeature('+a.id+')">📣 홍보</button>')
+        : '';
       return '<div class="aa-row" style="--ag-c:'+c+'">'
         + '<div class="aa-ic" style="background:'+c+'1f;border-color:'+c+'40">'+svg(a.area,22)+'</div>'
-        + '<div class="aa-main"><div class="aa-nm">'+esc(a.name)+' <span style="font-size:10px;color:var(--text-4);font-weight:600">v'+esc(a.ver||'1.0')+'</span></div>'
+        + '<div class="aa-main"><div class="aa-nm">'+esc(a.name)+' <span style="font-size:10px;color:var(--text-4);font-weight:600">v'+esc(a.ver||'1.0')+'</span>'+(a.featured&&official?' <span style="font-size:9px;font-weight:800;color:#8b7cf0;background:rgba(139,124,240,.16);padding:1px 6px;border-radius:999px">📣 추천</span>':'')+'</div>'
         + '<div class="aa-meta">'+sb(a.status)+'<span style="color:'+c+'">'+ar.icon+' '+esc(ar.name)+'</span> · 👤 '+esc(a.author)+' · ⬇ '+(a.dl||0).toLocaleString()+' · '+esc(a.updated||'')+'</div></div>'
-        + '<div class="aa-acts">'+actApprove
+        + '<div class="aa-acts">'+actApprove+actFeature
           + '<button class="aa-btn" onclick="adminAgentEdit('+a.id+')">✏️ 수정</button>'
           + '<button class="aa-btn del" onclick="agentDelete('+a.id+')">🗑 삭제</button></div>'
         + '</div>';
