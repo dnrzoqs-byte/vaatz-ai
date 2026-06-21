@@ -7405,8 +7405,8 @@ window.vaatzClaimQuest = function(id){
   /* ── 거버넌스: 정식/심사 단계 + 권한 업로드 ── */
   /* 2단계: 임시(PoC) / 공식(최종 심사 통과) */
   var STATUS = {
-    official:{ label:'공식', icon:'✅', c:'#2bb673', desc:'ADMIN 최종 심사 통과 — 신뢰할 수 있는 정식 에이전트' },
-    temp:    { label:'임시', icon:'🧪', c:'#e0a13a', desc:'PoC 단계 — ADMIN 최종 승인 전' }
+    official:{ label:'공식', icon:'✅', c:'#2bb673', desc:'PoC 완료 후 정식 서비스 단계 — 안심하고 사용' },
+    temp:    { label:'임시', icon:'🧪', c:'#e0a13a', desc:'구성원이 자유롭게 만든 PoC — 사용에 유의' }
   };
   function statusInfo(s){ return s==='official' ? STATUS.official : STATUS.temp; }
   function isOfficial(a){ return a && a.status==='official'; }
@@ -7525,6 +7525,8 @@ window.vaatzClaimQuest = function(id){
       '#ct-agent .agent-rank-empty{font-size:11px;color:var(--text-4);padding:6px}',
       '#ct-agent .agent-sec-h{font-size:12.5px;font-weight:800;color:var(--text-2);margin:18px 0 10px;display:flex;align-items:center;gap:8px}',
       '#ct-agent .agent-sec-n{font-size:10px;font-weight:700;color:var(--text-4);background:var(--bg-3);border:1px solid var(--border-1);padding:1px 9px;border-radius:999px}',
+      '#ct-agent .agent-sec-d{font-size:10.5px;color:var(--text-4);line-height:1.55;margin:-4px 0 10px}',
+      '#ct-agent .agent-sec-d b{color:var(--text-2)}',
       '#ct-agent .agent-sec-empty{font-size:11px;color:var(--text-4);padding:16px;text-align:center;border:1px dashed var(--border-2);border-radius:10px}',
       '#ct-agent .agent-dl-btn.poc{background:rgba(224,161,58,.16);color:#e0a13a;border:1px solid rgba(224,161,58,.45)}',
       '#ct-agent .agent-dl-btn.poc:hover{filter:none;background:#e0a13a;color:#fff;border-color:#e0a13a}',
@@ -7622,8 +7624,9 @@ window.vaatzClaimQuest = function(id){
     }).join('');
   }
 
-  function sectionHtml(title, arr, emptyMsg){
+  function sectionHtml(title, desc, arr, emptyMsg){
     return '<div class="agent-sec-h">'+title+' <span class="agent-sec-n">'+arr.length+'</span></div>'
+      + (desc ? '<div class="agent-sec-d">'+desc+'</div>' : '')
       + (arr.length ? '<div class="agent-grid">'+arr.map(cardHtml).join('')+'</div>' : '<div class="agent-sec-empty">'+emptyMsg+'</div>');
   }
 
@@ -7662,9 +7665,9 @@ window.vaatzClaimQuest = function(id){
       + '<div class="agent-toolbar"><div class="agent-search"><span style="font-size:11px;color:var(--text-4)">🔍</span><input id="agentSearchInput" placeholder="에이전트 검색 (이름·설명·태그)..." oninput="agentSearch(this.value)" value="'+esc(st.q)+'"></div></div>'
       + '<div class="agent-stats"><span>✅ 공식 <b>'+totalOff+'</b></span><span>🧪 임시(PoC) <b>'+totalTmp+'</b></span><span>⬇ 총 다운로드 <b>'+st.list.reduce(function(s,a){return s+(a.dl||0);},0).toLocaleString()+'</b></span></div>'
       + '<div class="agent-chips">'+chipsHtml()+'</div>'
-      + '<div class="agent-caution">⚠️ <b>임시(PoC)</b> 에이전트는 검증 전 시험판입니다. 실제 업무 적용 전 결과를 반드시 확인하세요. 신뢰가 필요하면 <b style="color:#2bb673">✅ 공식</b>을 이용하세요.</div>'
-      + sectionHtml('✅ 공식 에이전트 · 심사 통과', officialList, '이 조건의 공식 에이전트가 없습니다.')
-      + sectionHtml('🧪 임시(PoC) · 검증 전 — 활용 유의', tempList, '임시(PoC) 에이전트가 없습니다.');
+      + '<div class="agent-caution">⚠️ <b>임시(PoC)</b>는 구성원이 자유롭게 만든 시험판입니다. 검증 전이므로 실제 업무 적용 전 결과를 반드시 확인하세요. 신뢰가 필요하면 <b style="color:#2bb673">✅ 공식</b>을 이용하세요.</div>'
+      + sectionHtml('✅ 공식 에이전트', 'PoC를 완료하고 ADMIN 심사를 통과한 <b>정식 서비스 단계</b>입니다. 안심하고 사용하세요.', officialList, '이 조건의 공식 에이전트가 없습니다.')
+      + sectionHtml('🧪 임시(PoC)', '구성원이 <b>자유롭게 만든 PoC</b> 시험판입니다. 검증 전이므로 <b>사용에 유의</b>하세요.', tempList, '임시(PoC) 에이전트가 없습니다.');
     /* 검색어 유지 시 커서 위치 복원 */
     var si = $('#agentSearchInput');
     if(si && st.q){ try{ si.focus(); si.setSelectionRange(si.value.length, si.value.length); }catch(e){} }
@@ -8720,6 +8723,7 @@ window.vaatzClaimQuest = function(id){
       '#rp .rpa-sec{font-size:10.5px;font-weight:800;color:var(--text-3);margin:12px 2px 8px;display:flex;align-items:center;gap:6px}',
       '#rp .rpa-sec:first-child{margin-top:2px}',
       '#rp .rpa-sec-n{font-size:9px;font-weight:700;color:var(--text-4);background:var(--bg-3);border:1px solid var(--border-1);padding:1px 7px;border-radius:999px}',
+      '#rp .rpa-sec-d{font-size:9.5px;color:var(--text-4);margin:-5px 2px 8px;line-height:1.5}',
       '#rpReopen{position:fixed;right:0;top:50%;transform:translateY(-50%);z-index:60;background:var(--accent);color:#fff;border:none;border-radius:10px 0 0 10px;padding:13px 6px;cursor:pointer;box-shadow:-2px 2px 12px rgba(0,0,0,.28);display:none;writing-mode:vertical-rl;font-size:11px;font-weight:800;letter-spacing:1.5px}',
       '#rpReopen:hover{filter:brightness(1.08);padding-right:9px}'
     ].join('');
@@ -8743,13 +8747,15 @@ window.vaatzClaimQuest = function(id){
     var offs=list.filter(function(a){return a.status==='official';});
     var tmps=list.filter(function(a){return a.status!=='official';});
     var chips='<button class="rpa-chip'+(rpAg.area==='all'?' on':'')+'" onclick="rpAgentFilter(\'all\')">전체</button>'
-      + areas().map(function(ar){ return '<button class="rpa-chip'+(rpAg.area===ar.id?' on':'')+'" title="'+esc(ar.name)+'" style="--ag-c:'+(ar.c||'#4b8ef0')+'" onclick="rpAgentFilter(\''+ar.id+'\')"><span class="rpa-chip-dot"></span>'+ar.icon+'</button>'; }).join('');
+      + areas().map(function(ar){ return '<button class="rpa-chip'+(rpAg.area===ar.id?' on':'')+'" title="'+esc(ar.name)+'" style="--ag-c:'+(ar.c||'#4b8ef0')+'" onclick="rpAgentFilter(\''+ar.id+'\')"><span class="rpa-chip-dot"></span>'+ar.icon+' '+esc(ar.name)+'</button>'; }).join('');
     var listHtml;
     if(!offs.length && !tmps.length){ listHtml='<div class="rpa-empty">😶 해당 조건의 에이전트가 없어요.<br>아래 전체 마켓에서 더 찾아보세요.</div>'; }
     else {
       listHtml = '<div class="rpa-sec">✅ 공식 <span class="rpa-sec-n">'+offs.length+'</span></div>'
+        + '<div class="rpa-sec-d">PoC 완료 · 정식 서비스 — 안심 사용</div>'
         + (offs.length ? offs.map(rpRowHtml).join('') : '<div class="rpa-empty" style="padding:12px">공식 에이전트 없음</div>')
         + '<div class="rpa-sec">🧪 임시(PoC) <span class="rpa-sec-n">'+tmps.length+'</span></div>'
+        + '<div class="rpa-sec-d">구성원 자유 제작 · 사용 유의</div>'
         + (tmps.length ? tmps.map(rpRowHtml).join('') : '<div class="rpa-empty" style="padding:12px">임시 에이전트 없음</div>');
     }
     box.innerHTML =
@@ -9171,4 +9177,27 @@ window.vaatzClaimQuest = function(id){
     window.oa=function(){ if(_oa) _oa.apply(this,arguments); setTimeout(function(){ if($('#p-usr') && $('#p-usr').style.display!=='none') renderTeamAdmins(); }, 120); };
   }
 
+})();
+
+
+/* ═══════════════════════════════════════════════════════════════
+ * §23  답변 근거 정리
+ *      · 중복 "RAG 출처 문서" 헤더 제거
+ *      · 출처 문서 목록(구매업무규정 제23조 등)을 정렬된 리스트로 가시화
+ *        (기존: 줄맞춤 안 되는 알약 칩 → 변경: 번호 배지 + 문서명 정렬 행)
+ * ═══════════════════════════════════════════════════════════════ */
+(function(){
+  'use strict';
+  if(document.getElementById('srcCleanStyle')) return;
+  var css=[
+    '#rp #rpPaneSrc .src-hd{display:none!important}',
+    '#rp #srcChips{display:flex!important;flex-direction:column!important;gap:6px!important;padding:12px 14px!important;border-bottom:1px solid var(--border-1)}',
+    '#rp #srcChips::before{content:"📎 답변 근거 문서";display:block;font-size:10.5px;font-weight:800;color:var(--text-3);letter-spacing:.3px;margin-bottom:3px}',
+    '#rp #srcChips .src-chip{width:100%;border-radius:9px!important;padding:9px 11px!important;justify-content:flex-start!important;gap:9px!important;background:var(--bg-2)!important;border:1px solid var(--border-1)!important;text-align:left;font-weight:600!important;font-size:12px!important;color:var(--text-2)!important;line-height:1.4}',
+    '#rp #srcChips .src-chip:hover{border-color:var(--accent)!important;color:var(--accent)!important;transform:translateX(2px)}',
+    '#rp #srcChips .src-chip.on{background:var(--accent-dim,rgba(75,142,240,.12))!important;border-color:var(--accent)!important;color:var(--accent)!important}',
+    '#rp #srcChips .src-chip-n{flex-shrink:0;width:21px;height:21px;border-radius:6px;background:var(--accent)!important;color:#fff!important;font-size:10.5px;font-weight:800;display:inline-flex;align-items:center;justify-content:center;font-family:Outfit,sans-serif}'
+  ].join('');
+  var s=document.createElement('style'); s.id='srcCleanStyle'; s.textContent=css;
+  (document.head||document.documentElement).appendChild(s);
 })();
