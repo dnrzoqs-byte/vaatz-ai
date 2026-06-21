@@ -8594,18 +8594,36 @@ window.vaatzClaimQuest = function(id){
   /* ── VAATZ Buddy 패널 정규화: 내 메모/기록장 제거 + 저장답변 추가 ── */
   var busy=false;
   function normalizeCompanion(){
-    var panel=$('.companion-panel'); if(!panel) return;
     busy=true;
-    $$('.companion-action',panel).forEach(function(b){ var t=b.textContent||''; if(t.indexOf('내 메모')>=0 || t.indexOf('기록장')>=0) b.remove(); });
-    var hasSaved=$$('.companion-action',panel).some(function(b){ return (b.textContent||'').indexOf('저장답변')>=0; });
-    if(!hasSaved){
-      var nb=document.createElement('button');
-      nb.className='companion-action'; nb.textContent='⭐ 저장답변';
-      nb.setAttribute('onclick','openSavedAnswers()');
-      panel.insertBefore(nb, panel.firstChild);
+    injectCompanionCss();
+    var panel=$('.companion-panel');
+    if(panel){
+      /* 내 메모·기록장·Q&A(미사용) 제거 */
+      $$('.companion-action',panel).forEach(function(b){ var t=b.textContent||''; if(t.indexOf('내 메모')>=0 || t.indexOf('기록장')>=0 || t.indexOf('Q&A')>=0) b.remove(); });
+      var hasSaved=$$('.companion-action',panel).some(function(b){ return (b.textContent||'').indexOf('저장답변')>=0; });
+      if(!hasSaved){
+        var nb=document.createElement('button');
+        nb.className='companion-action'; nb.textContent='⭐ 저장답변';
+        nb.setAttribute('onclick','openSavedAnswers()');
+        panel.insertBefore(nb, panel.firstChild);
+      }
     }
+    /* 캐릭터 말풍선 메뉴(floatChar)의 미사용 Q&A 제거 */
+    var cm=document.getElementById('charMenu');
+    if(cm){ $$('button',cm).forEach(function(b){ if((b.textContent||'').indexOf('Q&A')>=0) b.remove(); }); }
     var m=$('#v25MemoModal'); if(m) m.remove();
     setTimeout(function(){ busy=false; }, 60);
+  }
+  /* 캐릭터 영역 자연스럽게: 화면 배회/통통 튐 애니메이션 진정 */
+  function injectCompanionCss(){
+    if(document.getElementById('companionCalmStyle')) return;
+    var css=[
+      '#companionHub.v29-hop{animation:none!important}',
+      '.companion-hub.v27-walk,.companion-hub.v27-left,.companion-hub.v27-right{left:auto!important;right:12px!important;transform:none!important}',
+      '.companion-hub{transition:transform .2s ease, box-shadow .2s ease!important}',
+      '.companion-card{box-shadow:0 10px 30px -10px rgba(0,0,0,.35)!important}'
+    ].join('');
+    var s=document.createElement('style'); s.id='companionCalmStyle'; s.textContent=css; (document.head||document.documentElement).appendChild(s);
   }
   function relabelSaveButtons(){
     $$('.saved-answer-btn').forEach(function(b){ if(b.dataset.vsa) return; b.dataset.vsa='1'; b.textContent='⭐ 저장'; b.onclick=function(e){ if(e&&e.stopPropagation)e.stopPropagation(); saveAnswerFromEl(b); }; });
@@ -8682,8 +8700,10 @@ window.vaatzClaimQuest = function(id){
       '#rp #rpPaneMy.on{display:flex;flex-direction:column;height:100%;min-height:0;padding:0}',
       '#rp .rpa-wrap{display:flex;flex-direction:column;flex:1;min-height:0}',
       '#rp .rpa-hd{padding:13px 14px 0}',
+      '#rp .rpa-hd-row{display:flex;align-items:center;justify-content:space-between;gap:8px}',
       '#rp .rpa-title{font-size:13.5px;font-weight:800;color:var(--text-1);display:flex;align-items:center;gap:6px}',
-      '#rp .rpa-sub{font-size:10.5px;color:var(--text-4);line-height:1.55;margin-top:3px}',
+      '#rp .rpa-up-btn{flex-shrink:0;font-size:11px;font-weight:700;color:#fff;background:var(--accent);border:none;border-radius:8px;padding:6px 11px;cursor:pointer;font-family:inherit;white-space:nowrap;transition:.13s}',
+      '#rp .rpa-up-btn:hover{filter:brightness(1.1);transform:translateY(-1px)}',
       '#rp .rpa-bar{padding:11px 14px 0}',
       '#rp .rpa-search{display:flex;align-items:center;gap:6px;background:var(--bg-3);border:1px solid var(--border-1);border-radius:9px;padding:8px 11px}',
       '#rp .rpa-search input{flex:1;background:none;border:none;outline:none;color:var(--text-1);font-size:12px;font-family:inherit}',
@@ -8759,8 +8779,8 @@ window.vaatzClaimQuest = function(id){
         + (tmps.length ? tmps.map(rpRowHtml).join('') : '<div class="rpa-empty" style="padding:12px">임시 에이전트 없음</div>');
     }
     box.innerHTML =
-      '<div class="rpa-hd"><div class="rpa-title">🤖 구매본부 AI Agent</div>'
-        + '<div class="rpa-sub"><b style="color:#2bb673">✅ 공식</b>만 다운로드되고 <b style="color:#e0a13a">🧪 임시</b>는 미리보기예요.</div></div>'
+      '<div class="rpa-hd"><div class="rpa-hd-row"><div class="rpa-title">🤖 구매본부 AI Agent</div>'
+        + '<button class="rpa-up-btn" title="내 에이전트 올리기" onclick="rpUpload()">➕ 올리기</button></div></div>'
       + '<div class="rpa-bar"><div class="rpa-search"><span style="font-size:12px;color:var(--text-4)">🔍</span>'
         + '<input id="rpAgentSearch" placeholder="에이전트 검색" oninput="rpAgentSearch(this.value)" value="'+esc(rpAg.q)+'"></div></div>'
       + '<div class="rpa-chips">'+chips+'</div>'
@@ -8774,6 +8794,7 @@ window.vaatzClaimQuest = function(id){
   window.rpAgentToggleOfficial = function(){ rpAg.officialOnly=!rpAg.officialOnly; rpRenderAgents(); };
   window.rpAgentDownload = function(id){ if(window.agentDownload) window.agentDownload(id); setTimeout(rpRenderAgents, 40); };
   window.rpOpenMarket = function(){ if(window.openAgentMarket) window.openAgentMarket(); else if(window.openComm) window.openComm('qa'); };
+  window.rpUpload = function(){ if(window.openAgentMarket){ window.openAgentMarket(); setTimeout(function(){ window.agentToggleUpload && window.agentToggleUpload(true); }, 340); } else if(window.agentToggleUpload){ window.agentToggleUpload(true); } };
   window.rpRenderAgents = rpRenderAgents;
 
   /* ── 우측 패널 재오픈 핸들 (닫았을 때 다시 열기) ── */
